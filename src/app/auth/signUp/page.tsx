@@ -8,23 +8,27 @@ import {
   Typography,
   Alert,
   AlertTitle,
+  Paper,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
-import { Button, TextField, Link } from "@mui/material";
-import { MouseEvent, useState } from "react";
+import { TextField, Link } from "@mui/material";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { LoadingButton } from "@mui/lab";
-import { Login } from "@mui/icons-material";
+import { Login, Visibility, VisibilityOff } from "@mui/icons-material";
 
 const SignUpPage: React.FC = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const error = searchParams.get("error");
-  const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     setLoading(true);
@@ -59,6 +63,13 @@ const SignUpPage: React.FC = () => {
     }
   };
 
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
   return (
     <Box
       display="flex"
@@ -66,11 +77,19 @@ const SignUpPage: React.FC = () => {
       alignItems="center"
       minHeight="100vh"
       bgcolor="background.default"
-      padding={5}
+      padding={3}
     >
-      <Card
-        className="p-5"
-        sx={{ maxWidth: 400, width: "100%", boxShadow: 3, borderRadius: 2 }}
+      <Paper
+        elevation={6}
+        sx={{
+          maxWidth: 450,
+          width: "100%",
+          px: 1,
+          py: 3,
+          borderRadius: 2,
+          boxShadow: 3,
+          backgroundColor: "background.paper",
+        }}
       >
         {error && (
           <Alert severity="error">
@@ -85,7 +104,7 @@ const SignUpPage: React.FC = () => {
           </Alert>
         )}
         <CardHeader
-          title="Sign Up"
+          title="Register"
           titleTypographyProps={{
             variant: "h4",
             align: "center",
@@ -124,26 +143,47 @@ const SignUpPage: React.FC = () => {
             <TextField
               label="Password"
               variant="outlined"
-              type="password"
-              autoComplete="new-password" // Add this line
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={Boolean(errors.password)}
               helperText={errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <LoadingButton
               variant="contained"
               color="primary"
               fullWidth
-              type="submit"
+              type="button"
               loading={loading}
               endIcon={<Login />}
               loadingPosition="end"
-              sx={{ textTransform: "none", fontSize: "1rem", paddingY: 1.5 }}
+              sx={{
+                textTransform: "none",
+                fontSize: "1rem",
+                py: 1.5,
+                px: 5,
+                maxWidth: "max-content",
+                alignSelf: "center",
+              }}
               onClick={handleSignUp}
             >
-              <span>Sign Up</span>
+              <span>Register</span>
             </LoadingButton>
           </Box>
         </CardContent>
@@ -155,7 +195,7 @@ const SignUpPage: React.FC = () => {
             </Link>
           </Typography>
         </Box>
-      </Card>
+      </Paper>
     </Box>
   );
 };

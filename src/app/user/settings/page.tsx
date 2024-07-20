@@ -2,7 +2,14 @@ import ResponsiveDrawer from "../userSideBar";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import React from "react";
-import { Box, Card, CardContent, Toolbar, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import "@fontsource/roboto/400.css";
 import EditForm from "./clientComponents/editForm";
 
@@ -29,10 +36,8 @@ const Settings = async () => {
       >
         <Toolbar />
         <Card>
+          <CardHeader title={<Typography variant="h4">Settings</Typography>} />
           <CardContent>
-            <div>
-              <Typography variant="h4">Account Settings</Typography>
-            </div>
             <EditForm
               user={{
                 id: user?.id ?? "",

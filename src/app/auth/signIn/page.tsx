@@ -10,13 +10,15 @@ import {
   AlertTitle,
   Collapse,
   Paper,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { Button, TextField, Link } from "@mui/material";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { LoadingButton } from "@mui/lab";
-import { Login } from "@mui/icons-material";
+import { Login, Visibility, VisibilityOff } from "@mui/icons-material";
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -25,6 +27,7 @@ const SignInPage: React.FC = () => {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const error = searchParams.get("error");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const ErrorAlert = () => {
     const [isError, setIsError] = useState(error ? true : false);
@@ -57,6 +60,13 @@ const SignInPage: React.FC = () => {
     });
   };
 
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
   return (
     <Box
       display="flex"
@@ -71,7 +81,8 @@ const SignInPage: React.FC = () => {
         sx={{
           maxWidth: 450,
           width: "100%",
-          p: 4,
+          px: 1,
+          py: 3,
           borderRadius: 2,
           boxShadow: 3,
           backgroundColor: "background.paper",
@@ -108,19 +119,40 @@ const SignInPage: React.FC = () => {
               label="Password"
               variant="outlined"
               autoComplete="current-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
+
             <LoadingButton
               variant="contained"
               color="primary"
-              fullWidth
               type="submit"
               loading={loading}
               endIcon={<Login />}
-              sx={{ textTransform: "none", fontSize: "1rem", py: 1.5 }}
+              sx={{
+                alignSelf: "center",
+                textTransform: "none",
+                fontSize: "1rem",
+                py: 1.5,
+                px: 5,
+                maxWidth: "max-content",
+              }}
             >
               <span>Login</span>
             </LoadingButton>
@@ -130,7 +162,7 @@ const SignInPage: React.FC = () => {
           <Typography variant="body2">
             Don't have an account?{" "}
             <Link href="/auth/signUp" color="primary.main" underline="hover">
-              Sign Up
+              Register
             </Link>
           </Typography>
         </Box>
