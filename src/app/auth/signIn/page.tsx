@@ -8,11 +8,15 @@ import {
   Typography,
   Alert,
   AlertTitle,
+  Collapse,
+  Paper,
 } from "@mui/material";
 import { Button, TextField, Link } from "@mui/material";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { LoadingButton } from "@mui/lab";
+import { Login } from "@mui/icons-material";
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -20,17 +24,30 @@ const SignInPage: React.FC = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const error = searchParams.get("error");
+  const [loading, setLoading] = useState(false);
 
-  const ErrorAlert = () => (
-    <Alert severity="error">
-      <AlertTitle>Error</AlertTitle>
-      {error === "CredentialsSignin"
-        ? "Invalid email or password."
-        : "An error occurred."}
-    </Alert>
-  );
+  const ErrorAlert = () => {
+    const [isError, setIsError] = useState(error ? true : false);
+
+    if (isError) {
+      setTimeout(() => {
+        setIsError(false);
+      }, 5000);
+    }
+    return (
+      <Collapse in={isError}>
+        <Alert severity="error">
+          <AlertTitle>Error</AlertTitle>
+          {error === "CredentialsSignin"
+            ? "Invalid email or password."
+            : "An error occurred."}
+        </Alert>
+      </Collapse>
+    );
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     e.preventDefault();
     await signIn("credentials", {
       redirect: true,
@@ -47,13 +64,20 @@ const SignInPage: React.FC = () => {
       alignItems="center"
       minHeight="100vh"
       bgcolor="background.default"
-      padding={5}
+      padding={3}
     >
-      <Card
-        className="p-3"
-        sx={{ maxWidth: 400, width: "100%", boxShadow: 3, borderRadius: 2 }}
+      <Paper
+        elevation={6}
+        sx={{
+          maxWidth: 450,
+          width: "100%",
+          p: 4,
+          borderRadius: 2,
+          boxShadow: 3,
+          backgroundColor: "background.paper",
+        }}
       >
-        {error && <ErrorAlert />}
+        <ErrorAlert />
         <CardHeader
           title="Login"
           titleTypographyProps={{
@@ -89,15 +113,17 @@ const SignInPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button
+            <LoadingButton
               variant="contained"
               color="primary"
               fullWidth
               type="submit"
-              sx={{ textTransform: "none", fontSize: "1rem", paddingY: 1.5 }}
+              loading={loading}
+              endIcon={<Login />}
+              sx={{ textTransform: "none", fontSize: "1rem", py: 1.5 }}
             >
-              Login
-            </Button>
+              <span>Login</span>
+            </LoadingButton>
           </Box>
         </CardContent>
         <Box mt={2} display="flex" justifyContent="center">
@@ -108,7 +134,7 @@ const SignInPage: React.FC = () => {
             </Link>
           </Typography>
         </Box>
-      </Card>
+      </Paper>
     </Box>
   );
 };
