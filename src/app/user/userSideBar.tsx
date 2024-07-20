@@ -1,0 +1,216 @@
+"use client";
+import * as React from "react";
+import "@fontsource/roboto/400.css";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  CssBaseline,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import {
+  Home,
+  Business,
+  Settings,
+  Menu as MenuIcon,
+  Inbox,
+  Mail,
+  ArrowBack,
+} from "@mui/icons-material";
+import Link from "next/link";
+
+const drawerWidth = 300;
+
+interface Props {
+  window?: Window | undefined;
+  selected: "Dashboard" | "My Companies" | "Settings";
+  user: { name: string; email: string };
+}
+
+const ResponsiveDrawer: React.FC<Props> = ({ window, selected, user }) => {
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const menus = [
+    { name: "Dashboard", icon: <Home />, link: "/user/dashboard" },
+    { name: "My Companies", icon: <Business />, link: "/user/mycompanies" },
+    { name: "Settings", icon: <Settings />, link: "/user/settings" },
+  ];
+
+  const drawer = (
+    <div>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          padding: 3,
+          backgroundColor: "#f5f5f5",
+        }}
+      >
+        <Avatar sx={{ width: 80, height: 80, mb: 2 }}></Avatar>
+        <Typography color="primary" variant="h6" noWrap component="div">
+          {user.name === "" ? "Stranger" : user.name}
+        </Typography>
+        <Typography color="textSecondary" variant="body2">
+          {user.email === "" ? "No email" : user.email}
+        </Typography>
+      </Box>
+      <Divider />
+      <List>
+        {menus.map((menu) => (
+          <ListItem key={menu.name} disablePadding>
+            <ListItemButton
+              selected={selected === menu.name}
+              component={Link}
+              href={menu.link}
+              sx={{
+                "&.Mui-selected": {
+                  backgroundColor: "#e0f7fa",
+                  "& .MuiListItemIcon-root": {
+                    color: "#00796b",
+                  },
+                },
+              }}
+            >
+              <ListItemIcon>{menu.icon}</ListItemIcon>
+              <ListItemText primary={menu.name} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+    </div>
+  );
+
+  return (
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        elevation={1}
+        sx={{
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
+          backgroundColor: "#fff",
+          color: "#333",
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { md: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <div className="flex-grow">
+            <Link href={"/"}>
+              <Typography
+                variant="h5"
+                sx={{ flexGrow: 1 }}
+                noWrap
+                component="div"
+              >
+                Salary App
+              </Typography>
+            </Link>
+          </div>
+          <IconButton onClick={handleMenuClick} color="inherit">
+            <Avatar></Avatar>
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            slotProps={{
+              paper: {
+                sx: {
+                  width: 200,
+                },
+              },
+            }}
+          >
+            <MenuItem
+              component={Link}
+              href="/user/settings"
+              onClick={handleMenuClose}
+            >
+              Settings
+            </MenuItem>
+            <Divider />
+            <MenuItem component={Link} href="/api/auth/signout">
+              Logout
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <Box
+        component="nav"
+        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: "none", md: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+    </Box>
+  );
+};
+
+export default ResponsiveDrawer;

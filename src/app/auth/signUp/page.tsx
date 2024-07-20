@@ -10,9 +10,11 @@ import {
   AlertTitle,
 } from "@mui/material";
 import { Button, TextField, Link } from "@mui/material";
-import { useState } from "react";
+import { MouseEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { LoadingButton } from "@mui/lab";
+import { Login } from "@mui/icons-material";
 
 const SignUpPage: React.FC = () => {
   const [name, setName] = useState("");
@@ -22,9 +24,10 @@ const SignUpPage: React.FC = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const error = searchParams.get("error");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSignUp = async () => {
+    setLoading(true);
     setErrors({});
     try {
       const res = await fetch("/api/auth/signUp", {
@@ -51,6 +54,8 @@ const SignUpPage: React.FC = () => {
     } catch (e) {
       console.log(e);
       setErrors({ general: `An unexpected error occurred ${e}` });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,7 +100,6 @@ const SignUpPage: React.FC = () => {
             display="flex"
             flexDirection="column"
             gap={2}
-            onSubmit={handleSignUp}
           >
             <TextField
               label="Name"
@@ -128,15 +132,19 @@ const SignUpPage: React.FC = () => {
               error={Boolean(errors.password)}
               helperText={errors.password}
             />
-            <Button
+            <LoadingButton
               variant="contained"
               color="primary"
               fullWidth
               type="submit"
+              loading={loading}
+              endIcon={<Login />}
+              loadingPosition="end"
               sx={{ textTransform: "none", fontSize: "1rem", paddingY: 1.5 }}
+              onClick={handleSignUp}
             >
-              Sign Up
-            </Button>
+              <span>Sign Up</span>
+            </LoadingButton>
           </Box>
         </CardContent>
         <Box mt={2} display="flex" justifyContent="center">

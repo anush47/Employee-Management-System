@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import User from "@/app/models/User";
 import bcrypt from "bcrypt";
+import dbConnect from "@/app/lib/db";
 
 export const options: NextAuthOptions = {
   // Configure one or more authentication providers
@@ -43,5 +44,35 @@ export const options: NextAuthOptions = {
   pages: {
     signIn: "/auth/signIn",
     error: "/auth/signIn",
+  },
+  callbacks: {
+    async jwt({ token, trigger, session }) {
+      if (trigger === "update") {
+        return { ...token, ...session.user };
+      }
+
+      await dbConnect();
+      const user = await User.findOne({ email: token.email });
+
+      if (!user) {
+        return token;
+      }
+
+      token.id = user.id;
+      token.role = user.role;
+
+      return token;
+    },
+
+    async session({ session, user, token }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          role: token.role,
+          id: token.id,
+        },
+      };
+    },
   },
 };
