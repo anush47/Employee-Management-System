@@ -94,7 +94,7 @@ const EditForm = ({
 
   return (
     <>
-      <FormControl fullWidth sx={{ my: 3, gap: 3 }}>
+      <FormControl fullWidth sx={{ mb: 3, gap: 3 }}>
         <Box sx={{ mb: 2 }}>
           <Collapse in={alertOpen}>
             <Alert severity={alertSeverity}>{alertMessage}</Alert>

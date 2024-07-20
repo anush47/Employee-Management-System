@@ -2,7 +2,15 @@ import { getServerSession } from "next-auth";
 import ResponsiveDrawer from "../userSideBar";
 import React from "react";
 import { options } from "@/app/api/auth/[...nextauth]/options";
-import { Box, Card, CardContent, Toolbar, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import CompaniesDataGrid from "./clientComponents/companiesDataGrid";
 
 const MyCompanies = async () => {
   const session = await getServerSession(options);
@@ -26,12 +34,17 @@ const MyCompanies = async () => {
       >
         <Toolbar />
         <Card>
+          <CardHeader
+            title={<Typography variant="h4">My Companies</Typography>}
+          />
           <CardContent>
-            <div>
-              <Typography variant="h4">
-                Welcome, {user ? user.name : "Stranger"}
-              </Typography>
-            </div>
+            <CompaniesDataGrid
+              user={{
+                id: user?.id ?? "",
+                name: user?.name ?? "",
+                email: user?.email ?? "",
+              }}
+            />
           </CardContent>
         </Card>
       </Box>
