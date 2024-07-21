@@ -9,6 +9,7 @@ import {
   Collapse,
   Box,
   Button,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
@@ -125,8 +126,9 @@ const EditForm = ({
               name !== "" && (
                 <InputAdornment position="end">
                   <LoadingButton
+                    color="success"
                     loading={loading}
-                    startIcon={<Done color="success" />}
+                    startIcon={<Done />}
                     loadingPosition="center"
                     onClick={handleSave}
                   >
