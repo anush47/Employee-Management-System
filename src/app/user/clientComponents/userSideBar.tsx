@@ -24,24 +24,36 @@ import {
   Business,
   Settings,
   Menu as MenuIcon,
-  Inbox,
-  Mail,
-  ArrowBack,
 } from "@mui/icons-material";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const drawerWidth = 300;
 
+//export selected type
+export type Selected = "dashboard" | "mycompanies" | "settings";
+
 interface Props {
   window?: Window | undefined;
-  selected: "Dashboard" | "My Companies" | "Settings";
   user: { name: string; email: string };
 }
+export let selected: Selected = "dashboard";
 
-const ResponsiveDrawer: React.FC<Props> = ({ window, selected, user }) => {
+const ResponsiveDrawer: React.FC<Props> = ({ window, user }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  //search params to get selected
+  const searchParams = useSearchParams();
+  const selectedParam = searchParams.get("selected");
+  if (selectedParam) {
+    selected = selectedParam as Selected;
+  }
+  //if wrong params default to dashboard
+  if (!["dashboard", "mycompanies", "settings"].includes(selected)) {
+    selected = "dashboard";
+  }
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -56,9 +68,21 @@ const ResponsiveDrawer: React.FC<Props> = ({ window, selected, user }) => {
   };
 
   const menus = [
-    { name: "Dashboard", icon: <Home />, link: "/user/dashboard" },
-    { name: "My Companies", icon: <Business />, link: "/user/mycompanies" },
-    { name: "Settings", icon: <Settings />, link: "/user/settings" },
+    {
+      name: "Dashboard",
+      key: "dashboard",
+      icon: <Home />,
+    },
+    {
+      name: "My Companies",
+      key: "mycompanies",
+      icon: <Business />,
+    },
+    {
+      name: "Settings",
+      key: "settings",
+      icon: <Settings />,
+    },
   ];
 
   const drawer = (
@@ -86,9 +110,9 @@ const ResponsiveDrawer: React.FC<Props> = ({ window, selected, user }) => {
         {menus.map((menu) => (
           <ListItem key={menu.name} disablePadding>
             <ListItemButton
-              selected={selected === menu.name}
+              selected={selected === menu.key}
               component={Link}
-              href={menu.link}
+              href={`/user/?selected=${menu.key}`}
               sx={{
                 "&.Mui-selected": {
                   backgroundColor: "#e0f7fa",

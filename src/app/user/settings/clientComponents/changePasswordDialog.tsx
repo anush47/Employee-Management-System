@@ -11,6 +11,9 @@ import { Slide } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import { LoadingButton } from "@mui/lab";
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -32,6 +35,9 @@ export default function ChangePasswordDialog({
   const [success, setSuccess] = React.useState<string | null>(null);
   const [formVisible, setFormVisible] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
+
+  const [showOldPassword, setShowOldPassword] = React.useState(false);
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
 
   const handleClose = () => {
     setOpen(false);
@@ -108,9 +114,20 @@ export default function ChangePasswordDialog({
                   id="oldPassword"
                   name="oldPassword"
                   label="Current Password"
-                  type="password"
+                  type={showOldPassword ? "text" : "password"}
                   fullWidth
                   variant="standard"
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                        edge="end"
+                      >
+                        {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    ),
+                  }}
                 />
                 <TextField
                   required
@@ -118,9 +135,20 @@ export default function ChangePasswordDialog({
                   id="newPassword"
                   name="newPassword"
                   label="New Password"
-                  type="password"
+                  type={showNewPassword ? "text" : "password"}
                   fullWidth
                   variant="standard"
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        edge="end"
+                      >
+                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    ),
+                  }}
                 />
               </>
             )}
@@ -133,9 +161,9 @@ export default function ChangePasswordDialog({
           <LoadingButton
             loading={loading}
             type="submit"
-            loadingPosition="start"
+            loadingPosition="center"
           >
-            Change Password
+            <span> Change Password</span>
           </LoadingButton>
         </DialogActions>
       )}
