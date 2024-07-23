@@ -126,13 +126,14 @@ const EditForm = ({
               name !== "" && (
                 <InputAdornment position="end">
                   <LoadingButton
+                    variant="outlined"
                     color="success"
                     loading={loading}
                     startIcon={<Done />}
-                    loadingPosition="center"
+                    loadingPosition="start"
                     onClick={handleSave}
                   >
-                    <span></span>
+                    <span>Save</span>
                   </LoadingButton>
                 </InputAdornment>
               )

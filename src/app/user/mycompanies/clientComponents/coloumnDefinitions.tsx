@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
+import Link from "next/link";
 
 export const columns: GridColDef[] = [
   { field: "name", headerName: "Name", flex: 1 },
@@ -10,14 +11,9 @@ export const columns: GridColDef[] = [
     headerName: "Actions",
     flex: 1,
     renderCell: (params) => (
-      <Button
-        variant="outlined"
-        onClick={() => {
-          alert(`View company: ${params.row.employerNo}`);
-        }}
-      >
-        View
-      </Button>
+      <Link href={`/user/mycompanies/${params.id}/`}>
+        <Button variant="outlined">View</Button>
+      </Link>
     ),
   },
 ];

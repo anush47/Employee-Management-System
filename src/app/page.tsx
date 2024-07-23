@@ -39,7 +39,7 @@ export default async function Home() {
                   gap: 3,
                 }}
               >
-                <Link href="/user?selected=dashboard">
+                <Link href="/user?userPageSelect=dashboard">
                   <Button variant="contained" color="primary" className="mr-4">
                     Go to Dashboard
                   </Button>
