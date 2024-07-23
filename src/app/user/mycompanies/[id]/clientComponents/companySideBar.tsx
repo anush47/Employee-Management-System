@@ -20,39 +20,48 @@ import {
   MenuItem,
 } from "@mui/material";
 import {
-  Home,
   Business,
-  Settings,
   Menu as MenuIcon,
+  Groups,
+  Payments,
+  ArrowBack,
 } from "@mui/icons-material";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 
 const drawerWidth = 300;
 
 //export selected type
-export type Selected = "dashboard" | "mycompanies" | "settings";
+export type Selected = "details" | "employees" | "payments";
 
 interface Props {
   window?: Window | undefined;
   user: { name: string; email: string };
 }
-export let selected: Selected = "dashboard";
+export let selected: Selected = "details";
+export let id: string;
 
-const UserSideBar: React.FC<Props> = ({ window, user }) => {
+const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  //get id from params of url
+  const params = useParams();
+  console.log(params);
+  if (params && params.id) {
+    id = params.id.toString();
+  }
+
   //search params to get selected
   const searchParams = useSearchParams();
-  const selectedParam = searchParams.get("userPageSelect");
+  const selectedParam = searchParams.get("companyPageSelect");
   if (selectedParam) {
     selected = selectedParam as Selected;
   }
   //if wrong params default to dashboard
-  if (!["dashboard", "mycompanies", "settings"].includes(selected)) {
-    selected = "dashboard";
+  if (!["details", "employees", "payments"].includes(selected)) {
+    selected = "details";
   }
 
   const handleDrawerToggle = () => {
@@ -69,19 +78,19 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
 
   const menus = [
     {
-      name: "Dashboard",
-      key: "dashboard",
-      icon: <Home />,
-    },
-    {
-      name: "My Companies",
-      key: "mycompanies",
+      name: "Company Details",
+      key: "details",
       icon: <Business />,
     },
     {
-      name: "Settings",
-      key: "settings",
-      icon: <Settings />,
+      name: "Employees",
+      key: "employees",
+      icon: <Groups />,
+    },
+    {
+      name: "Payments",
+      key: "payments",
+      icon: <Payments />,
     },
   ];
 
@@ -97,7 +106,6 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           backgroundColor: "#f5f5f5",
         }}
       >
-        <Avatar sx={{ width: 80, height: 80, mb: 2 }}></Avatar>
         <Typography color="primary" variant="h6" noWrap component="div">
           {user.name === "" ? "Stranger" : user.name}
         </Typography>
@@ -113,7 +121,8 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
               selected={selected === menu.key}
               onClick={() => handleDrawerToggle()}
               component={Link}
-              href={`/user/?userPageSelect=${menu.key}`}
+              href={`
+                /user/mycompanies/${id}?companyPageSelect=${menu.key}`}
               sx={{
                 "&.Mui-selected": {
                   backgroundColor: "#e0f7fa",
@@ -130,6 +139,27 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
         ))}
       </List>
       <Divider />
+      <List>
+        <ListItem key="back" disablePadding>
+          <ListItemButton
+            component={Link}
+            href="/user?userPageSelect=mycompanies"
+            sx={{
+              "&.Mui-selected": {
+                backgroundColor: "#e0f7fa",
+                "& .MuiListItemIcon-root": {
+                  color: "#00796b",
+                },
+              },
+            }}
+          >
+            <ListItemIcon>
+              <ArrowBack />
+            </ListItemIcon>
+            <ListItemText primary="Back" />
+          </ListItemButton>
+        </ListItem>
+      </List>
     </div>
   );
 
@@ -238,4 +268,4 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   );
 };
 
-export default UserSideBar;
+export default CompanySideBar;

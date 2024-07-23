@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
-import UserSideBar from "./clientComponents/userSideBar";
+import CompanySideBar from "./clientComponents/companySideBar";
 import React from "react";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { Box } from "@mui/material";
-import UserMainBox from "./clientComponents/userMainBox";
+import MainBox from "./clientComponents/companyMainBox";
 
 const UserPage = async () => {
   const session = await getServerSession(options);
@@ -11,14 +11,14 @@ const UserPage = async () => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <UserSideBar
+      <CompanySideBar
         user={
           user
             ? { name: user.name ?? "", email: user.email ?? "" }
             : { name: "", email: "" }
         }
       />
-      <UserMainBox
+      <MainBox
         user={
           user
             ? {

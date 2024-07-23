@@ -2,14 +2,14 @@
 import React, { Suspense, lazy } from "react";
 import { Box, Toolbar, LinearProgress, CircularProgress } from "@mui/material";
 import "@fontsource/roboto/400.css";
-import { selected } from "./userSideBar";
+import { selected } from "./companySideBar";
 
-// Lazy load the components
-const Dashboard = lazy(() => import("../dashboard/dashboard"));
-const MyCompanies = lazy(() => import("../mycompanies/myCompanies"));
-const Settings = lazy(() => import("../settings/settings"));
+// // Lazy load the components
+const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
+const Employees = lazy(() => import("../employees/employees"));
+const Payments = lazy(() => import("../payments/payments"));
 
-const MainBox = ({
+const CompanyMainBox = ({
   user,
 }: {
   user: { name: string; email: string; id: string };
@@ -33,12 +33,12 @@ const MainBox = ({
       >
         {(() => {
           switch (selected) {
-            case "dashboard":
-              return <Dashboard user={user} />;
-            case "mycompanies":
-              return <MyCompanies user={user} />;
-            case "settings":
-              return <Settings user={user} />;
+            case "details":
+              return <CompanyDetails user={user} />;
+            case "employees":
+              return <Employees user={user} />;
+            case "payments":
+              return <Payments user={user} />;
             default:
               return <div>Component not found</div>;
           }
@@ -61,4 +61,4 @@ const MainBox = ({
   );
 };
 
-export default MainBox;
+export default CompanyMainBox;

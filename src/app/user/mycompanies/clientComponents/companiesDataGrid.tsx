@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { Box, Alert, Button, CircularProgress } from "@mui/material";
 import { columns } from "./coloumnDefinitions";
 
@@ -56,7 +56,6 @@ const CompaniesDataGrid = ({
       sx={{
         width: "100%",
         height: 400,
-        display: "flex",
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -79,8 +78,17 @@ const CompaniesDataGrid = ({
             },
           }}
           pageSizeOptions={[5]}
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: {
+              showQuickFilter: true,
+            },
+          }}
           checkboxSelection
           disableRowSelectionOnClick
+          disableColumnFilter
+          //disableColumnSelector
+          disableDensitySelector
         />
       )}
     </Box>
