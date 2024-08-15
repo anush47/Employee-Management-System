@@ -1,6 +1,13 @@
 import React from "react";
-import { Card, CardContent, CardHeader, Typography } from "@mui/material";
-import "@fontsource/roboto/400.css";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  Box,
+} from "@mui/material";
 import EditForm from "./clientComponents/editForm";
 
 const Settings = ({
@@ -8,13 +15,24 @@ const Settings = ({
 }: {
   user: { name: string; email: string; id: string };
 }) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Card>
-      <CardHeader title={<Typography variant="h4">Settings</Typography>} />
-      <CardContent>
-        <EditForm user={user} />
-      </CardContent>
-    </Card>
+    <Box>
+      <Card>
+        <CardHeader
+          title={
+            <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
+              Settings
+            </Typography>
+          }
+        />
+        <CardContent>
+          <EditForm user={user} />
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

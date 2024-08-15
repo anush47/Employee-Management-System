@@ -1,56 +1,90 @@
-import React from "react";
+"use client";
+import React, { Suspense, lazy, useState } from "react";
 import {
-  Button,
   Card,
   CardContent,
   CardHeader,
   Typography,
   Tooltip,
+  Button,
   Box,
+  CircularProgress,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Slide,
 } from "@mui/material";
-import CompaniesDataGrid from "./clientComponents/companiesDataGrid";
-import { Add } from "@mui/icons-material";
+import { Add, ArrowBack } from "@mui/icons-material";
+import AddCompanyForm from "./clientComponents/AddCompany";
+
+// Lazily load CompaniesDataGrid
+const CompaniesDataGrid = lazy(
+  () => import("./clientComponents/companiesDataGrid")
+);
 
 const MyCompanies = ({
   user,
 }: {
   user: { name: string; email: string; id: string };
 }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   const handleAddClick = () => {
-    // Handle the add button click
-    console.log("Add button clicked");
+    setIsAdding(true);
+  };
+
+  const handleBackClick = () => {
+    setIsAdding(false);
   };
 
   return (
-    <Card>
-      <CardHeader
-        title={
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <Typography variant="h4">My Companies</Typography>
-            <Tooltip title="Add a new company" arrow>
-              <Button
-                variant="contained"
-                color="success"
-                startIcon={<Add />}
-                onClick={handleAddClick}
+    <Box>
+      {isAdding ? (
+        <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
+          <Card>
+            <AddCompanyForm user={user} handleBackClick={handleBackClick} />
+          </Card>
+        </Slide>
+      ) : (
+        <Card>
+          <CardHeader
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  mb: 2,
+                }}
               >
-                Add
-              </Button>
-            </Tooltip>
-          </div>
-        }
-      />
-      <CardContent>
-        <Box
-          sx={{
-            width: "100%",
-            overflowX: "auto",
-          }}
-        >
-          <CompaniesDataGrid user={user} />
-        </Box>
-      </CardContent>
-    </Card>
+                <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
+                  My Companies
+                </Typography>
+                <Tooltip title="Add a new company" arrow>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<Add />}
+                    onClick={handleAddClick}
+                  >
+                    Add
+                  </Button>
+                </Tooltip>
+              </Box>
+            }
+          />
+          <CardContent>
+            <Suspense fallback={<CircularProgress />}>
+              <CompaniesDataGrid user={user} />
+            </Suspense>
+          </CardContent>
+        </Card>
+      )}
+    </Box>
   );
 };
 

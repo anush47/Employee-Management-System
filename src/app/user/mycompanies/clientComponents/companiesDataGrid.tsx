@@ -1,10 +1,9 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
-import { Box, Alert, Button, CircularProgress } from "@mui/material";
+import { Box, Alert, CircularProgress } from "@mui/material";
 import { columns } from "./coloumnDefinitions";
 
-interface Company {
+export interface Company {
   id: string;
   name: string;
   employerNo: string;
@@ -24,17 +23,14 @@ const CompaniesDataGrid = ({
     const fetchCompanies = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/companies/getCompanies`);
+        const response = await fetch(`/api/companies/many`);
         if (!response.ok) {
           throw new Error("Failed to fetch companies");
         }
         const data = await response.json();
-        // Map data to include 'id' property
         const companiesWithId = data.companies.map((company: any) => ({
-          id: company._id, // Use _id as id
-          name: company.name,
-          employerNo: company.employerNo,
-          address: company.address,
+          ...company,
+          id: company._id,
         }));
         setCompanies(companiesWithId);
       } catch (error) {
@@ -87,7 +83,6 @@ const CompaniesDataGrid = ({
           checkboxSelection
           disableRowSelectionOnClick
           disableColumnFilter
-          //disableColumnSelector
           disableDensitySelector
         />
       )}

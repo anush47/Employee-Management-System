@@ -1,47 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
-import { z } from "zod";
-import Company from "@/app/models/Company";
 import { getServerSession } from "next-auth";
+import Company from "@/app/models/Company";
 import { options } from "../../auth/[...nextauth]/options";
+import { z } from "zod";
 
 // Define schema for validation
-const employerNoSchema = z.string().min(1, "Employer No is required");
+const userIdSchema = z.string().min(1, "User ID is required");
+const companyIdSchema = z.string().min(1, "Company ID is required");
 
 export async function GET(req: NextRequest) {
   try {
-    // Retrieve query parameters (adjust if using a different method)
-    const url = new URL(req.url);
-    const employerNo = url.searchParams.get("employerNo");
-
-    // Validate employerNo
-    employerNoSchema.parse(employerNo);
-
     // Get user session
     const session = await getServerSession(options);
     const user = session?.user || null;
     const userId = user?.id;
 
-    // if (!userId) {
-    //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    // }
+    // Validate userId
+    userIdSchema.parse(userId);
+
+    //get the companyId from url
+    const companyId = req.nextUrl.searchParams.get("companyId");
+    // Validate companyId
+    companyIdSchema.parse(companyId);
 
     // Create filter
-    const filter = { employerNo, user: userId };
+    const filter = { user: userId, _id: companyId };
 
     // Connect to the database
     await dbConnect();
 
-    // Fetch company from the database
-    const company = await Company.findOne(filter);
-
-    if (!company) {
-      return NextResponse.json(
-        { message: "Company not found" },
-        { status: 404 }
-      );
-    }
-
+    // Fetch companies from the database
+    const company = await Company.findOne(filter).lean(); // Use .lean() for better performance
+    console.log(company);
     // Return the company data
     return NextResponse.json({ company });
   } catch (error) {

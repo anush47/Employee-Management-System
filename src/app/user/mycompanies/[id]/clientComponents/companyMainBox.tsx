@@ -1,8 +1,16 @@
 "use client";
-import React, { Suspense, lazy } from "react";
-import { Box, Toolbar, LinearProgress, CircularProgress } from "@mui/material";
+import React, { Suspense, lazy, useState, useEffect } from "react";
+import {
+  Box,
+  Toolbar,
+  LinearProgress,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 import "@fontsource/roboto/400.css";
 import { selected } from "./companySideBar";
+import { Company } from "../../clientComponents/companiesDataGrid";
+import { companyId } from "./companySideBar";
 
 // // Lazy load the components
 const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
