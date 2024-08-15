@@ -12,7 +12,7 @@ export const columns: GridColDef[] = [
     flex: 1,
     renderCell: (params) => (
       <Link href={`/user/mycompanies/${params.id}/`}>
-        <Button variant="outlined">View</Button>
+        <Button variant="text">View</Button>
       </Link>
     ),
   },

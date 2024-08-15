@@ -39,7 +39,7 @@ interface Props {
   user: { name: string; email: string };
 }
 export let selected: Selected = "details";
-export let id: string;
+export let companyId: string;
 
 const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -48,9 +48,8 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
 
   //get id from params of url
   const params = useParams();
-  console.log(params);
   if (params && params.id) {
-    id = params.id.toString();
+    companyId = params.id.toString();
   }
 
   //search params to get selected
@@ -122,7 +121,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
               onClick={() => handleDrawerToggle()}
               component={Link}
               href={`
-                /user/mycompanies/${id}?companyPageSelect=${menu.key}`}
+                /user/mycompanies/${companyId}?companyPageSelect=${menu.key}`}
               sx={{
                 "&.Mui-selected": {
                   backgroundColor: "#e0f7fa",

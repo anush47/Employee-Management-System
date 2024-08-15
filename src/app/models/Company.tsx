@@ -22,7 +22,6 @@ const companySchema = new Schema<ICompany>(
     },
     address: {
       type: String,
-      required: true,
     },
     user: {
       type: Schema.Types.ObjectId,
