@@ -55,3 +55,77 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+// Define schema for company update
+const companyUpdateSchema = z.object({
+  name: z.string().min(1, "Company name is required"),
+  employerNo: z.string().min(1, "Employer number is required"),
+  address: z.string().optional(),
+  paymentMethod: z.string().optional(),
+});
+
+export async function POST(req: NextRequest) {
+  try {
+    // Get user session
+    const session = await getServerSession(options);
+    const user = session?.user || null;
+    const userId = user?.id;
+
+    // Validate userId
+    userIdSchema.parse(userId);
+
+    // Parse request body
+    const body = await req.json();
+    const companyId = body.id;
+    const companyData = body;
+
+    // Validate companyId
+    companyIdSchema.parse(companyId);
+
+    // Validate companyData
+    companyUpdateSchema.parse(companyData);
+
+    // Create filter
+    const filter = { user: userId, _id: companyId };
+
+    // Connect to the database
+    await dbConnect();
+
+    console.log(companyData);
+
+    // Update the company in the database
+    const updatedCompany = await Company.findOneAndUpdate(filter, companyData, {
+      new: true,
+      runValidators: true,
+    }).lean(); // Use .lean() for better performance
+    console.log(updatedCompany);
+
+    if (!updatedCompany) {
+      return NextResponse.json(
+        { message: "Company not found" },
+        { status: 404 }
+      );
+    }
+
+    // Return the updated company data
+    return NextResponse.json({ company: updatedCompany });
+  } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: error.errors[0].message },
+        { status: 400 }
+      );
+    }
+    // Handle general errors
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      },
+      { status: 500 }
+    );
+  }
+}

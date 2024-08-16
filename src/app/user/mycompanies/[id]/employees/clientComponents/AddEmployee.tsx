@@ -22,31 +22,35 @@ import {
 } from "@mui/material";
 import { Cancel, Save, Search } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
-import { Company } from "./companiesDataGrid";
-import { CompanyValidation } from "./companyValidation";
+//import { Company } from "./companiesDataGrid";
+//import { CompanyValidation } from "./companyValidation";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
-const AddCompanyForm: React.FC<{
+const AddEmployeeForm: React.FC<{
   user: { id: string; name: string; email: string };
   handleBackClick: () => void;
 }> = ({ user, handleBackClick }) => {
-  const [formFields, setFormFields] = useState<Company>({
+  interface Employee {
+    designation: unknown;
+    id: string;
+    name: string;
+    memberNo: string;
+    address: string;
+    paymentMethod: string;
+  }
+
+  const [formFields, setFormFields] = useState<Employee>({
     id: "",
     name: "",
-    employerNo: "",
+    memberNo: "",
+    nic: "",
     address: "",
     paymentMethod: "",
-    paymentStructure: {
-      additions: [
-        { name: "Incentive", amount: "" },
-        { name: "Performance Allowance", amount: "" },
-      ],
-      deductions: [],
-    },
+    designation: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const [nameLoading, setNameLoading] = useState<boolean>(false);
+  const [memberNoLoading, setNameLoading] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
@@ -68,11 +72,11 @@ const AddCompanyForm: React.FC<{
   };
 
   const onSaveClick = async () => {
-    const newErrors = CompanyValidation(formFields);
-    setErrors(newErrors);
-    const isValid = Object.keys(newErrors).length === 0;
+    //const newErrors = CompanyValidation(formFields);
+    //setErrors(newErrors);
+    //const isValid = Object.keys(newErrors).length === 0;
 
-    if (!isValid) {
+    if (!true) {
       return;
     }
 
@@ -104,16 +108,10 @@ const AddCompanyForm: React.FC<{
         setFormFields({
           id: "",
           name: "",
-          employerNo: "",
+          memberNo: "",
           address: "",
           paymentMethod: "",
-          paymentStructure: {
-            additions: [
-              { name: "Incentive", amount: "" },
-              { name: "Performance Allowance", amount: "" },
-            ],
-            deductions: [],
-          },
+          designation: "",
         });
         setErrors({});
         handleBackClick();
@@ -136,7 +134,7 @@ const AddCompanyForm: React.FC<{
     }
   };
 
-  const onFetchNameClick = async () => {
+  const onFetchMemberNoClick = async () => {
     setNameLoading(true);
     try {
       // Simulate fetching company name
@@ -182,7 +180,7 @@ const AddCompanyForm: React.FC<{
             }}
           >
             <Typography variant={isSmallScreen ? "h5" : "h4"}>
-              Add Company
+              Add Employee
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Tooltip title="Discard and go back to my companies" arrow>
@@ -222,10 +220,10 @@ const AddCompanyForm: React.FC<{
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.employerNo}>
               <TextField
-                label="Employer Number"
+                label="Member Number"
                 placeholder="A/12345"
-                name="employerNo"
-                value={formFields.employerNo}
+                name="memberNo"
+                value={formFields.memberNo}
                 onChange={handleChange}
                 variant="filled"
                 InputProps={{
@@ -235,10 +233,10 @@ const AddCompanyForm: React.FC<{
                         variant="text"
                         color="inherit"
                         endIcon={<Search />}
-                        loading={nameLoading}
+                        loading={memberNoLoading}
                         loadingPosition="end"
-                        onClick={onFetchNameClick}
-                        disabled={nameLoading} // Disable button while loading
+                        onClick={onFetchMemberNoClick}
+                        disabled={memberNoLoading} // Disable button while loading
                         sx={{ marginTop: 1 }}
                       />
                     </InputAdornment>
@@ -248,6 +246,17 @@ const AddCompanyForm: React.FC<{
               {errors.employerNo && (
                 <FormHelperText>{errors.employerNo}</FormHelperText>
               )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.name}>
+              <TextField
+                label="Designation"
+                name="designation"
+                value={formFields.designation}
+                onChange={handleChange}
+                variant="filled"
+              />
             </FormControl>
           </Grid>
           <Grid item xs={12}>
@@ -302,4 +311,4 @@ const AddCompanyForm: React.FC<{
   );
 };
 
-export default AddCompanyForm;
+export default AddEmployeeForm;
