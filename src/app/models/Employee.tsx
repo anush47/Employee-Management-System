@@ -1,13 +1,14 @@
 import { Schema, model, models, Document } from "mongoose";
+import { number } from "zod";
 
 // Define an interface for the Company document
-interface ICompany extends Document {
+interface IEmployee extends Document {
+  memberNo: Number;
   name: string;
-  employerNo: string;
-  address: string;
-  user: Schema.Types.ObjectId;
+  nic: string;
+  basic: number;
+  company: Schema.Types.ObjectId;
   startedAt: Date;
-  paymentMethod: String;
   paymentStructure: {
     additions: {
       name: string;
@@ -21,30 +22,31 @@ interface ICompany extends Document {
 }
 
 // Define the schema for the Company model
-const companySchema = new Schema<ICompany>(
+const employeeSchema = new Schema<IEmployee>(
   {
+    memberNo: {
+      type: Number,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
     },
-    employerNo: {
+    nic: {
       type: String,
-      unique: true,
       required: true,
     },
-    address: {
-      type: String,
+    basic: {
+      type: Number,
+      required: true,
     },
-    user: {
+    company: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Company",
       required: true,
     },
     startedAt: {
       type: Date,
-    },
-    paymentMethod: {
-      type: String,
     },
     paymentStructure: {
       additions: {
@@ -59,10 +61,6 @@ const companySchema = new Schema<ICompany>(
             },
           },
         ],
-        default: [
-          { name: "Incentive", amount: null },
-          { name: "Performance Allowance", amount: null },
-        ],
       },
       deductions: {
         type: [
@@ -76,7 +74,6 @@ const companySchema = new Schema<ICompany>(
             },
           },
         ],
-        default: [],
       },
     },
   },
@@ -86,6 +83,7 @@ const companySchema = new Schema<ICompany>(
 );
 
 // Check if the model already exists
-const Company = models.Company || model<ICompany>("Company", companySchema);
+const Employee =
+  models.Employee || model<IEmployee>("Employee", employeeSchema);
 
-export default Company;
+export default Employee;

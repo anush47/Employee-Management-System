@@ -15,6 +15,7 @@ import { companyId } from "./companySideBar";
 // // Lazy load the components
 const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
 const Employees = lazy(() => import("../employees/employees"));
+const Dashboard = lazy(() => import("../dashboard/dashboard"));
 const Payments = lazy(() => import("../payments/payments"));
 
 const CompanyMainBox = ({
@@ -41,6 +42,8 @@ const CompanyMainBox = ({
       >
         {(() => {
           switch (selected) {
+            case "dashboard":
+              return <Dashboard user={user} />;
             case "details":
               return <CompanyDetails user={user} />;
             case "employees":

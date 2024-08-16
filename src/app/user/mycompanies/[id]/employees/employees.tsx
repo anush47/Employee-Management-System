@@ -1,24 +1,91 @@
 "use client";
-import { Box, Card, CardContent, CardHeader, Typography } from "@mui/material";
-import React from "react";
+import React, { Suspense, lazy, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Tooltip,
+  Button,
+  Box,
+  CircularProgress,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Slide,
+} from "@mui/material";
+import { Add, ArrowBack } from "@mui/icons-material";
+import AddEmployeeForm from "./clientComponents/AddEmployee";
 
-const Employees = ({
+// Lazily load CompaniesDataGrid
+const CompaniesDataGrid = lazy(
+  () => import("./clientComponents/employeesDataGrid")
+);
+
+const MyCompanies = ({
   user,
 }: {
   user: { name: string; email: string; id: string };
 }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const handleAddClick = () => {
+    setIsAdding(true);
+  };
+
+  const handleBackClick = () => {
+    setIsAdding(false);
+  };
+
   return (
-    <Card>
-      <CardHeader
-        title={
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <Typography variant="h4">Employees</Typography>
-          </div>
-        }
-      />
-      <CardContent></CardContent>
-    </Card>
+    <Box>
+      {isAdding ? (
+        <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
+          <Card>
+            <AddEmployeeForm user={user} handleBackClick={handleBackClick} />
+          </Card>
+        </Slide>
+      ) : (
+        <Card>
+          <CardHeader
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  mb: 2,
+                }}
+              >
+                <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
+                  Employees
+                </Typography>
+                <Tooltip title="Add a new employee" arrow>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<Add />}
+                    onClick={handleAddClick}
+                  >
+                    Add
+                  </Button>
+                </Tooltip>
+              </Box>
+            }
+          />
+          <CardContent>
+            <Suspense fallback={<CircularProgress />}>
+              <CompaniesDataGrid user={user} />
+            </Suspense>
+          </CardContent>
+        </Card>
+      )}
+    </Box>
   );
 };
 
-export default Employees;
+export default MyCompanies;

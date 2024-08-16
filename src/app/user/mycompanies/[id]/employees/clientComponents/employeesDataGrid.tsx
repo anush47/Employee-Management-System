@@ -4,21 +4,11 @@ import { Box, Alert, CircularProgress } from "@mui/material";
 import { columns } from "./coloumnDefinitions";
 
 export interface Company {
+  paymentMethod: unknown;
   id: string;
   name: string;
   employerNo: string;
   address: string;
-  paymentMethod: String;
-  paymentStructure: {
-    additions: {
-      name: string;
-      amount: string;
-    }[];
-    deductions: {
-      name: string;
-      amount: string;
-    }[];
-  };
 }
 
 const CompaniesDataGrid = ({
