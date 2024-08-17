@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridColumnVisibilityModel,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import { Box, Alert, CircularProgress } from "@mui/material";
 import { columns } from "./coloumnDefinitions";
 
@@ -58,6 +63,12 @@ const CompaniesDataGrid = ({
     fetchCompanies();
   }, [user]);
 
+  const [columnVisibilityModel, setColumnVisibilityModel] =
+    React.useState<GridColumnVisibilityModel>({
+      id: false,
+      address: false,
+    });
+
   return (
     <Box
       sx={{
@@ -91,10 +102,14 @@ const CompaniesDataGrid = ({
               showQuickFilter: true,
             },
           }}
-          checkboxSelection
+          //checkboxSelection
           disableRowSelectionOnClick
           disableColumnFilter
           disableDensitySelector
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={(newModel) =>
+            setColumnVisibilityModel(newModel)
+          }
         />
       )}
     </Box>

@@ -20,25 +20,28 @@ import {
   Alert,
   Slide,
 } from "@mui/material";
-import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
+import { ArrowBack, Cancel, Edit, Save, Search } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Employee } from "./employeesDataGrid";
+import { ddmmyyyy_to_mmddyyyy, Employee } from "./employeesDataGrid";
 import { LoadingButton } from "@mui/lab";
 import "dayjs/locale/en-gb";
 import { PaymentStructure } from "../../companyDetails/paymentStructure";
 import { companyId } from "../../clientComponents/companySideBar";
 import { Company } from "../../../clientComponents/companiesDataGrid";
+import { useSearchParams } from "next/navigation";
+import dayjs from "dayjs";
 //import { Company } from "./companiesDataGrid";
 //import { CompanyValidation } from "./companyValidation";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
-const AddEmployeeForm: React.FC<{
+const EditEmployeeForm: React.FC<{
   user: { id: string; name: string; email: string };
   handleBackClick: () => void;
-}> = ({ user, handleBackClick }) => {
+  employeeId: string | null;
+}> = ({ user, handleBackClick, employeeId }) => {
   const [formFields, setFormFields] = useState<Employee>({
     id: "",
     name: "",
@@ -68,39 +71,26 @@ const AddEmployeeForm: React.FC<{
     designation?: string;
     startedAt?: string;
   }>({});
-  const [company, setCompany] = useState<Company | null>(null);
+  const [company, setEmployee] = useState<Company | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    const fetchCompany = async () => {
+    const fetchEmployee = async () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/companies/one?companyId=${companyId}`
+          `/api/employees/one?employeeId=${employeeId}`
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch company");
+          throw new Error("Failed to fetch Employee");
         }
         const data = await response.json();
-        setCompany(data.company);
+        setEmployee(data.employee);
         // Set default payment structure to payments from company
-        setFormFields((prev) => ({
-          ...prev,
-          paymentStructure:
-            data.company.paymentStructure &&
-            data.company.paymentStructure.additions.length > 0 &&
-            data.company.paymentStructure.deductions.length > 0
-              ? data.company.paymentStructure
-              : {
-                  additions: [
-                    { name: "incentive", amount: "" },
-                    { name: "performance allowance", amount: "" },
-                  ],
-                  deductions: [],
-                },
-        }));
+        setFormFields(data.employee);
       } catch (error) {
         setSnackbarMessage(
           error instanceof Error ? error.message : "Error fetching company."
@@ -113,7 +103,7 @@ const AddEmployeeForm: React.FC<{
     };
 
     if (companyId?.length === 24) {
-      fetchCompany();
+      fetchEmployee();
     } else {
       setSnackbarMessage("Invalid Company ID");
       setSnackbarSeverity("error");
@@ -135,14 +125,13 @@ const AddEmployeeForm: React.FC<{
 
   const onSaveClick = async () => {
     if (!true) {
-      // Placeholder for validation logic
       return;
     }
 
     setLoading(true);
     try {
-      // Perform POST request to add a new employee
-      const response = await fetch("/api/employees/new", {
+      // Perform POST request to update the employee
+      const response = await fetch("/api/employees/one", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,14 +145,12 @@ const AddEmployeeForm: React.FC<{
       const result = await response.json();
 
       if (response.ok) {
-        setSnackbarMessage("Employee saved successfully!");
+        setSnackbarMessage("Employee updated successfully!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
 
-        // Wait for 2 seconds before clearing the form
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // Clear the form after successful save
         setFormFields({
           id: "",
           name: "",
@@ -181,7 +168,6 @@ const AddEmployeeForm: React.FC<{
         setErrors({});
         handleBackClick();
       } else {
-        // Handle validation or other errors returned by the API
         setSnackbarMessage(
           result.message || "Error saving employee. Please try again."
         );
@@ -190,36 +176,11 @@ const AddEmployeeForm: React.FC<{
       }
     } catch (error) {
       console.error("Error saving employee:", error);
-
       setSnackbarMessage("Error saving employee. Please try again.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const onFetchMemberNoClick = async () => {
-    setNameLoading(true);
-    try {
-      // Simulate fetching company name
-      //const name = await fetchCompanyName(formFields.employerNo);
-      const name = "Fetched name";
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setFormFields((prevFields) => ({ ...prevFields, name }));
-
-      // Show success snackbar with the fetched name
-      setSnackbarMessage(`Name found: ${name}`);
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Error fetching company name:", error);
-
-      setSnackbarMessage("Error fetching company name. Please try again.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    } finally {
-      setNameLoading(false);
     }
   };
 
@@ -255,23 +216,35 @@ const AddEmployeeForm: React.FC<{
                   <ArrowBack />
                 </IconButton>
               </Tooltip>
-              Add Employee
-              <Tooltip title="Save new company" arrow>
-                <span>
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    startIcon={<Save />}
-                    sx={{
-                      ml: 2,
-                    }}
-                    onClick={onSaveClick}
-                    disabled={loading} // Disable button while loading
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Save"}
-                  </Button>
-                </span>
-              </Tooltip>
+              Edit Employee
+              {isEditing ? (
+                <Tooltip title="Save new company" arrow>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        marginLeft: 1,
+                      }}
+                      color="success"
+                      startIcon={<Save />}
+                      onClick={onSaveClick}
+                      disabled={loading} // Disable button while loading
+                    >
+                      {loading ? <CircularProgress size={24} /> : "Save"}
+                    </Button>
+                  </span>
+                </Tooltip>
+              ) : (
+                <IconButton
+                  sx={{
+                    marginLeft: 1,
+                  }}
+                  color="primary"
+                  onClick={() => setIsEditing(true)}
+                >
+                  {loading ? <CircularProgress size={24} /> : <Edit />}
+                </IconButton>
+              )}
             </Typography>
           </Box>
         }
@@ -299,22 +272,6 @@ const AddEmployeeForm: React.FC<{
                 value={formFields.memberNo}
                 onChange={handleChange}
                 variant="filled"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <LoadingButton
-                        variant="text"
-                        color="inherit"
-                        endIcon={<Search />}
-                        loading={memberNoLoading}
-                        loadingPosition="end"
-                        onClick={onFetchMemberNoClick}
-                        disabled={memberNoLoading} // Disable button while loading
-                        sx={{ marginTop: 1 }}
-                      />
-                    </InputAdornment>
-                  ),
-                }}
               />
               {errors.memberNo && (
                 <FormHelperText>{errors.memberNo}</FormHelperText>
@@ -329,6 +286,9 @@ const AddEmployeeForm: React.FC<{
                 value={formFields.nic}
                 onChange={handleChange}
                 variant="filled"
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
               />
             </FormControl>
           </Grid>
@@ -341,6 +301,9 @@ const AddEmployeeForm: React.FC<{
                 value={formFields.basic}
                 onChange={handleChange}
                 variant="filled"
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
               />
             </FormControl>
           </Grid>
@@ -352,6 +315,9 @@ const AddEmployeeForm: React.FC<{
                 value={formFields.designation}
                 onChange={handleChange}
                 variant="filled"
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
               />
             </FormControl>
           </Grid>
@@ -362,9 +328,17 @@ const AddEmployeeForm: React.FC<{
                 adapterLocale="en-gb"
               >
                 <DatePicker
+                  readOnly={!isEditing}
                   label="Started At"
                   name="startedAt"
                   openTo="year"
+                  value={
+                    formFields.startedAt
+                      ? dayjs(
+                          ddmmyyyy_to_mmddyyyy(formFields.startedAt as string)
+                        )
+                      : null
+                  }
                   views={["year", "month", "day"]}
                   onChange={(newDate) => {
                     setFormFields((prevFields) => ({
@@ -382,7 +356,7 @@ const AddEmployeeForm: React.FC<{
         </Grid>
         <Grid mt={3} item xs={12}>
           <PaymentStructure
-            isEditing={true}
+            isEditing={isEditing}
             handleChange={handleChange}
             paymentStructure={formFields.paymentStructure}
             setPaymentStructure={(paymentStructure) => {
@@ -416,4 +390,4 @@ const AddEmployeeForm: React.FC<{
   );
 };
 
-export default AddEmployeeForm;
+export default EditEmployeeForm;
