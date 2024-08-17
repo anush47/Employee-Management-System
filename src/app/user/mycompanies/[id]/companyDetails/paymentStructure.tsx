@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Button,
@@ -32,7 +32,13 @@ interface PaymentStructureProps {
 const validateAmount = (value: string) => {
   // Regex to allow either a single number, a range (number-number), or empty string
   const regex = /^(\d+(\.\d{2})?|\d+(\.\d{2})?-\d+(\.\d{2})?)?$/;
-  return regex.test(value);
+  //console.log(value);
+  if (!regex.test(value)) {
+    //if undefined
+    if (value === "") return true;
+    return false;
+  }
+  return true;
 };
 
 export const PaymentStructure = ({
@@ -41,11 +47,19 @@ export const PaymentStructure = ({
   setPaymentStructure,
   isEditing,
 }: PaymentStructureProps) => {
+  useEffect(() => {
+    //do once only when company fetched
+    setAdditions(paymentStructure?.additions);
+    setDeductions(paymentStructure?.deductions);
+  }, [paymentStructure]);
   const [additions, setAdditions] = React.useState(
-    paymentStructure?.additions || [{ name: "Incentive", amount: "" }]
+    paymentStructure?.additions || [
+      { name: "Incentive", amount: "" },
+      { name: "Performance Allowance", amount: "" },
+    ]
   );
   const [deductions, setDeductions] = React.useState(
-    paymentStructure?.deductions || [{ name: "Tax", amount: "" }]
+    paymentStructure?.deductions || []
   );
   const [errors, setErrors] = React.useState<{
     additions: string[];
@@ -98,17 +112,21 @@ export const PaymentStructure = ({
     if (type === "additions") {
       newAdditions[index] = { ...newAdditions[index], [field]: value };
       setAdditions(newAdditions);
-      newErrors.additions[index] = validateAmount(value)
-        ? ""
-        : "Invalid amount format";
+      newErrors.additions[index] =
+        (field === "amount" && validateAmount(value)) ||
+        (field === "name" && value !== "")
+          ? ""
+          : "Invalid format";
       setErrors(newErrors);
       setPaymentStructure({ additions: newAdditions, deductions });
     } else {
       newDeductions[index] = { ...newDeductions[index], [field]: value };
       setDeductions(newDeductions);
-      newErrors.deductions[index] = validateAmount(value)
-        ? ""
-        : "Invalid amount format";
+      newErrors.deductions[index] =
+        (field === "amount" && validateAmount(value)) ||
+        (field === "name" && value !== "")
+          ? ""
+          : "Invalid format";
       setErrors(newErrors);
       setPaymentStructure({ additions, deductions: newDeductions });
     }

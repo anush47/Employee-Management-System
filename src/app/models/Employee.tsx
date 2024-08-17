@@ -1,14 +1,14 @@
 import { Schema, model, models, Document } from "mongoose";
-import { number } from "zod";
+import { string } from "zod";
 
 // Define an interface for the Company document
 interface IEmployee extends Document {
-  memberNo: Number;
+  memberNo: number;
   name: string;
   nic: string;
   basic: number;
   company: Schema.Types.ObjectId;
-  startedAt: Date;
+  startedAt: string;
   paymentStructure: {
     additions: {
       name: string;
@@ -46,7 +46,7 @@ const employeeSchema = new Schema<IEmployee>(
       required: true,
     },
     startedAt: {
-      type: Date,
+      type: String,
     },
     paymentStructure: {
       additions: {
@@ -67,7 +67,6 @@ const employeeSchema = new Schema<IEmployee>(
           {
             name: {
               type: String,
-              required: true,
             },
             amount: {
               type: String,

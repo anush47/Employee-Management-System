@@ -6,7 +6,7 @@ interface ICompany extends Document {
   employerNo: string;
   address: string;
   user: Schema.Types.ObjectId;
-  startedAt: Date;
+  startedAt: String;
   paymentMethod: String;
   paymentStructure: {
     additions: {
@@ -41,7 +41,7 @@ const companySchema = new Schema<ICompany>(
       required: true,
     },
     startedAt: {
-      type: Date,
+      type: String,
     },
     paymentMethod: {
       type: String,
