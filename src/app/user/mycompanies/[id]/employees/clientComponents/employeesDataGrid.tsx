@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridColumnVisibilityModel,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import {
   Box,
   Alert,
@@ -9,7 +14,14 @@ import {
   Slide,
 } from "@mui/material";
 import { companyId } from "../../clientComponents/companySideBar";
-import { columns } from "./coloumnDefinitions";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import "dayjs/locale/en-gb";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import Link from "next/link";
+
+// Set dayjs format for consistency
+dayjs.locale("en-gb");
 
 export interface Employee {
   id: string;
@@ -32,11 +44,15 @@ export interface Employee {
   company: string;
 }
 
-const EmployeesDataGrid = ({
-  user,
-}: {
+export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
+  const [dd, mm, yyyy] = ddmmyyyy.split("-");
+  return `${mm}-${dd}-${yyyy}`;
+};
+
+const EmployeesDataGrid: React.FC<{
   user: { id: string; name: string; email: string };
-}) => {
+  isEditingEmployeeInHome: boolean;
+}> = ({ user, isEditingEmployeeInHome }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +61,82 @@ const EmployeesDataGrid = ({
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+
+  const columns: GridColDef[] = [
+    {
+      field: "memberNo",
+      headerName: "Member No",
+      editable: isEditingEmployeeInHome,
+      type: "number",
+      align: "left",
+      headerAlign: "left",
+      flex: 1,
+      display: "text",
+    },
+    {
+      field: "name",
+      headerName: "Name",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "nic",
+      headerName: "NIC",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "basic",
+      headerName: "Basic",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+      type: "number",
+      align: "left",
+      headerAlign: "left",
+    },
+    {
+      field: "startedAt",
+      headerName: "Started At",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+      valueGetter: (params) => {
+        // Ensure the date is formatted correctly for display
+        return params;
+      },
+      renderEditCell: (params) => (
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+          <DatePicker
+            label="Started At"
+            openTo="year"
+            views={["year", "month", "day"]}
+            value={dayjs(ddmmyyyy_to_mmddyyyy(params.value))}
+            onChange={(newDate) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: params.field,
+                value: newDate ? newDate.format("DD-MM-YYYY") : null,
+              });
+            }}
+            slotProps={{
+              field: { clearable: true },
+            }}
+          />
+        </LocalizationProvider>
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      renderCell: (params) => (
+        <Link
+          href={`/user/mycompanies/${companyId}?companyPageSelect=employees&employeeId=${params.id}`}
+        >
+          <Button variant="text">View</Button>
+        </Link>
+      ),
+    },
+  ];
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -131,23 +223,42 @@ const EmployeesDataGrid = ({
       newEmployee.name = newEmployee.name.toUpperCase();
       newEmployee.nic = newEmployee.nic.toUpperCase();
       newEmployee.basic = parseFloat(newEmployee.basic);
+      try {
+        // Perform POST request to update the employee
+        const response = await fetch("/api/employees/one", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...newEmployee,
+            userId: user.id, // Include user ID
+          }),
+        });
 
-      // Uncomment and modify the fetch request if you have a real API
-      // const response = await fetch(`/api/employees/${newEmployee.id}`, {
-      //   method: "PUT",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(newEmployee),
-      // });
-      // if (!response.ok) {
-      //   throw new Error("Failed to update employee");
+        const result = await response.json();
+
+        if (!response.ok) {
+          setSnackbarMessage(
+            result.message || "Error saving employee. Please try again."
+          );
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+        }
+      } catch (error) {
+        console.error("Error saving employee:", error);
+        setSnackbarMessage("Error saving employee. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      } finally {
+        setLoading(false);
+      }
       // }
-      console.log(newEmployee);
+      //console.log(newEmployee);
 
       // Success feedback
       setSnackbarMessage(
-        `Employee ${newEmployee.memberNo} updated successfully!`
+        `Employee ${newEmployee.memberNo} - updated successfully!`
       );
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
@@ -196,6 +307,12 @@ const EmployeesDataGrid = ({
     setSnackbarOpen(false);
   };
 
+  const [columnVisibilityModel, setColumnVisibilityModel] =
+    React.useState<GridColumnVisibilityModel>({
+      id: false,
+      startedAt: false,
+    });
+
   return (
     <Box
       sx={{
@@ -230,12 +347,16 @@ const EmployeesDataGrid = ({
               showQuickFilter: true,
             },
           }}
-          checkboxSelection
+          //checkboxSelection
           disableRowSelectionOnClick
           disableColumnFilter
           disableDensitySelector
           processRowUpdate={handleRowUpdate}
           onProcessRowUpdateError={handleRowUpdateError}
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={(newModel) =>
+            setColumnVisibilityModel(newModel)
+          }
         />
       )}
 

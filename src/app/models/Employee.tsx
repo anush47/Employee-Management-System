@@ -8,6 +8,7 @@ interface IEmployee extends Document {
   nic: string;
   basic: number;
   company: Schema.Types.ObjectId;
+  designation: string;
   startedAt: string;
   paymentStructure: {
     additions: {
@@ -44,6 +45,9 @@ const employeeSchema = new Schema<IEmployee>(
       type: Schema.Types.ObjectId,
       ref: "Company",
       required: true,
+    },
+    designation: {
+      type: String,
     },
     startedAt: {
       type: String,
