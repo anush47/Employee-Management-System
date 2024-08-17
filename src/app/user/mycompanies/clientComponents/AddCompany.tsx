@@ -63,7 +63,11 @@ const AddCompanyForm: React.FC<{
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = event.target;
+    let { name, value } = event.target;
+    //capitalize name
+    if (name === "name" || name === "employerNo") {
+      value = value.toUpperCase();
+    }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -139,11 +143,30 @@ const AddCompanyForm: React.FC<{
   const onFetchNameClick = async () => {
     setNameLoading(true);
     try {
+      const response = await fetch("/api/companies/getReferenceNo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employerNo: formFields.employerNo,
+        }),
+      });
+      const result = await response.json();
+
       // Simulate fetching company name
       //const name = await fetchCompanyName(formFields.employerNo);
-      const name = "Fetched name";
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setFormFields((prevFields) => ({ ...prevFields, name }));
+      const name = result.name;
+      if (!name) {
+        setSnackbarMessage("Employer number not found. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        name: name.toUpperCase(),
+      }));
 
       // Show success snackbar with the fetched name
       setSnackbarMessage(`Name found: ${name}`);
@@ -177,7 +200,7 @@ const AddCompanyForm: React.FC<{
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
+              gap: 2,
               mb: 2,
             }}
           >
