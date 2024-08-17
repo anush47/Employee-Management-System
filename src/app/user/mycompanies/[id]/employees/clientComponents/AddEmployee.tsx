@@ -125,7 +125,11 @@ const AddEmployeeForm: React.FC<{
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = event.target;
+    let { name, value } = event.target;
+    //capitalize for name,nic
+    if (name === "name" || name === "nic") {
+      value = value.toUpperCase();
+    }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 

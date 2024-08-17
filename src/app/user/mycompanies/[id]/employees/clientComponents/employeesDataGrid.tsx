@@ -77,6 +77,7 @@ const EmployeesDataGrid = ({
   }, [user, companyId]);
 
   const validate = (newEmployee: {
+    id: string;
     name: string;
     memberNo: string;
     nic: string;
@@ -91,8 +92,19 @@ const EmployeesDataGrid = ({
     if (newEmployee.name === "") {
       errors.name = "Name is required";
     }
-    if (newEmployee.memberNo === "") {
+    if (newEmployee.memberNo === null || newEmployee.memberNo === "") {
       errors.memberNo = "Member number is required";
+    } else {
+      //check if number already exists except this one
+      const existingEmployee = employees.find((employee) => {
+        return (
+          employee.memberNo === parseInt(newEmployee.memberNo) &&
+          employee.id !== newEmployee.id
+        );
+      });
+      if (existingEmployee) {
+        errors.memberNo = "Member number already exists";
+      }
     }
     if (newEmployee.nic === "") {
       errors.nic = "NIC is required";
@@ -103,13 +115,22 @@ const EmployeesDataGrid = ({
     return errors;
   };
 
-  // Handle successful row update
   const handleRowUpdate = async (newEmployee: any) => {
     try {
+      // Validate the new employee data
       const errors = validate(newEmployee);
       if (Object.keys(errors).length > 0) {
-        throw new Error("Validation error");
+        throw new Error(
+          `Validation error in ${newEmployee.memberNo}: ${Object.values(
+            errors
+          ).join(", ")}`
+        );
       }
+
+      // Format data
+      newEmployee.name = newEmployee.name.toUpperCase();
+      newEmployee.nic = newEmployee.nic.toUpperCase();
+      newEmployee.basic = parseFloat(newEmployee.basic);
 
       // Uncomment and modify the fetch request if you have a real API
       // const response = await fetch(`/api/employees/${newEmployee.id}`, {
@@ -124,34 +145,45 @@ const EmployeesDataGrid = ({
       // }
       console.log(newEmployee);
 
-      setSnackbarMessage("Employee updated successfully!");
+      // Success feedback
+      setSnackbarMessage(
+        `Employee ${newEmployee.memberNo} updated successfully!`
+      );
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
 
       return newEmployee;
-    } catch (error) {
-      setSnackbarMessage(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+    } catch (error: any) {
+      // Add type 'any' to the 'error' object
+      // Pass the error details along
+      throw {
+        message:
+          error?.message || "An error occurred while updating the employee.",
+        error: error,
+      };
     }
   };
 
-  // Handle row update errors
   const handleRowUpdateError = (params: any) => {
     // Revert changes if necessary
     const updatedEmployees = employees.map((employee) => {
       if (employee.id === params.id) {
-        return params.oldRow;
+        return params.oldRow; // Revert to old row data
       }
       return employee;
     });
 
-    setEmployees(updatedEmployees);
-    setSnackbarMessage("Error updating employee.");
-    setSnackbarSeverity("error");
-    setSnackbarOpen(true);
+    // Log error and revert row updates
+    console.error("Row update error:", params.error?.error || params.error);
+
+    setEmployees(updatedEmployees); // Update state with reverted data
+
+    // Display the error details in Snackbar
+    setSnackbarMessage(
+      params.error?.message || "An unexpected error occurred." // Show detailed error message
+    );
+    setSnackbarSeverity("error"); // Set snackbar severity to error
+    setSnackbarOpen(true); // Open Snackbar
   };
 
   const handleSnackbarClose = (
