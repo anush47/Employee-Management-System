@@ -56,8 +56,6 @@ const MyCompanies = ({
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
                   mb: 2,
                 }}
               >

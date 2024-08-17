@@ -202,24 +202,36 @@ const AddEmployeeForm: React.FC<{
   const onFetchMemberNoClick = async () => {
     setNameLoading(true);
     try {
-      // Simulate fetching company name
-      //const name = await fetchCompanyName(formFields.employerNo);
-      const name = "Fetched name";
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setFormFields((prevFields) => ({ ...prevFields, name }));
+      setLoading(true);
+      const response = await fetch(
+        `/api/employees/many?companyId=${companyId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch employees");
+      }
+      const data = await response.json();
+      const employees = data.employees;
+
+      //sort employees from memberno and get last memberno
+      employees.sort((a: Employee, b: Employee) => a.memberNo - b.memberNo);
+      const lastEmployee = employees[employees.length - 1];
+      const newMemberNo = lastEmployee ? lastEmployee.memberNo + 1 : 1;
+
+      setFormFields((prevFields) => ({ ...prevFields, memberNo: newMemberNo }));
 
       // Show success snackbar with the fetched name
-      setSnackbarMessage(`Name found: ${name}`);
+      setSnackbarMessage(`New Member No.: ${newMemberNo}`);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (error) {
-      console.error("Error fetching company name:", error);
+      console.error("Error fetching Member No:", error);
 
-      setSnackbarMessage("Error fetching company name. Please try again.");
+      setSnackbarMessage("Error fetching Member No. Please try again.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
       setNameLoading(false);
+      setLoading(false);
     }
   };
 
