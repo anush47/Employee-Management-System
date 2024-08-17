@@ -5,9 +5,11 @@ import Company from "@/app/models/Company";
 import { options } from "../../auth/[...nextauth]/options";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
+import Employee from "@/app/models/Employee";
 
 // Define schema for validation
 const userIdSchema = z.string().min(1, "User ID is required");
+const companyIdSchema = z.string().min(1, "Company ID is required");
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,19 +21,30 @@ export async function GET(req: NextRequest) {
     // Validate userId
     userIdSchema.parse(userId);
 
-    // Convert userId to ObjectId
+    //get the companyId from url
+    const companyId = req.nextUrl.searchParams.get("companyId");
+    // Validate companyId
+    companyIdSchema.parse(companyId);
 
     // Create filter
-    const filter = { user: userId };
+    const filter = { user: userId, _id: companyId };
 
     // Connect to the database
     await dbConnect();
 
-    // Fetch companies from the database
-    const companies = await Company.find(filter).lean(); // Use .lean() for better performance
-    //console.log(companies);
-    // Return the company data
-    return NextResponse.json({ companies });
+    //check if company exists without fetching data
+    const companyExists = await Company.exists(filter);
+    if (!companyExists) {
+      return NextResponse.json(
+        { message: "Company not found" },
+        { status: 404 }
+      );
+    }
+    //find employees with company as company ID
+    const employees = await Employee.find({ company: companyId });
+
+    //return employees
+    return NextResponse.json({ employees });
   } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {

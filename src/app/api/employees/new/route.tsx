@@ -2,18 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import Company from "@/app/models/Company";
+import Employee from "@/app/models/Employee"; // Assuming you have an Employee model
 import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
 
-// Define schema for validation
-const companySchema = z.object({
+// Define the schema for employee validation
+const employeeSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  employerNo: z
-    .string()
-    .min(1, "Employer Number is required")
-    .regex(/^[A-Z]\/\d{5}$/, "Employer Number must match the pattern A/12345"),
-  address: z.string().optional(),
+  memberNo: z.number().min(1, "Member number is required"),
+  nic: z.string().min(1, "NIC is required"),
+  basic: z.number().min(1, "Basic salary is required"),
+  designation: z.string().optional(),
+  startedAt: z.string().optional(),
+  paymentStructure: z.object({
+    additions: z.array(
+      z.object({
+        name: z.string(),
+        amount: z.union([z.string(), z.number(), z.null()]),
+      })
+    ),
+    deductions: z.array(
+      z.object({
+        name: z.string(),
+        amount: z.union([z.string(), z.number(), z.null()]),
+      })
+    ),
+  }),
+  company: z.string().length(24, "Company ID must be a valid ObjectId"),
 });
+
+// Define the schema as shown earlier
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,24 +49,52 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate the request body
     const body = await req.json();
-    const parsedBody = companySchema.parse(body);
+    //change memberNo to int
+    body.memberNo = parseInt(body.memberNo);
+    console.log(body);
+    const parsedBody = employeeSchema.parse(body);
+    //print
+    console.log(parsedBody);
 
     // Connect to the database
     await dbConnect();
 
-    // Create new company
-    const newCompany = new Company({
+    // Find the company by ID to ensure it exists and belongs to the user
+    const company = await Company.findById(parsedBody.company);
+    if (!company || company.user.toString() !== userId) {
+      return NextResponse.json(
+        { message: "Access denied. You cannot add employees to this company." },
+        { status: 403 }
+      );
+    }
+
+    //check employees in company to see if member no exists
+    const employees = await Employee.find({
+      company: parsedBody.company,
+    });
+    for (let i = 0; i < employees.length; i++) {
+      if (employees[i].memberNo === parsedBody.memberNo) {
+        return NextResponse.json(
+          { message: "Employee with this member number already exists" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create new employee
+    const newEmployee = new Employee({
       ...parsedBody,
       user: userId,
     });
 
-    // Save the new company to the database
-    await newCompany.save();
+    // Save the new employee to the database
+    await newEmployee.save();
 
     // Return success response
-    return NextResponse.json({ message: "Company added successfully" });
+    return NextResponse.json({ message: "Employee added successfully" });
   } catch (error) {
     // Handle Zod validation errors
+    console.log(error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: error.errors[0].message },
@@ -56,13 +102,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    //duplicate error
-    if ((error as any).code === 11000) {
-      return NextResponse.json(
-        { message: "Company with this Employer Number already exists" },
-        { status: 400 }
-      );
-    }
     // Handle general errors
     return NextResponse.json(
       {

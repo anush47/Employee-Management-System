@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   CircularProgress,
@@ -21,7 +21,15 @@ import {
   Slide,
 } from "@mui/material";
 import { Cancel, Save, Search } from "@mui/icons-material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { Employee } from "./employeesDataGrid";
 import { LoadingButton } from "@mui/lab";
+import "dayjs/locale/en-gb";
+import { PaymentStructure } from "../../companyDetails/paymentStructure";
+import { companyId } from "../../clientComponents/companySideBar";
+import { Company } from "../../../clientComponents/companiesDataGrid";
 //import { Company } from "./companiesDataGrid";
 //import { CompanyValidation } from "./companyValidation";
 
@@ -31,23 +39,19 @@ const AddEmployeeForm: React.FC<{
   user: { id: string; name: string; email: string };
   handleBackClick: () => void;
 }> = ({ user, handleBackClick }) => {
-  interface Employee {
-    designation: unknown;
-    id: string;
-    name: string;
-    memberNo: string;
-    address: string;
-    paymentMethod: string;
-  }
-
   const [formFields, setFormFields] = useState<Employee>({
     id: "",
     name: "",
-    memberNo: "",
+    memberNo: 0,
     nic: "",
-    address: "",
-    paymentMethod: "",
+    basic: 16000,
     designation: "",
+    startedAt: "",
+    paymentStructure: {
+      additions: [],
+      deductions: [],
+    },
+    company: companyId || "",
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [memberNoLoading, setNameLoading] = useState<boolean>(false);
@@ -56,12 +60,66 @@ const AddEmployeeForm: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
-  const [errors, setErrors] = useState<{ name?: string; employerNo?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{
+    name?: string;
+    memberNo?: string;
+    basic?: string;
+    nic?: string;
+    designation?: string;
+    startedAt?: string;
+  }>({});
+  const [company, setCompany] = useState<Company | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/companies/one?companyId=${companyId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch company");
+        }
+        const data = await response.json();
+        setCompany(data.company);
+        // Set default payment structure to payments from company
+        setFormFields((prev) => ({
+          ...prev,
+          paymentStructure:
+            data.company.paymentStructure &&
+            data.company.paymentStructure.additions.length > 0 &&
+            data.company.paymentStructure.deductions.length > 0
+              ? data.company.paymentStructure
+              : {
+                  additions: [
+                    { name: "incentive", amount: "" },
+                    { name: "performance allowance", amount: "" },
+                  ],
+                  deductions: [],
+                },
+        }));
+      } catch (error) {
+        setSnackbarMessage(
+          error instanceof Error ? error.message : "Error fetching company."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (companyId?.length === 24) {
+      fetchCompany();
+    } else {
+      setSnackbarMessage("Invalid Company ID");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  }, [companyId, user]);
 
   // Unified handle change for all fields
   const handleChange = (
@@ -72,18 +130,15 @@ const AddEmployeeForm: React.FC<{
   };
 
   const onSaveClick = async () => {
-    //const newErrors = CompanyValidation(formFields);
-    //setErrors(newErrors);
-    //const isValid = Object.keys(newErrors).length === 0;
-
     if (!true) {
+      // Placeholder for validation logic
       return;
     }
 
     setLoading(true);
     try {
-      // Perform POST request to add a new company
-      const response = await fetch("/api/companies/new", {
+      // Perform POST request to add a new employee
+      const response = await fetch("/api/employees/new", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,36 +152,42 @@ const AddEmployeeForm: React.FC<{
       const result = await response.json();
 
       if (response.ok) {
-        setSnackbarMessage("Company saved successfully!");
+        setSnackbarMessage("Employee saved successfully!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
 
-        //wait
+        // Wait for 2 seconds before clearing the form
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Clear the form after successful save
         setFormFields({
           id: "",
           name: "",
-          memberNo: "",
-          address: "",
-          paymentMethod: "",
+          memberNo: 0,
+          basic: 16000,
           designation: "",
+          nic: "",
+          startedAt: "",
+          paymentStructure: {
+            additions: [],
+            deductions: [],
+          },
+          company: companyId,
         });
         setErrors({});
         handleBackClick();
       } else {
         // Handle validation or other errors returned by the API
         setSnackbarMessage(
-          result.message || "Error saving company. Please try again."
+          result.message || "Error saving employee. Please try again."
         );
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
       }
     } catch (error) {
-      console.error("Error saving company:", error);
+      console.error("Error saving employee:", error);
 
-      setSnackbarMessage("Error saving company. Please try again.");
+      setSnackbarMessage("Error saving employee. Please try again.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
@@ -189,15 +250,17 @@ const AddEmployeeForm: React.FC<{
                 </IconButton>
               </Tooltip>
               <Tooltip title="Save new company" arrow>
-                <Button
-                  variant="outlined"
-                  color="success"
-                  startIcon={<Save />}
-                  onClick={onSaveClick}
-                  disabled={loading} // Disable button while loading
-                >
-                  {loading ? <CircularProgress size={24} /> : "Save"}
-                </Button>
+                <span>
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    startIcon={<Save />}
+                    onClick={onSaveClick}
+                    disabled={loading} // Disable button while loading
+                  >
+                    {loading ? <CircularProgress size={24} /> : "Save"}
+                  </Button>
+                </span>
               </Tooltip>
             </Box>
           </Box>
@@ -218,11 +281,11 @@ const AddEmployeeForm: React.FC<{
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.employerNo}>
+            <FormControl fullWidth error={!!errors.memberNo}>
               <TextField
                 label="Member Number"
-                placeholder="A/12345"
                 name="memberNo"
+                type="number"
                 value={formFields.memberNo}
                 onChange={handleChange}
                 variant="filled"
@@ -243,13 +306,36 @@ const AddEmployeeForm: React.FC<{
                   ),
                 }}
               />
-              {errors.employerNo && (
-                <FormHelperText>{errors.employerNo}</FormHelperText>
+              {errors.memberNo && (
+                <FormHelperText>{errors.memberNo}</FormHelperText>
               )}
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.name}>
+            <FormControl fullWidth error={!!errors.nic}>
+              <TextField
+                label="NIC"
+                name="nic"
+                value={formFields.nic}
+                onChange={handleChange}
+                variant="filled"
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.basic}>
+              <TextField
+                label="Basic"
+                name="basic"
+                type="number"
+                value={formFields.basic}
+                onChange={handleChange}
+                variant="filled"
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.designation}>
               <TextField
                 label="Designation"
                 name="designation"
@@ -259,35 +345,44 @@ const AddEmployeeForm: React.FC<{
               />
             </FormControl>
           </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <TextField
-                label="Company Address"
-                name="address"
-                value={formFields.address}
-                onChange={handleChange}
-                variant="filled"
-                size="small"
-                multiline
-                minRows={2}
-              />
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.startedAt}>
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="en-gb"
+              >
+                <DatePicker
+                  label="Started At"
+                  name="startedAt"
+                  openTo="year"
+                  views={["year", "month", "day"]}
+                  onChange={(newDate) => {
+                    setFormFields((prevFields) => ({
+                      ...prevFields,
+                      startedAt: newDate?.format("DD-MM-YYYY") as string | Date,
+                    }));
+                  }}
+                  slotProps={{
+                    field: { clearable: true },
+                  }}
+                />
+              </LocalizationProvider>
             </FormControl>
           </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <TextField
-                label="Payment Method"
-                name="paymentMethod"
-                value={formFields.paymentMethod}
-                onChange={handleChange}
-                variant="filled"
-                size="small"
-              />
-            </FormControl>
-            <FormHelperText>
-              Bank name, branch EPF/ETF is paid. you may use "Cash" as well
-            </FormHelperText>
-          </Grid>
+        </Grid>
+        <Grid mt={3} item xs={12}>
+          <PaymentStructure
+            isEditing={true}
+            handleChange={handleChange}
+            paymentStructure={formFields.paymentStructure}
+            setPaymentStructure={(paymentStructure) => {
+              //console.log("Setting payment structure:", paymentStructure); // Debugging
+              setFormFields((prev) => ({
+                ...prev,
+                paymentStructure,
+              }));
+            }}
+          />
         </Grid>
       </CardContent>
 
