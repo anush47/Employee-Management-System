@@ -50,6 +50,7 @@ const EditEmployeeForm: React.FC<{
     basic: 16000,
     designation: "",
     startedAt: "",
+    resignedAt: "",
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -70,6 +71,7 @@ const EditEmployeeForm: React.FC<{
     nic?: string;
     designation?: string;
     startedAt?: string;
+    resignedAt?: string;
   }>({});
   const [company, setEmployee] = useState<Company | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -159,6 +161,7 @@ const EditEmployeeForm: React.FC<{
           designation: "",
           nic: "",
           startedAt: "",
+          resignedAt: "",
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -344,6 +347,40 @@ const EditEmployeeForm: React.FC<{
                     setFormFields((prevFields) => ({
                       ...prevFields,
                       startedAt: newDate?.format("DD-MM-YYYY") as string | Date,
+                    }));
+                  }}
+                  slotProps={{
+                    field: { clearable: true },
+                  }}
+                />
+              </LocalizationProvider>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.resignedAt}>
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="en-gb"
+              >
+                <DatePicker
+                  readOnly={!isEditing}
+                  label="Resigned At"
+                  name="resignedAt"
+                  openTo="year"
+                  value={
+                    formFields.resignedAt
+                      ? dayjs(
+                          ddmmyyyy_to_mmddyyyy(formFields.resignedAt as string)
+                        )
+                      : null
+                  }
+                  views={["year", "month", "day"]}
+                  onChange={(newDate) => {
+                    setFormFields((prevFields) => ({
+                      ...prevFields,
+                      resignedAt: newDate?.format("DD-MM-YYYY") as
+                        | string
+                        | Date,
                     }));
                   }}
                   slotProps={{

@@ -41,6 +41,7 @@ export interface Employee {
     }[];
   };
   startedAt: Date | string;
+  resignedAt: Date | string;
   company: string;
 }
 

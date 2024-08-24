@@ -10,6 +10,7 @@ interface IEmployee extends Document {
   company: Schema.Types.ObjectId;
   designation: string;
   startedAt: string;
+  resignedAt: string;
   paymentStructure: {
     additions: {
       name: string;
@@ -50,6 +51,9 @@ const employeeSchema = new Schema<IEmployee>(
       type: String,
     },
     startedAt: {
+      type: String,
+    },
+    resignedAt: {
       type: String,
     },
     paymentStructure: {
