@@ -31,6 +31,7 @@ export interface Employee {
   nic: string;
   basic: number;
   divideBy: 240 | 200;
+  active: boolean;
   paymentStructure: {
     additions: {
       name: string;
@@ -125,6 +126,43 @@ const EmployeesDataGrid: React.FC<{
           />
         </LocalizationProvider>
       ),
+    },
+    {
+      field: "resignedAt",
+      headerName: "Resigned At",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+      valueGetter: (params) => {
+        // Ensure the date is formatted correctly for display
+        return params;
+      },
+      renderEditCell: (params) => (
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+          <DatePicker
+            label="Resigned At"
+            openTo="year"
+            views={["year", "month", "day"]}
+            value={dayjs(ddmmyyyy_to_mmddyyyy(params.value))}
+            onChange={(newDate) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: params.field,
+                value: newDate ? newDate.format("DD-MM-YYYY") : null,
+              });
+            }}
+            slotProps={{
+              field: { clearable: true },
+            }}
+          />
+        </LocalizationProvider>
+      ),
+    },
+    {
+      field: "active",
+      headerName: "Active",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+      type: "boolean",
     },
     {
       field: "actions",
@@ -313,6 +351,8 @@ const EmployeesDataGrid: React.FC<{
     React.useState<GridColumnVisibilityModel>({
       id: false,
       startedAt: false,
+      resignedAt: false,
+      nic: false,
     });
 
   return (

@@ -22,8 +22,10 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
-import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
+import { ArrowBack, Cancel, CheckBox, Save, Search } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -47,6 +49,7 @@ const AddEmployeeForm: React.FC<{
     name: "",
     memberNo: 0,
     nic: "",
+    active: true,
     basic: 16000,
     divideBy: 240,
     designation: "",
@@ -133,11 +136,15 @@ const AddEmployeeForm: React.FC<{
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
   ) => {
     let { name, value } = event.target;
-    console.log(name, value); // Debugging
     //capitalize for name,nic
     if (name === "name" || name === "nic") {
       value = value.toUpperCase();
     }
+    // handle boolean
+    if (name === "active") {
+      value = event.target.checked;
+    }
+    console.log(name, value); // Debugging
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -179,6 +186,7 @@ const AddEmployeeForm: React.FC<{
           basic: 16000,
           designation: "",
           divideBy: 240,
+          active: true,
           nic: "",
           startedAt: "",
           resignedAt: "",
@@ -414,6 +422,23 @@ const AddEmployeeForm: React.FC<{
                   }}
                 />
               </LocalizationProvider>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    defaultChecked
+                    size="large"
+                    name="active"
+                    color="success"
+                    value={formFields.active}
+                    onChange={handleChange}
+                  />
+                }
+                label="Is Active ?"
+              />
             </FormControl>
           </Grid>
         </Grid>
