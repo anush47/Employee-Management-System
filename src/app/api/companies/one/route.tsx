@@ -131,3 +131,62 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+//delete
+export async function DELETE(req: NextRequest) {
+  try {
+    // Get user session
+    const session = await getServerSession(options);
+    const user = session?.user || null;
+    const userId = user?.id;
+
+    // Validate userId
+    userIdSchema.parse(userId);
+
+    // Parse request body
+    const body = await req.json();
+    const companyId = body.id;
+
+    // Validate companyId
+    companyIdSchema.parse(companyId);
+
+    // Create filter
+    const filter = { user: userId, _id: companyId };
+
+    // Connect to the database
+    await dbConnect();
+
+    // Find the company to delete
+    const company = await Company.findOne(filter);
+    if (!company) {
+      return NextResponse.json(
+        { message: "Company not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the company from the database
+    await Company.findByIdAndDelete(companyId);
+
+    // Return success response
+    return NextResponse.json({ message: "Company deleted successfully" });
+  } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: error.errors[0].message },
+        { status: 400 }
+      );
+    }
+    // Handle general errors
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      },
+      { status: 500 }
+    );
+  }
+}

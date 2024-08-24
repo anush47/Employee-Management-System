@@ -14,6 +14,7 @@ const companySchema = z.object({
     .regex(/^[A-Z]\/\d{5}$/, "Employer Number must match the pattern A/12345"),
   address: z.string().optional(),
   startedAt: z.string().optional(),
+  paymentMethod: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {

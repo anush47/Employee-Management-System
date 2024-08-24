@@ -527,7 +527,7 @@ const EditEmployeeForm: React.FC<{
               onClick={onDeleteClick}
               disabled={!isEditing || loading} // Disable button while loading
             >
-              {loading ? <CircularProgress size={24} /> : "Delete"}
+              {loading ? <CircularProgress size={24} /> : "Delete Employee"}
             </Button>
           </Grid>
         }
