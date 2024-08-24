@@ -30,6 +30,7 @@ export interface Employee {
   memberNo: number;
   nic: string;
   basic: number;
+  divideBy: 240 | 200;
   paymentStructure: {
     additions: {
       name: string;

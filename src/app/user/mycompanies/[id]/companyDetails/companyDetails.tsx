@@ -237,7 +237,6 @@ const CompanyDetails = ({
     return (
       <Dialog
         open={deleteDialogOpen}
-        TransitionComponent={SlideTransition}
         keepMounted
         onClose={handleDeleteCancelation}
         aria-describedby="alert-dialog-slide-description"
