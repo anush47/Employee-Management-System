@@ -196,3 +196,71 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+//delete employee
+export async function DELETE(req: NextRequest) {
+  try {
+    // Get user session
+    const session = await getServerSession(options);
+    const user = session?.user || null;
+    const userId = user?.id;
+
+    // Validate userId
+    userIdSchema.parse(userId);
+
+    // Parse request body
+    const body = await req.json();
+    const employeeId = body.employeeId;
+
+    // Validate employeeId
+    employeeIdSchema.parse(employeeId);
+
+    // Connect to the database
+    await dbConnect();
+
+    // Find the employee to delete
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return NextResponse.json(
+        { message: "Employee not found" },
+        { status: 404 }
+      );
+    }
+
+    // Find the company to ensure it belongs to the user
+    const company = await Company.findById(employee.company);
+    if (!company || company.user.toString() !== userId) {
+      return NextResponse.json(
+        {
+          message:
+            "Access denied. You cannot delete employees in this company.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Delete the employee from the database
+    await Employee.findByIdAndDelete(employeeId);
+
+    // Return success response
+    return NextResponse.json({ message: "Employee deleted successfully" });
+  } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: error.errors[0].message },
+        { status: 400 }
+      );
+    }
+    // Handle general errors
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      },
+      { status: 500 }
+    );
+  }
+}
