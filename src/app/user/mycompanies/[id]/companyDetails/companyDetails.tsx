@@ -17,8 +17,13 @@ import {
   Typography,
   Tooltip,
   Slide,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
-import { Save, Cancel, Edit } from "@mui/icons-material";
+import { Save, Cancel, Edit, Delete } from "@mui/icons-material";
 import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { CompanyValidation } from "../../clientComponents/companyValidation";
@@ -36,6 +41,7 @@ const CompanyDetails = ({
   user: { name: string; email: string; id: string };
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [company, setCompany] = useState<Company>();
   const [formFields, setFormFields] = useState<Company>({
@@ -57,9 +63,9 @@ const CompanyDetails = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "info" | "warning"
+  >("success");
   const [errors, setErrors] = useState<{ name?: string; employerNo?: string }>(
     {}
   );
@@ -175,6 +181,48 @@ const CompanyDetails = ({
     }
   };
 
+  const handleDeleteConfirmation = async () => {
+    try {
+      const response = await fetch(`/api/companies/one`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: companyId,
+        }),
+      });
+      if (response.ok) {
+        setSnackbarMessage("Company deleted successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+        setDeleteDialogOpen(false);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        //await
+        // Redirect to the companies page
+        window.location.href = "/user?userPageSelect=mycompanies";
+      }
+    } catch (error) {
+      console.error("Error deleting company:", error);
+      setSnackbarMessage("Error deleting company. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
+  //delete cancelation
+  const handleDeleteCancelation = () => {
+    //show snackbar
+    setSnackbarMessage("Delete canceled");
+    setSnackbarSeverity("info");
+    setSnackbarOpen(true);
+    setDeleteDialogOpen(false);
+  };
+
+  const onDeleteClick = async () => {
+    setDeleteDialogOpen(true);
+  };
+
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
     reason?: string
@@ -183,6 +231,35 @@ const CompanyDetails = ({
       return;
     }
     setSnackbarOpen(false);
+  };
+
+  const DeleteDialog = () => {
+    return (
+      <Dialog
+        open={deleteDialogOpen}
+        TransitionComponent={SlideTransition}
+        keepMounted
+        onClose={handleDeleteCancelation}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{"Delete Employee?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            Are you sure you want to delete this company
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancelation}>Cancel</Button>
+          <Button
+            onClick={handleDeleteConfirmation}
+            color="error"
+            endIcon={<Delete />}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   };
 
   return (
@@ -400,6 +477,18 @@ const CompanyDetails = ({
                     }));
                   }}
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Delete />}
+                  onClick={onDeleteClick}
+                  disabled={!isEditing || loading}
+                >
+                  Delete Company
+                </Button>
+                <DeleteDialog />
               </Grid>
             </Grid>
           )
