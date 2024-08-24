@@ -28,6 +28,8 @@ import {
   ArrowBack,
   Home,
   NavigateNext,
+  Money,
+  LocalAtm,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -36,7 +38,12 @@ import { useSearchParams, useParams } from "next/navigation";
 const drawerWidth = 300;
 
 //export selected type
-export type Selected = "dashboard" | "details" | "employees" | "payments";
+export type Selected =
+  | "dashboard"
+  | "details"
+  | "employees"
+  | "payments"
+  | "salaries";
 
 interface Props {
   window?: Window | undefined;
@@ -63,7 +70,11 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
     selected = selectedParam as Selected;
   }
   //if wrong params default to dashboard
-  if (!["dashboard", "details", "employees", "payments"].includes(selected)) {
+  if (
+    !["dashboard", "details", "employees", "payments", "salaries"].includes(
+      selected
+    )
+  ) {
     selected = "details";
   }
 
@@ -96,6 +107,12 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       icon: <Groups />,
     },
     {
+      name: "Salaries",
+      key: "salaries",
+      icon: <LocalAtm />,
+    },
+
+    {
       name: "Payments",
       key: "payments",
       icon: <Payments />,
@@ -126,6 +143,8 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
           ? "Company Details"
           : selected === "employees"
           ? "Employees"
+          : selected === "salaries"
+          ? "Salaries"
           : "Payments"}
       </LinkM>,
     ]);

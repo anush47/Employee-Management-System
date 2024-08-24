@@ -11,6 +11,7 @@ import "@fontsource/roboto/400.css";
 import { selected } from "./companySideBar";
 import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "./companySideBar";
+import Salaries from "../salaries/salaries";
 
 // // Lazy load the components
 const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
@@ -51,6 +52,8 @@ const CompanyMainBox = ({
                 return <Employees user={user} />;
               case "payments":
                 return <Payments user={user} />;
+              case "salaries":
+                return <Salaries user={user} />;
               default:
                 return <div>Component not found</div>;
             }
