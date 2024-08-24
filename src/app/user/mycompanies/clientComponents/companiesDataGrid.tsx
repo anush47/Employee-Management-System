@@ -14,6 +14,8 @@ export interface Company {
   employerNo: string;
   address: string;
   paymentMethod: String;
+  startedAt: Date | String;
+  endedAt: Date | String;
   paymentStructure: {
     additions: {
       name: string;

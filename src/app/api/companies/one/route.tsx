@@ -62,6 +62,8 @@ const companyUpdateSchema = z.object({
   employerNo: z.string().min(1, "Employer number is required"),
   address: z.string().optional(),
   paymentMethod: z.string().optional(),
+  startedAt: z.string().optional(),
+  endedAt: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {

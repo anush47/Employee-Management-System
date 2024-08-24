@@ -23,7 +23,11 @@ import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { CompanyValidation } from "../../clientComponents/companyValidation";
 import { PaymentStructure } from "./paymentStructure";
-
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { ddmmyyyy_to_mmddyyyy } from "../employees/clientComponents/employeesDataGrid";
+import dayjs from "dayjs";
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const CompanyDetails = ({
@@ -40,6 +44,8 @@ const CompanyDetails = ({
     employerNo: "",
     address: "",
     paymentMethod: "",
+    startedAt: "",
+    endedAt: "",
     paymentStructure: {
       additions: [
         { name: "Incentive", amount: "" },
@@ -110,6 +116,8 @@ const CompanyDetails = ({
         employerNo: "",
         address: "",
         paymentMethod: "",
+        startedAt: "",
+        endedAt: "",
         paymentStructure: {
           additions: [
             { name: "Incentive", amount: "" },
@@ -308,6 +316,77 @@ const CompanyDetails = ({
                   Bank name, branch EPF/ETF is paid. you may use "Cash" as well
                 </FormHelperText>
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDayjs}
+                    adapterLocale="en-gb"
+                  >
+                    <DatePicker
+                      readOnly={!isEditing}
+                      label="Started At"
+                      name="startedAt"
+                      openTo="year"
+                      value={
+                        formFields.startedAt
+                          ? dayjs(
+                              ddmmyyyy_to_mmddyyyy(
+                                formFields.startedAt as string
+                              )
+                            )
+                          : null
+                      }
+                      views={["year", "month", "day"]}
+                      onChange={(newDate) => {
+                        setFormFields((prevFields) => ({
+                          ...prevFields,
+                          startedAt: newDate?.format("DD-MM-YYYY") as
+                            | string
+                            | Date,
+                        }));
+                      }}
+                      slotProps={{
+                        field: { clearable: true },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDayjs}
+                    adapterLocale="en-gb"
+                  >
+                    <DatePicker
+                      readOnly={!isEditing}
+                      label="Ended At"
+                      name="endedAt"
+                      openTo="year"
+                      value={
+                        formFields.endedAt
+                          ? dayjs(
+                              ddmmyyyy_to_mmddyyyy(formFields.endedAt as string)
+                            )
+                          : null
+                      }
+                      views={["year", "month", "day"]}
+                      onChange={(newDate) => {
+                        setFormFields((prevFields) => ({
+                          ...prevFields,
+                          endedAt: newDate?.format("DD-MM-YYYY") as
+                            | string
+                            | Date,
+                        }));
+                      }}
+                      slotProps={{
+                        field: { clearable: true },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </FormControl>
+              </Grid>
+
               <Grid item xs={12}>
                 <PaymentStructure
                   isEditing={isEditing}
