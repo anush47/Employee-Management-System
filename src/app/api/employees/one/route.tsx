@@ -70,6 +70,7 @@ const employeeSchema = z.object({
   nic: z.string().optional(),
   basic: z.number().min(0, "Basic salary must be a positive number"),
   startedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
+  resignedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
   company: z.string().min(1, "Company ID is required"),
   paymentStructure: z
     .object({
