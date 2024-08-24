@@ -15,6 +15,7 @@ export const employeeSchema = z.object({
   divideBy: z.union([z.literal(240), z.literal(200)]).default(240),
   designation: z.string().optional(),
   startedAt: z.string().optional(),
+  active: z.boolean().default(true),
   paymentStructure: z.object({
     additions: z.array(
       z.object({

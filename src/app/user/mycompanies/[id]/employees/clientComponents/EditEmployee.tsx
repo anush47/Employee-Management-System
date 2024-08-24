@@ -21,6 +21,8 @@ import {
   Slide,
   Select,
   InputLabel,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -66,6 +68,7 @@ const EditEmployeeForm: React.FC<{
     divideBy: 240,
     basic: 16000,
     designation: "",
+    active: true,
     startedAt: "",
     resignedAt: "",
     paymentStructure: {
@@ -141,6 +144,9 @@ const EditEmployeeForm: React.FC<{
     if (name === "name" || name === "nic") {
       value = value.toUpperCase();
     }
+    if (name === "active") {
+      value = event.target.checked;
+    }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -181,6 +187,7 @@ const EditEmployeeForm: React.FC<{
           designation: "",
           nic: "",
           startedAt: "",
+          active: true,
           resignedAt: "",
           paymentStructure: {
             additions: [],
@@ -237,6 +244,7 @@ const EditEmployeeForm: React.FC<{
           basic: 16000,
           divideBy: 240,
           designation: "",
+          active: true,
           nic: "",
           startedAt: "",
           resignedAt: "",
@@ -524,6 +532,24 @@ const EditEmployeeForm: React.FC<{
               </LocalizationProvider>
             </FormControl>
           </Grid>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formFields.active}
+                  size="large"
+                  name="active"
+                  color="success"
+                  value={formFields.active}
+                  onChange={handleChange}
+                  disabled={!isEditing || loading}
+                />
+              }
+              label="Is Active ?"
+            />
+          </FormControl>
         </Grid>
         <Grid mt={3} item xs={12}>
           <PaymentStructure
