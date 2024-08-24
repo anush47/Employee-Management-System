@@ -20,7 +20,14 @@ import {
   Alert,
   Slide,
 } from "@mui/material";
-import { ArrowBack, Cancel, Edit, Save, Search } from "@mui/icons-material";
+import {
+  ArrowBack,
+  Cancel,
+  Delete,
+  Edit,
+  Save,
+  Search,
+} from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -34,6 +41,12 @@ import { useSearchParams } from "next/navigation";
 import dayjs from "dayjs";
 //import { Company } from "./companiesDataGrid";
 //import { CompanyValidation } from "./companyValidation";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import { TransitionProps } from "@mui/material/transitions";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -61,9 +74,9 @@ const EditEmployeeForm: React.FC<{
   const [memberNoLoading, setNameLoading] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
   const [errors, setErrors] = useState<{
     name?: string;
     memberNo?: string;
@@ -75,6 +88,7 @@ const EditEmployeeForm: React.FC<{
   }>({});
   const [company, setEmployee] = useState<Company | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -187,6 +201,76 @@ const EditEmployeeForm: React.FC<{
     }
   };
 
+  const handleDeleteConfirmation = async () => {
+    try {
+      // Perform DELETE request to delete the employee
+      const response = await fetch("/api/employees/one", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: employeeId,
+          userId: user.id, // Include user ID
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSnackbarMessage("Employee deleted successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        setFormFields({
+          id: "",
+          name: "",
+          memberNo: 0,
+          basic: 16000,
+          designation: "",
+          nic: "",
+          startedAt: "",
+          resignedAt: "",
+          paymentStructure: {
+            additions: [],
+            deductions: [],
+          },
+          company: companyId,
+        });
+        setErrors({});
+        handleBackClick();
+      } else {
+        setSnackbarMessage(
+          result.message || "Error deleting employee. Please try again."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      setSnackbarMessage("Error deleting employee. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //delete cancelation
+  const handleDeleteCancelation = () => {
+    //show snackbar
+    setSnackbarMessage("Delete canceled");
+    setSnackbarSeverity("info");
+    setSnackbarOpen(true);
+    setDeleteDialogOpen(false);
+  };
+
+  const onDeleteClick = async () => {
+    setDeleteDialogOpen(true);
+  };
+
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
     reason?: string
@@ -195,6 +279,35 @@ const EditEmployeeForm: React.FC<{
       return;
     }
     setSnackbarOpen(false);
+  };
+
+  const DeleteDialog = () => {
+    return (
+      <Dialog
+        open={deleteDialogOpen}
+        TransitionComponent={SlideTransition}
+        keepMounted
+        onClose={handleDeleteCancelation}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{"Delete Employee?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            Are you sure you want to delete this employee?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancelation}>Cancel</Button>
+          <Button
+            onClick={handleDeleteConfirmation}
+            color="error"
+            endIcon={<Delete />}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   };
 
   return (
@@ -405,8 +518,20 @@ const EditEmployeeForm: React.FC<{
             }}
           />
         </Grid>
+        {
+          <Grid mt={3} item xs={12}>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<Delete />}
+              onClick={onDeleteClick}
+              disabled={!isEditing || loading} // Disable button while loading
+            >
+              {loading ? <CircularProgress size={24} /> : "Delete"}
+            </Button>
+          </Grid>
+        }
       </CardContent>
-
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={5000}
@@ -423,6 +548,8 @@ const EditEmployeeForm: React.FC<{
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      <DeleteDialog />
     </>
   );
 };
