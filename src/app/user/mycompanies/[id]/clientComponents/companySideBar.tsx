@@ -18,6 +18,7 @@ import {
   Typography,
   Menu,
   MenuItem,
+  Breadcrumbs,
 } from "@mui/material";
 import {
   Business,
@@ -26,8 +27,10 @@ import {
   Payments,
   ArrowBack,
   Home,
+  NavigateNext,
 } from "@mui/icons-material";
 import Link from "next/link";
+import { Link as LinkM } from "@mui/material";
 import { useSearchParams, useParams } from "next/navigation";
 
 const drawerWidth = 300;
@@ -98,6 +101,35 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       icon: <Payments />,
     },
   ];
+
+  const [breadcrumbs, setBreadcrumbs] = React.useState<React.ReactNode[]>([]);
+
+  React.useEffect(() => {
+    setBreadcrumbs([
+      <LinkM underline="hover" key="1" color="inherit" href="/">
+        Home
+      </LinkM>,
+      <LinkM
+        underline="hover"
+        key="2"
+        color="inherit"
+        href="
+      /user?userPageSelect=mycompanies
+    "
+      >
+        My Companies
+      </LinkM>,
+      <LinkM underline="none" key="3" color="text.primary">
+        {selected === "dashboard"
+          ? "Dashboard"
+          : selected === "details"
+          ? "Company Details"
+          : selected === "employees"
+          ? "Employees"
+          : "Payments"}
+      </LinkM>,
+    ]);
+  }, [selected]);
 
   const drawer = (
     <div>
@@ -204,6 +236,18 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
               </Typography>
             </Link>
           </div>
+          <Breadcrumbs
+            separator={<NavigateNext fontSize="small" />}
+            aria-label="breadcrumb"
+            sx={
+              //hide in small
+              {
+                display: { xs: "none", md: "block" },
+              }
+            }
+          >
+            {breadcrumbs}
+          </Breadcrumbs>
           <IconButton onClick={handleMenuClick} color="inherit">
             <Avatar></Avatar>
           </IconButton>
