@@ -40,20 +40,22 @@ const CompanyMainBox = ({
           </div>
         }
       >
-        {(() => {
-          switch (selected) {
-            case "dashboard":
-              return <Dashboard user={user} />;
-            case "details":
-              return <CompanyDetails user={user} />;
-            case "employees":
-              return <Employees user={user} />;
-            case "payments":
-              return <Payments user={user} />;
-            default:
-              return <div>Component not found</div>;
-          }
-        })()}
+        <div>
+          {(() => {
+            switch (selected) {
+              case "dashboard":
+                return <Dashboard user={user} />;
+              case "details":
+                return <CompanyDetails user={user} />;
+              case "employees":
+                return <Employees user={user} />;
+              case "payments":
+                return <Payments user={user} />;
+              default:
+                return <div>Component not found</div>;
+            }
+          })()}
+        </div>
       </Suspense>
     );
   };

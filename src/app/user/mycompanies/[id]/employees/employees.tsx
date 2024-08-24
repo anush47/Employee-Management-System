@@ -76,13 +76,31 @@ const MyCompanies = ({
     <Box>
       {isAdding ? (
         <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
-          <Card>
+          <Card
+            //set height to viewport height and make scrollable only on larger screens
+            sx={{
+              height: "85vh",
+              overflowY: "auto",
+              "@media (max-width: 600px)": {
+                height: "auto",
+              },
+            }}
+          >
             <AddEmployeeForm user={user} handleBackClick={handleBackClick} />
           </Card>
         </Slide>
       ) : isEditing ? (
         <Slide direction="left" in={isEditing} mountOnEnter unmountOnExit>
-          <Card>
+          <Card
+            //set height to viewport height and make scrollable only on larger screens
+            sx={{
+              height: "85vh",
+              overflowY: "auto",
+              "@media (max-width: 600px)": {
+                height: "auto",
+              },
+            }}
+          >
             <EditEmployeeForm
               user={user}
               handleBackClick={handleBackClickEdit}
@@ -91,7 +109,16 @@ const MyCompanies = ({
           </Card>
         </Slide>
       ) : (
-        <Card>
+        <Card
+          //set height to viewport height and make scrollable only on larger screens
+          sx={{
+            height: "85vh",
+            overflowY: "auto",
+            "@media (max-width: 600px)": {
+              height: "auto",
+            },
+          }}
+        >
           <CardHeader
             title={
               <Box
