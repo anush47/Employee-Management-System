@@ -154,7 +154,7 @@ export const PaymentStructure = ({
                 alignItems="center"
                 key={index}
               >
-                <Grid item xs={5}>
+                <Grid item xs={6}>
                   <FormControl fullWidth>
                     <TextField
                       label="Name"
@@ -174,7 +174,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={6}>
                   <FormControl fullWidth>
                     <TextField
                       label="Amount"
@@ -236,7 +236,7 @@ export const PaymentStructure = ({
                 alignItems="center"
                 key={index}
               >
-                <Grid item xs={5}>
+                <Grid item xs={6}>
                   <FormControl fullWidth>
                     <TextField
                       label="Name"
@@ -256,7 +256,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={6}>
                   <FormControl fullWidth>
                     <TextField
                       label="Amount"

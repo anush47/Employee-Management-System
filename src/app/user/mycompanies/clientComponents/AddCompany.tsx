@@ -21,9 +21,14 @@ import {
   Slide,
 } from "@mui/material";
 import { Cancel, Save, Search } from "@mui/icons-material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LoadingButton } from "@mui/lab";
 import { Company } from "./companiesDataGrid";
 import { CompanyValidation } from "./companyValidation";
+import dayjs from "dayjs";
+import { ddmmyyyy_to_mmddyyyy } from "../[id]/employees/clientComponents/employeesDataGrid";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -36,6 +41,8 @@ const AddCompanyForm: React.FC<{
     name: "",
     employerNo: "",
     address: "",
+    startedAt: "",
+    endedAt: "",
     paymentMethod: "",
     paymentStructure: {
       additions: [
@@ -110,6 +117,8 @@ const AddCompanyForm: React.FC<{
           name: "",
           employerNo: "",
           address: "",
+          startedAt: "",
+          endedAt: "",
           paymentMethod: "",
           paymentStructure: {
             additions: [
@@ -285,6 +294,37 @@ const AddCompanyForm: React.FC<{
                 multiline
                 minRows={2}
               />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl>
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="en-gb"
+              >
+                <DatePicker
+                  label="Started At"
+                  name="startedAt"
+                  openTo="year"
+                  value={
+                    formFields.startedAt
+                      ? dayjs(
+                          ddmmyyyy_to_mmddyyyy(formFields.startedAt as string)
+                        )
+                      : null
+                  }
+                  views={["year", "month", "day"]}
+                  onChange={(newDate) => {
+                    setFormFields((prevFields) => ({
+                      ...prevFields,
+                      startedAt: newDate?.format("DD-MM-YYYY") as string | Date,
+                    }));
+                  }}
+                  slotProps={{
+                    field: { clearable: true },
+                  }}
+                />
+              </LocalizationProvider>
             </FormControl>
           </Grid>
           <Grid item xs={12}>
