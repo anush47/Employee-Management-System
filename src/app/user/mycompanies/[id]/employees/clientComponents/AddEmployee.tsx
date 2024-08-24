@@ -19,6 +19,9 @@ import {
   Snackbar,
   Alert,
   Slide,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -45,6 +48,7 @@ const AddEmployeeForm: React.FC<{
     memberNo: 0,
     nic: "",
     basic: 16000,
+    divideBy: 240,
     designation: "",
     startedAt: "",
     resignedAt: "",
@@ -66,8 +70,10 @@ const AddEmployeeForm: React.FC<{
     memberNo?: string;
     basic?: string;
     nic?: string;
+    divideBy?: string;
     designation?: string;
     startedAt?: string;
+    resignedAt?: string;
   }>({});
   const [company, setCompany] = useState<Company | null>(null);
 
@@ -124,9 +130,10 @@ const AddEmployeeForm: React.FC<{
 
   // Unified handle change for all fields
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
   ) => {
     let { name, value } = event.target;
+    console.log(name, value); // Debugging
     //capitalize for name,nic
     if (name === "name" || name === "nic") {
       value = value.toUpperCase();
@@ -171,6 +178,7 @@ const AddEmployeeForm: React.FC<{
           memberNo: 0,
           basic: 16000,
           designation: "",
+          divideBy: 240,
           nic: "",
           startedAt: "",
           resignedAt: "",
@@ -359,6 +367,21 @@ const AddEmployeeForm: React.FC<{
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.divideBy}>
+              <InputLabel id="category-label">Category</InputLabel>
+              <Select
+                labelId="category-label"
+                label="Category"
+                name="divideBy"
+                value={formFields.divideBy}
+                onChange={handleChange}
+                variant="outlined"
+              >
+                {categories}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.designation}>
               <TextField
                 label="Designation"
@@ -429,5 +452,15 @@ const AddEmployeeForm: React.FC<{
     </>
   );
 };
+
+export const categories = [
+  { value: 240, label: "240 ewun" },
+  { value: 200, label: "200 ewun" },
+  { value: 240, label: "160 ewun" },
+].map((category) => (
+  <MenuItem key={category.label} value={category.value}>
+    {category.label}
+  </MenuItem>
+));
 
 export default AddEmployeeForm;

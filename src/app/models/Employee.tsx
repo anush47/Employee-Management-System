@@ -11,6 +11,7 @@ interface IEmployee extends Document {
   designation: string;
   startedAt: string;
   resignedAt: string;
+  divideBy: 240 | 200;
   paymentStructure: {
     additions: {
       name: string;
@@ -55,6 +56,11 @@ const employeeSchema = new Schema<IEmployee>(
     },
     resignedAt: {
       type: String,
+    },
+    divideBy: {
+      type: Number,
+      enum: [240, 200],
+      default: 240,
     },
     paymentStructure: {
       additions: {

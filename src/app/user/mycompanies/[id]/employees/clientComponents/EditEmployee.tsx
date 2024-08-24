@@ -19,6 +19,8 @@ import {
   Snackbar,
   Alert,
   Slide,
+  Select,
+  InputLabel,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -47,6 +49,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { TransitionProps } from "@mui/material/transitions";
+import { categories } from "./AddEmployee";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -60,6 +63,7 @@ const EditEmployeeForm: React.FC<{
     name: "",
     memberNo: 0,
     nic: "",
+    divideBy: 240,
     basic: 16000,
     designation: "",
     startedAt: "",
@@ -83,6 +87,7 @@ const EditEmployeeForm: React.FC<{
     basic?: string;
     nic?: string;
     designation?: string;
+    divideBy?: string;
     startedAt?: string;
     resignedAt?: string;
   }>({});
@@ -129,7 +134,7 @@ const EditEmployeeForm: React.FC<{
 
   // Unified handle change for all fields
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
   ) => {
     let { name, value } = event.target;
     //capitalize for name,nic
@@ -172,6 +177,7 @@ const EditEmployeeForm: React.FC<{
           name: "",
           memberNo: 0,
           basic: 16000,
+          divideBy: 240,
           designation: "",
           nic: "",
           startedAt: "",
@@ -229,6 +235,7 @@ const EditEmployeeForm: React.FC<{
           name: "",
           memberNo: 0,
           basic: 16000,
+          divideBy: 240,
           designation: "",
           nic: "",
           startedAt: "",
@@ -285,7 +292,6 @@ const EditEmployeeForm: React.FC<{
     return (
       <Dialog
         open={deleteDialogOpen}
-        TransitionComponent={SlideTransition}
         keepMounted
         onClose={handleDeleteCancelation}
         aria-describedby="alert-dialog-slide-description"
@@ -424,6 +430,21 @@ const EditEmployeeForm: React.FC<{
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.divideBy}>
+              <InputLabel id="category-label">Category</InputLabel>
+              <Select
+                labelId="category-label"
+                label="Category"
+                name="divideBy"
+                value={formFields.divideBy}
+                onChange={handleChange}
+                variant="outlined"
+              >
+                {categories}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.designation}>
               <TextField
                 label="Designation"
@@ -518,19 +539,18 @@ const EditEmployeeForm: React.FC<{
             }}
           />
         </Grid>
-        {
-          <Grid mt={3} item xs={12}>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<Delete />}
-              onClick={onDeleteClick}
-              disabled={!isEditing || loading} // Disable button while loading
-            >
-              {loading ? <CircularProgress size={24} /> : "Delete Employee"}
-            </Button>
-          </Grid>
-        }
+
+        <Grid mt={3} item xs={12}>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Delete />}
+            onClick={onDeleteClick}
+            disabled={!isEditing || loading} // Disable button while loading
+          >
+            {loading ? <CircularProgress size={24} /> : "Delete Employee"}
+          </Button>
+        </Grid>
       </CardContent>
       <Snackbar
         open={snackbarOpen}
