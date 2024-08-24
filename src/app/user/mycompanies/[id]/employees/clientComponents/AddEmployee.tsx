@@ -47,6 +47,7 @@ const AddEmployeeForm: React.FC<{
     basic: 16000,
     designation: "",
     startedAt: "",
+    resignedAt: "",
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -172,6 +173,7 @@ const AddEmployeeForm: React.FC<{
           designation: "",
           nic: "",
           startedAt: "",
+          resignedAt: "",
           paymentStructure: {
             additions: [],
             deductions: [],
