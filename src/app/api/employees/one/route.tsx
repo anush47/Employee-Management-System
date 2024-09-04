@@ -74,6 +74,14 @@ const employeeSchema = z.object({
   startedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
   resignedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
   company: z.string().min(1, "Company ID is required"),
+  shifts: z
+    .array(
+      z.object({
+        start: z.string(),
+        end: z.string(),
+      })
+    )
+    .optional(),
   paymentStructure: z
     .object({
       additions: z.array(

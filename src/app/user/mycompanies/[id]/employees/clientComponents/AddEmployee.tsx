@@ -35,6 +35,7 @@ import "dayjs/locale/en-gb";
 import { PaymentStructure } from "../../companyDetails/paymentStructure";
 import { companyId } from "../../clientComponents/companySideBar";
 import { Company } from "../../../clientComponents/companiesDataGrid";
+import { Shifts } from "../../companyDetails/shifts";
 //import { Company } from "./companiesDataGrid";
 //import { CompanyValidation } from "./companyValidation";
 
@@ -55,6 +56,7 @@ const AddEmployeeForm: React.FC<{
     designation: "",
     startedAt: "",
     resignedAt: "",
+    shifts: [],
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -98,6 +100,10 @@ const AddEmployeeForm: React.FC<{
         // Set default payment structure to payments from company
         setFormFields((prev) => ({
           ...prev,
+          shifts:
+            data.company.shifts && data.company.shifts.length > 0
+              ? data.company.shifts
+              : [{ start: "08:00", end: "17:00" }],
           paymentStructure:
             data.company.paymentStructure &&
             data.company.paymentStructure.additions.length > 0 &&
@@ -190,6 +196,7 @@ const AddEmployeeForm: React.FC<{
           nic: "",
           startedAt: "",
           resignedAt: "",
+          shifts: [],
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -452,6 +459,23 @@ const AddEmployeeForm: React.FC<{
               setFormFields((prev) => ({
                 ...prev,
                 paymentStructure,
+              }));
+            }}
+          />
+        </Grid>
+
+        <div className="my-5" />
+
+        <Grid item xs={12}>
+          <Shifts
+            isEditing={true}
+            handleChange={handleChange}
+            shifts={formFields.shifts}
+            setShifts={(shifts) => {
+              console.log("Setting shifts:", shifts); // Debugging
+              setFormFields((prev) => ({
+                ...prev,
+                shifts,
               }));
             }}
           />

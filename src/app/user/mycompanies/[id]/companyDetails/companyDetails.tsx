@@ -476,6 +476,8 @@ const CompanyDetails = ({
                 />
               </Grid>
 
+              <div className="my-5" />
+
               <Grid item xs={12}>
                 <Shifts
                   isEditing={isEditing}

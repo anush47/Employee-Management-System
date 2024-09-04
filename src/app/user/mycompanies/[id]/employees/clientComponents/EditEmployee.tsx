@@ -52,6 +52,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { TransitionProps } from "@mui/material/transitions";
 import { categories } from "./AddEmployee";
+import { Shifts } from "../../companyDetails/shifts";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -71,6 +72,7 @@ const EditEmployeeForm: React.FC<{
     active: true,
     startedAt: "",
     resignedAt: "",
+    shifts: [],
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -189,6 +191,7 @@ const EditEmployeeForm: React.FC<{
           startedAt: "",
           active: true,
           resignedAt: "",
+          shifts: [],
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -248,6 +251,7 @@ const EditEmployeeForm: React.FC<{
           nic: "",
           startedAt: "",
           resignedAt: "",
+          shifts: [],
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -561,6 +565,23 @@ const EditEmployeeForm: React.FC<{
               setFormFields((prev) => ({
                 ...prev,
                 paymentStructure,
+              }));
+            }}
+          />
+        </Grid>
+
+        <div className="my-5" />
+
+        <Grid item xs={12}>
+          <Shifts
+            isEditing={isEditing}
+            handleChange={handleChange}
+            shifts={formFields.shifts}
+            setShifts={(shifts) => {
+              console.log("Setting shifts:", shifts); // Debugging
+              setFormFields((prev) => ({
+                ...prev,
+                shifts,
               }));
             }}
           />

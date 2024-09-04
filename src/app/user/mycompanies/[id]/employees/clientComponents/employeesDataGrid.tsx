@@ -32,6 +32,10 @@ export interface Employee {
   basic: number;
   divideBy: 240 | 200;
   active: boolean;
+  shifts: {
+    start: string;
+    end: string;
+  }[];
   paymentStructure: {
     additions: {
       name: string;

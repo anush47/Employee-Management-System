@@ -16,6 +16,12 @@ export const employeeSchema = z.object({
   designation: z.string().optional(),
   startedAt: z.string().optional(),
   active: z.boolean().default(true),
+  shifts: z.array(
+    z.object({
+      start: z.string().min(1, "Start time is required"),
+      end: z.string().min(1, "End time is required"),
+    })
+  ),
   paymentStructure: z.object({
     additions: z.array(
       z.object({
