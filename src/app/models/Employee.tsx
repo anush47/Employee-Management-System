@@ -1,7 +1,6 @@
 import { Schema, model, models, Document } from "mongoose";
-import { string } from "zod";
 
-// Define an interface for the Company document
+// Define an interface for the Employee document
 interface IEmployee extends Document {
   memberNo: number;
   name: string;
@@ -13,6 +12,10 @@ interface IEmployee extends Document {
   resignedAt: string;
   divideBy: 240 | 200;
   active: boolean;
+  shifts: {
+    start: string;
+    end: string;
+  }[];
   paymentStructure: {
     additions: {
       name: string;
@@ -25,7 +28,7 @@ interface IEmployee extends Document {
   };
 }
 
-// Define the schema for the Company model
+// Define the schema for the Employee model
 const employeeSchema = new Schema<IEmployee>(
   {
     memberNo: {
@@ -51,6 +54,26 @@ const employeeSchema = new Schema<IEmployee>(
     },
     designation: {
       type: String,
+    },
+    shifts: {
+      type: [
+        {
+          name: {
+            type: String,
+            required: true,
+            default: "default",
+          },
+          start: {
+            type: String,
+            required: true,
+          },
+          end: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+      required: true,
     },
     startedAt: {
       type: String,
