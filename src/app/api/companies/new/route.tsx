@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsedBody = companySchema.parse(body);
 
+    console.log(parsedBody);
+
     // Connect to the database
     await dbConnect();
 

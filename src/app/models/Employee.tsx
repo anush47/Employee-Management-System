@@ -58,11 +58,6 @@ const employeeSchema = new Schema<IEmployee>(
     shifts: {
       type: [
         {
-          name: {
-            type: String,
-            required: true,
-            default: "default",
-          },
           start: {
             type: String,
             required: true,

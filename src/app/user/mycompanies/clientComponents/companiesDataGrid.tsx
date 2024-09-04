@@ -9,6 +9,7 @@ import { Box, Alert, CircularProgress } from "@mui/material";
 import { columns } from "./coloumnDefinitions";
 
 export interface Company {
+  shifts: any;
   id: string;
   name: string;
   employerNo: string;

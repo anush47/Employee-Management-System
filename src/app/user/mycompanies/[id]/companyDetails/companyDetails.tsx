@@ -33,6 +33,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ddmmyyyy_to_mmddyyyy } from "../employees/clientComponents/employeesDataGrid";
 import dayjs from "dayjs";
+import { Shifts } from "./shifts";
+import { start } from "repl";
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const CompanyDetails = ({
@@ -53,12 +55,10 @@ const CompanyDetails = ({
     startedAt: "",
     endedAt: "",
     paymentStructure: {
-      additions: [
-        { name: "Incentive", amount: "" },
-        { name: "Performance Allowance", amount: "" },
-      ],
+      additions: [],
       deductions: [],
     },
+    shifts: [], // Add the shifts property here
   });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -125,12 +125,10 @@ const CompanyDetails = ({
         startedAt: "",
         endedAt: "",
         paymentStructure: {
-          additions: [
-            { name: "Incentive", amount: "" },
-            { name: "Performance Allowance", amount: "" },
-          ],
+          additions: [],
           deductions: [],
         },
+        shifts: [], // Add the shifts property here
       }
     );
   };
@@ -477,6 +475,22 @@ const CompanyDetails = ({
                   }}
                 />
               </Grid>
+
+              <Grid item xs={12}>
+                <Shifts
+                  isEditing={isEditing}
+                  handleChange={handleChange}
+                  shifts={formFields.shifts}
+                  setShifts={(shifts: any) => {
+                    console.log("Setting shifts:", shifts); // Debugging
+                    setFormFields((prev) => ({
+                      ...prev,
+                      shifts,
+                    }));
+                  }}
+                />
+              </Grid>
+
               <Grid item xs={12}>
                 <Button
                   variant="outlined"

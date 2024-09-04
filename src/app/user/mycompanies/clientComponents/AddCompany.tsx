@@ -29,6 +29,7 @@ import { Company } from "./companiesDataGrid";
 import { CompanyValidation } from "./companyValidation";
 import dayjs from "dayjs";
 import { ddmmyyyy_to_mmddyyyy } from "../[id]/employees/clientComponents/employeesDataGrid";
+import { start } from "repl";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -45,12 +46,10 @@ const AddCompanyForm: React.FC<{
     endedAt: "",
     paymentMethod: "",
     paymentStructure: {
-      additions: [
-        { name: "Incentive", amount: "" },
-        { name: "Performance Allowance", amount: "" },
-      ],
+      additions: [],
       deductions: [],
     },
+    shifts: [], // Add the shifts property
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [nameLoading, setNameLoading] = useState<boolean>(false);
@@ -120,11 +119,9 @@ const AddCompanyForm: React.FC<{
           startedAt: "",
           endedAt: "",
           paymentMethod: "",
+          shifts: [],
           paymentStructure: {
-            additions: [
-              { name: "Incentive", amount: "" },
-              { name: "Performance Allowance", amount: "" },
-            ],
+            additions: [],
             deductions: [],
           },
         });

@@ -9,6 +9,10 @@ interface ICompany extends Document {
   startedAt: String;
   endedAt: String;
   paymentMethod: String;
+  shifts: {
+    start: string;
+    end: string;
+  }[];
   paymentStructure: {
     additions: {
       name: string;
@@ -49,6 +53,22 @@ const companySchema = new Schema<ICompany>(
     },
     paymentMethod: {
       type: String,
+    },
+    shifts: {
+      type: [
+        {
+          start: {
+            type: String,
+            required: true,
+          },
+          end: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+      required: true,
+      default: [{ start: "08:00", end: "17:00" }],
     },
     paymentStructure: {
       additions: {
