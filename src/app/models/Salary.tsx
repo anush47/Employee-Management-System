@@ -4,7 +4,7 @@ import { Schema, model, models, Document } from "mongoose";
 interface ISalary extends Document {
   company: Schema.Types.ObjectId;
   memberNo: number;
-  month: string;
+  period: string;
   basic: number;
   noPay: {
     amount: number;
@@ -40,7 +40,7 @@ const salarySchema = new Schema<ISalary>(
       type: Number,
       required: true,
     },
-    month: {
+    period: {
       type: String,
       required: true,
     },
