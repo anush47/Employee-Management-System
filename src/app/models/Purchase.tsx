@@ -1,7 +1,7 @@
 import { Schema, model, models, Document } from "mongoose";
 
 // Define an interface for the Purchases document
-interface IPurchases extends Document {
+interface IPurchase extends Document {
   period: string;
   company: string;
   price: number;
@@ -10,7 +10,7 @@ interface IPurchases extends Document {
 }
 
 // Define the schema for the Purchases model
-const purchasesSchema = new Schema<IPurchases>(
+const purchasesSchema = new Schema<IPurchase>(
   {
     period: {
       type: String,
@@ -42,6 +42,6 @@ const purchasesSchema = new Schema<IPurchases>(
 
 // Check if the model already exists
 const Purchases =
-  models.Purchases || model<IPurchases>("Purchases", purchasesSchema);
+  models.Purchases || model<IPurchase>("Purchases", purchasesSchema);
 
 export default Purchases;
