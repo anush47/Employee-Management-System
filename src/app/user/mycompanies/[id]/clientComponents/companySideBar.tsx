@@ -31,6 +31,7 @@ import {
   Money,
   LocalAtm,
   Payment,
+  ShoppingBag,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -126,7 +127,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
     {
       name: "Purchases",
       key: "purchases",
-      icon: <Payment />,
+      icon: <ShoppingBag />,
     },
   ];
 
