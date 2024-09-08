@@ -36,6 +36,7 @@ import {
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
 import { useSearchParams, useParams } from "next/navigation";
+import { Company } from "../../clientComponents/companiesDataGrid";
 
 const drawerWidth = 300;
 
@@ -58,6 +59,7 @@ export let companyId: string;
 const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [company, setCompany] = React.useState<Company | null>(null);
   const open = Boolean(anchorEl);
 
   //get id from params of url
@@ -171,6 +173,26 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
     ]);
   }, [selected]);
 
+  React.useEffect(() => {
+    //fetch company
+    const fetchCompany = async () => {
+      try {
+        const response = await fetch(
+          `/api/companies/one?companyId=${companyId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch company");
+        }
+        const data = await response.json();
+        setCompany(data.company);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (companyId) fetchCompany();
+  }, [companyId]);
+
   const drawer = (
     <div>
       <Box
@@ -184,10 +206,10 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
         }}
       >
         <Typography color="primary" variant="h6" noWrap component="div">
-          {user.name === "" ? "Stranger" : user.name}
+          {company?.name}
         </Typography>
         <Typography color="textSecondary" variant="body2">
-          {user.email === "" ? "No email" : user.email}
+          {user.name === "" ? "No email" : user.name}
         </Typography>
       </Box>
       <Divider />
