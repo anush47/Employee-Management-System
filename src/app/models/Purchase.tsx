@@ -10,7 +10,7 @@ interface IPurchase extends Document {
 }
 
 // Define the schema for the Purchases model
-const purchasesSchema = new Schema<IPurchase>(
+const purchaseSchema = new Schema<IPurchase>(
   {
     period: {
       type: String,
@@ -41,7 +41,7 @@ const purchasesSchema = new Schema<IPurchase>(
 );
 
 // Check if the model already exists
-const Purchases =
-  models.Purchases || model<IPurchase>("Purchases", purchasesSchema);
+const Purchase =
+  models.Purchase || model<IPurchase>("Purchase", purchaseSchema);
 
-export default Purchases;
+export default Purchase;
