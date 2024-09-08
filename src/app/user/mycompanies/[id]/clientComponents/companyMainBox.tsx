@@ -11,13 +11,14 @@ import "@fontsource/roboto/400.css";
 import { selected } from "./companySideBar";
 import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "./companySideBar";
-import Salaries from "../salaries/salaries";
 
 // // Lazy load the components
 const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
 const Employees = lazy(() => import("../employees/employees"));
 const Dashboard = lazy(() => import("../dashboard/dashboard"));
 const Payments = lazy(() => import("../payments/payments"));
+const Salaries = lazy(() => import("../salaries/salaries"));
+const Purchases = lazy(() => import("../purchases/purchases"));
 
 const CompanyMainBox = ({
   user,
@@ -54,6 +55,8 @@ const CompanyMainBox = ({
                 return <Payments user={user} />;
               case "salaries":
                 return <Salaries user={user} />;
+              case "purchases":
+                return <Purchases user={user} />;
               default:
                 return <div>Component not found</div>;
             }

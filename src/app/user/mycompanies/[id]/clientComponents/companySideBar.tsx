@@ -30,6 +30,7 @@ import {
   NavigateNext,
   Money,
   LocalAtm,
+  Payment,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -43,7 +44,8 @@ export type Selected =
   | "details"
   | "employees"
   | "payments"
-  | "salaries";
+  | "salaries"
+  | "purchases";
 
 interface Props {
   window?: Window | undefined;
@@ -71,9 +73,14 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   }
   //if wrong params default to dashboard
   if (
-    !["dashboard", "details", "employees", "payments", "salaries"].includes(
-      selected
-    )
+    ![
+      "dashboard",
+      "details",
+      "employees",
+      "payments",
+      "salaries",
+      "purchases",
+    ].includes(selected)
   ) {
     selected = "details";
   }
@@ -111,11 +118,15 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       key: "salaries",
       icon: <LocalAtm />,
     },
-
     {
       name: "Payments",
       key: "payments",
       icon: <Payments />,
+    },
+    {
+      name: "Purchases",
+      key: "purchases",
+      icon: <Payment />,
     },
   ];
 
@@ -137,15 +148,24 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
         My Companies
       </LinkM>,
       <LinkM underline="none" key="3" color="text.primary">
-        {selected === "dashboard"
-          ? "Dashboard"
-          : selected === "details"
-          ? "Company Details"
-          : selected === "employees"
-          ? "Employees"
-          : selected === "salaries"
-          ? "Salaries"
-          : "Payments"}
+        {(() => {
+          switch (selected) {
+            case "dashboard":
+              return "Dashboard";
+            case "details":
+              return "Company Details";
+            case "employees":
+              return "Employees";
+            case "salaries":
+              return "Salaries";
+            case "payments":
+              return "Payments";
+            case "purchases":
+              return "Purchases";
+            default:
+              return "";
+          }
+        })()}
       </LinkM>,
     ]);
   }, [selected]);
