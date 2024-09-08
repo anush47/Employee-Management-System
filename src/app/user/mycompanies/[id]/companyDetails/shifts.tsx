@@ -22,10 +22,10 @@ interface ShiftsProps {
   isEditing: boolean;
 }
 
-const validateTime = (value: string) => {
-  // Regex to validate time in HH:MM format (24-hour)
-  const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-  return regex.test(value);
+const formatTime = (value: string) => {
+  // Format time to HH:MM if necessary
+  const [hours, minutes] = value.split(":");
+  return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
 };
 
 export const Shifts = ({
@@ -66,13 +66,10 @@ export const Shifts = ({
     value: string
   ) => {
     const newShifts = [...shifts];
-    const newErrors = { ...errors };
+    const formattedTime = formatTime(value);
 
-    newShifts[index] = { ...newShifts[index], [field]: value };
+    newShifts[index] = { ...newShifts[index], [field]: formattedTime };
     setShifts(newShifts);
-
-    newErrors[field][index] = validateTime(value) ? "" : "Invalid time format";
-    setErrors(newErrors);
   };
 
   return (
@@ -92,22 +89,24 @@ export const Shifts = ({
                 <Grid
                   mb={1}
                   container
-                  spacing={2}
+                  columnSpacing={2}
+                  rowSpacing={1}
                   alignItems="center"
                   key={index}
                 >
+                  <Grid item xs={12}>
+                    <Typography>Shift {index + 1}</Typography>
+                  </Grid>
                   <Grid item xs={5}>
                     <FormControl fullWidth>
                       <TextField
                         label="Start Time"
-                        type="text"
+                        type="time"
                         variant="filled"
                         value={shift.start}
                         onChange={(e) =>
                           handleFieldChange(index, "start", e.target.value)
                         }
-                        helperText={errors.start[index]}
-                        error={!!errors.start[index]}
                         InputProps={{
                           readOnly: !isEditing,
                         }}
@@ -118,14 +117,12 @@ export const Shifts = ({
                     <FormControl fullWidth>
                       <TextField
                         label="End Time"
-                        type="text"
+                        type="time"
                         variant="filled"
                         value={shift.end}
                         onChange={(e) =>
                           handleFieldChange(index, "end", e.target.value)
                         }
-                        helperText={errors.end[index]}
-                        error={!!errors.end[index]}
                         InputProps={{
                           readOnly: !isEditing,
                         }}
