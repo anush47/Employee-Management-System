@@ -454,6 +454,7 @@ const EditEmployeeForm: React.FC<{
                 value={formFields.divideBy}
                 onChange={handleChange}
                 variant="outlined"
+                readOnly={!isEditing}
               >
                 {categories}
               </Select>
@@ -469,6 +470,7 @@ const EditEmployeeForm: React.FC<{
                 value={formFields.otMethod}
                 onChange={handleChange}
                 variant="outlined"
+                readOnly={!isEditing}
               >
                 {otMethods}
               </Select>

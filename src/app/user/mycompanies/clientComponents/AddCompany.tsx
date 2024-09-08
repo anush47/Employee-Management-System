@@ -19,6 +19,8 @@ import {
   Snackbar,
   Alert,
   Slide,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { Cancel, Save, Search } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -44,6 +46,7 @@ const AddCompanyForm: React.FC<{
     address: "",
     startedAt: "",
     endedAt: "",
+    active: true,
     paymentMethod: "",
     paymentStructure: {
       additions: [],
@@ -67,12 +70,15 @@ const AddCompanyForm: React.FC<{
 
   // Unified handle change for all fields
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>
   ) => {
     let { name, value } = event.target;
     //capitalize name
     if (name === "name" || name === "employerNo") {
       value = value.toUpperCase();
+    }
+    if (name === "active") {
+      value = event.target.checked;
     }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
@@ -117,6 +123,7 @@ const AddCompanyForm: React.FC<{
           employerNo: "",
           address: "",
           startedAt: "",
+          active: true,
           endedAt: "",
           paymentMethod: "",
           shifts: [],
@@ -322,6 +329,24 @@ const AddCompanyForm: React.FC<{
                   }}
                 />
               </LocalizationProvider>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formFields.active}
+                    size="large"
+                    name="active"
+                    color="success"
+                    value={formFields.active}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                }
+                label="Is Active ?"
+              />
             </FormControl>
           </Grid>
           <Grid item xs={12}>

@@ -16,6 +16,7 @@ const companySchema = z.object({
   startedAt: z.string().optional(),
   paymentMethod: z.string().optional(),
   monthlyPrice: z.number(),
+  active: z.boolean().default(true),
 });
 
 export async function POST(req: NextRequest) {

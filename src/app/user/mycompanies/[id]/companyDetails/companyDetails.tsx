@@ -22,6 +22,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { Save, Cancel, Edit, Delete } from "@mui/icons-material";
 import { Company } from "../../clientComponents/companiesDataGrid";
@@ -54,6 +56,7 @@ const CompanyDetails = ({
     paymentMethod: "",
     startedAt: "",
     endedAt: "",
+    active: true,
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -103,9 +106,13 @@ const CompanyDetails = ({
   }, [companyId, user]);
 
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>
   ) => {
-    const { name, value } = event.target;
+    let { name, value } = event.target;
+    if (name === "active") {
+      value = event.target.checked;
+    }
+
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -124,6 +131,7 @@ const CompanyDetails = ({
         paymentMethod: "",
         startedAt: "",
         endedAt: "",
+        active: true,
         paymentStructure: {
           additions: [],
           deductions: [],
@@ -458,6 +466,25 @@ const CompanyDetails = ({
                       }}
                     />
                   </LocalizationProvider>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formFields.active}
+                        size="large"
+                        name="active"
+                        color="success"
+                        value={formFields.active}
+                        onChange={handleChange}
+                        disabled={!isEditing || loading}
+                      />
+                    }
+                    label="Is Active ?"
+                  />
                 </FormControl>
               </Grid>
 

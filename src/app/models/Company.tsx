@@ -9,6 +9,7 @@ interface ICompany extends Document {
   startedAt: String;
   endedAt: String;
   paymentMethod: String;
+  active: boolean;
   monthlyPrice: number;
   shifts: {
     start: string;
@@ -56,6 +57,11 @@ const companySchema = new Schema<ICompany>(
     },
     endedAt: {
       type: String,
+    },
+    active: {
+      type: Boolean,
+      required: true,
+      default: true,
     },
     paymentMethod: {
       type: String,

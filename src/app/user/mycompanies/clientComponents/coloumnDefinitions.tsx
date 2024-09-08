@@ -1,6 +1,7 @@
 import { Button } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
+import { boolean } from "zod";
 
 export const columns: GridColDef[] = [
   { field: "_id", headerName: "ID", flex: 1 },
@@ -8,6 +9,7 @@ export const columns: GridColDef[] = [
   { field: "employerNo", headerName: "Employer No", flex: 1 },
   { field: "address", headerName: "Address", flex: 1 },
   { field: "paymentMethod", headerName: "Payment Method", flex: 1 },
+  { field: "active", headerName: "Active", flex: 1, type: "boolean" },
   {
     field: "actions",
     headerName: "Actions",

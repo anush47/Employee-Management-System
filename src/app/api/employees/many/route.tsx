@@ -28,24 +28,38 @@ export async function GET(req: NextRequest) {
 
     // Connect to the database
     await dbConnect();
-
     let filter = {};
-
+    let companyFilter = {};
     if (user?.role === "admin") {
       // Admin can see all employees
-      filter = {};
+      if (companyId === "all") {
+        // Admin can see all employees of all companies
+        filter = {};
+      } else {
+        // Admin can see employees of a specific company
+        filter = { company: companyId };
+        companyFilter = {
+          _id: companyId,
+        };
+      }
     } else if (companyId === "all") {
       // User can see all employees of their companies
       const userCompanies = await Company.find({ user: userId }).select("_id");
       const companyIds = userCompanies.map((company) => company._id);
       filter = { company: { $in: companyIds } };
+      companyFilter = {
+        _id: { $in: companyIds },
+      };
     } else {
       // User can see employees of a specific company
-      filter = { user: userId, company: companyId };
+      filter = { company: companyId };
+      companyFilter = {
+        user: userId,
+        _id: companyId,
+      };
     }
-
     // Check if company exists without fetching data
-    const companyExists = await Company.exists(filter);
+    const companyExists = await Company.exists(companyFilter);
     if (!companyExists) {
       return NextResponse.json(
         { message: "Company not found" },

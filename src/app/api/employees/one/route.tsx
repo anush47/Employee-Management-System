@@ -129,10 +129,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     body.memberNo = parseInt(body.memberNo); // Convert memberNo to integer
     body.basic = parseFloat(body.basic);
-    console.log(body);
     const parsedBody = employeeSchema.parse(body);
-    console.log(parsedBody);
-    console.log(parsedBody.paymentStructure);
 
     // Connect to the database
     await dbConnect();

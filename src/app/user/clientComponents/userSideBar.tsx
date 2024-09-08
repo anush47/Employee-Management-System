@@ -98,11 +98,6 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       icon: <Business />,
     },
     {
-      name: "Settings",
-      key: "settings",
-      icon: <Settings />,
-    },
-    {
       name: "Employees",
       key: "employees",
       icon: <Groups />,
@@ -116,6 +111,12 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       icon: <ShoppingBag />,
     });
   }
+
+  menus.push({
+    name: "Settings",
+    key: "settings",
+    icon: <Settings />,
+  });
 
   const [breadcrumbs, setBreadcrumbs] = React.useState<React.ReactNode[]>([]);
   React.useEffect(() => {
