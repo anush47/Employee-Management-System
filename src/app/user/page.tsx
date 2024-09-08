@@ -14,8 +14,12 @@ const UserPage = async () => {
       <UserSideBar
         user={
           user
-            ? { name: user.name ?? "", email: user.email ?? "" }
-            : { name: "", email: "" }
+            ? {
+                name: user.name ?? "",
+                email: user.email ?? "",
+                role: user.role ?? "",
+              }
+            : { name: "", email: "", role: "" }
         }
       />
       <UserMainBox

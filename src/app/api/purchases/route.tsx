@@ -67,19 +67,39 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json({ purchase });
     } else if (companyId) {
-      const company = await Company.findById(companyId);
-
-      if (!company) {
-        return NextResponse.json(
-          { message: "Company not found" },
-          { status: 404 }
-        );
+      // Create filter
+      const companyFilter = { user: userId, _id: companyId };
+      if (user?.role === "admin") {
+        // Remove user from filter
+        delete (companyFilter as { user?: string }).user;
       }
 
-      const purchases = await Purchase.find({ company: company._id }).select(
-        "-request"
-      );
-      return NextResponse.json({ purchases });
+      if (companyId !== "all") {
+        const company = await Company.findOne(companyFilter);
+
+        if (!company) {
+          return NextResponse.json(
+            { message: "Company not found" },
+            { status: 404 }
+          );
+        }
+        // Create filter
+        const filter = { company: company._id || "" };
+        if (user?.role === "admin") {
+          // Remove user from filter
+          if (companyId === "all") {
+            delete filter.company;
+          }
+        }
+
+        console.log(filter);
+
+        const purchases = await Purchase.find(filter).select("-request");
+        return NextResponse.json({ purchases });
+      } else {
+        const purchases = await Purchase.find().select("-request");
+        return NextResponse.json({ purchases });
+      }
     } else {
       return NextResponse.json(
         { message: "Purchase ID or Company ID is required" },
@@ -162,6 +182,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
+//update schema
+const purchaseUpdateSchema = z.object({
+  _id: z.string().min(1, "Purchase ID is required"),
+  approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
+});
+
 // PUT: Update an existing purchase
 export async function PUT(req: NextRequest) {
   try {
@@ -176,16 +202,12 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const parsedBody = purchaseSchema
-      .extend({
-        _id: z
-          .string()
-          .min(1, "Purchase ID is required")
-          .refine((id) => /^[0-9a-fA-F]{24}$/.test(id), "Invalid purchase ID"),
-      })
-      .parse(body);
+    if (user.role !== "admin") {
+      return NextResponse.json({ message: "Access denied" }, { status: 403 });
+    }
 
+    const body = await req.json();
+    const parsedBody = purchaseUpdateSchema.parse(body);
     await dbConnect();
 
     const existingPurchase = await Purchase.findById(parsedBody._id);
@@ -196,16 +218,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Create filter
-    const filter: { user?: string; _id: string } = {
-      user: userId,
-      _id: existingPurchase?.company,
-    };
-    if (user?.role === "admin") {
-      // Remove user from filter
-      delete filter.user;
-    }
-    const company = await Company.findOne(filter);
+    const company = await Company.findById(existingPurchase.company);
     if (!company) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
@@ -231,6 +244,7 @@ export async function PUT(req: NextRequest) {
       purchase: updatedPurchase,
     });
   } catch (error: any) {
+    //console.log(error);
     return NextResponse.json(
       {
         message:

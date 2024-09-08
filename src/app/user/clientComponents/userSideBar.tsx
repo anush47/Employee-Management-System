@@ -26,6 +26,7 @@ import {
   Settings,
   Menu as MenuIcon,
   NavigateNext,
+  ShoppingBag,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -34,11 +35,11 @@ import { useSearchParams } from "next/navigation";
 const drawerWidth = 300;
 
 //export selected type
-export type Selected = "dashboard" | "mycompanies" | "settings";
+export type Selected = "dashboard" | "mycompanies" | "settings" | "purchases";
 
 interface Props {
   window?: Window | undefined;
-  user: { name: string; email: string };
+  user: { name: string; email: string; role: string };
 }
 export let selected: Selected = "dashboard";
 
@@ -54,7 +55,9 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
     selected = selectedParam as Selected;
   }
   //if wrong params default to dashboard
-  if (!["dashboard", "mycompanies", "settings"].includes(selected)) {
+  if (
+    !["dashboard", "mycompanies", "settings", "purchases"].includes(selected)
+  ) {
     selected = "dashboard";
   }
 
@@ -87,6 +90,14 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       icon: <Settings />,
     },
   ];
+
+  if (user.role === "admin") {
+    menus.push({
+      name: "Purchases",
+      key: "purchases",
+      icon: <ShoppingBag />,
+    });
+  }
 
   const [breadcrumbs, setBreadcrumbs] = React.useState<React.ReactNode[]>([]);
   React.useEffect(() => {

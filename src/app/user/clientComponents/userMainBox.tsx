@@ -3,6 +3,7 @@ import React, { Suspense, lazy } from "react";
 import { Box, Toolbar, LinearProgress, CircularProgress } from "@mui/material";
 import "@fontsource/roboto/400.css";
 import { selected } from "./userSideBar";
+import Purchases from "../purchases/purchases";
 
 // Lazy load the components
 const Dashboard = lazy(() => import("../dashboard/dashboard"));
@@ -39,6 +40,8 @@ const UserMainBox = ({
               return <MyCompanies user={user} />;
             case "settings":
               return <Settings user={user} />;
+            case "purchases":
+              return <Purchases user={user} />;
             default:
               return <div>Component not found</div>;
           }
