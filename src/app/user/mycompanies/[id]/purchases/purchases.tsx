@@ -62,7 +62,7 @@ const Purchases = ({
               },
             }}
           >
-            <NewPurchaseForm user={user} handleBackClick={handleBackClick} />
+            <NewPurchaseForm handleBackClick={handleBackClick} />
           </Card>
         </Slide>
       ) : (

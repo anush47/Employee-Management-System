@@ -7,24 +7,25 @@ import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
 
 // Define schema for purchase validation
-const purchaseIdSchema = z.string().min(1, "Purchase ID is required");
 const purchaseSchema = z.object({
-  period: z.string().min(1, "Period is required"),
-  company: z.string().min(1, "Company ID is required"),
+  periods: z.array(z.string().min(1, "Period is required")),
+  company: z
+    .string()
+    .min(1, "Company ID is required")
+    .refine((id) => /^[0-9a-fA-F]{24}$/.test(id), "Invalid company ID"),
   price: z.number().min(0, "Price must be a positive number"),
   request: z.string().min(1, "Request is required"),
+  requestDay: z.string().min(1, "Request day is required"),
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
 });
 
 // GET: Fetch a purchase by ID or all purchases of the company
 export async function GET(req: NextRequest) {
   try {
-    // Get user session
     const session = await getServerSession(options);
     const user = session?.user || null;
     const userId = user?.id;
 
-    // Validate user ID
     if (!userId) {
       return NextResponse.json(
         { message: "User ID is required" },
@@ -32,16 +33,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get the purchase ID from the URL query
     const purchaseId = req.nextUrl.searchParams.get("purchaseId");
+    const companyId = req.nextUrl.searchParams.get("companyId");
 
-    // Connect to the database
     await dbConnect();
 
-    // Fetch the purchase(s) from the database
     if (purchaseId) {
-      // Fetch a specific purchase by ID
-      purchaseIdSchema.parse(purchaseId);
+      purchaseSchema.shape.company.parse(purchaseId); // Validate ID
 
       const purchase = await Purchase.findById(purchaseId);
 
@@ -52,7 +50,6 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      // Ensure the purchase belongs to the user's company
       const company = await Company.findById(purchase.company);
       if (!company || company.user.toString() !== userId) {
         return NextResponse.json(
@@ -61,11 +58,9 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      // Return the purchase data
       return NextResponse.json({ purchase });
-    } else {
-      // Fetch all purchases of the company
-      const company = await Company.findOne({ user: userId });
+    } else if (companyId) {
+      const company = await Company.findById(companyId);
 
       if (!company) {
         return NextResponse.json(
@@ -74,11 +69,17 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      const purchases = await Purchase.find({ company: company._id });
-
+      const purchases = await Purchase.find({ company: company._id }).select(
+        "-request"
+      );
       return NextResponse.json({ purchases });
+    } else {
+      return NextResponse.json(
+        { message: "Purchase ID or Company ID is required" },
+        { status: 400 }
+      );
     }
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
       {
         message:
@@ -94,7 +95,6 @@ export async function GET(req: NextRequest) {
 // POST: Create a new purchase
 export async function POST(req: NextRequest) {
   try {
-    // Get user session
     const session = await getServerSession(options);
     const user = session?.user || null;
     const userId = user?.id;
@@ -106,27 +106,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse and validate the request body
     const body = await req.json();
-    const parsedBody = purchaseSchema.parse(body);
+    body.approvedStatus = "pending";
+    // Get today's date
+    const today = new Date();
+    const date = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
 
-    // Connect to the database
+    // Add zeros if necessary
+    body.requestDay = `${date}-${month}-${year}`;
+
+    const parsedBody = purchaseSchema.parse(body);
+    console.log(parsedBody);
+
     await dbConnect();
 
-    // Check if the company belongs to the user
     const company = await Company.findById(parsedBody.company);
     if (!company || company.user.toString() !== userId) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
-    // Create a new purchase
     const newPurchase = await Purchase.create(parsedBody);
-
     return NextResponse.json({
       message: "Purchase created successfully",
       purchase: newPurchase,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error);
     return NextResponse.json(
       {
         message:
@@ -142,7 +149,6 @@ export async function POST(req: NextRequest) {
 // PUT: Update an existing purchase
 export async function PUT(req: NextRequest) {
   try {
-    // Get user session
     const session = await getServerSession(options);
     const user = session?.user || null;
     const userId = user?.id;
@@ -154,16 +160,18 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Parse and validate the request body
     const body = await req.json();
     const parsedBody = purchaseSchema
-      .extend({ _id: z.string().min(1, "Purchase ID is required") })
+      .extend({
+        _id: z
+          .string()
+          .min(1, "Purchase ID is required")
+          .refine((id) => /^[0-9a-fA-F]{24}$/.test(id), "Invalid purchase ID"),
+      })
       .parse(body);
 
-    // Connect to the database
     await dbConnect();
 
-    // Find the purchase to update
     const existingPurchase = await Purchase.findById(parsedBody._id);
     if (!existingPurchase) {
       return NextResponse.json(
@@ -172,13 +180,11 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Check if the purchase belongs to the user's company
     const company = await Company.findById(existingPurchase.company);
     if (!company || company.user.toString() !== userId) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
-    // Update the purchase
     const updatedPurchase = await Purchase.findByIdAndUpdate(
       parsedBody._id,
       parsedBody,
@@ -199,7 +205,7 @@ export async function PUT(req: NextRequest) {
       message: "Purchase updated successfully",
       purchase: updatedPurchase,
     });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
       {
         message:

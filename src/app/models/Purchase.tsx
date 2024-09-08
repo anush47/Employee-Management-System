@@ -2,7 +2,7 @@ import { Schema, model, models, Document } from "mongoose";
 
 // Define an interface for the Purchases document
 interface IPurchase extends Document {
-  period: string;
+  periods: string[];
   company: Schema.Types.ObjectId;
   price: number;
   request: string;
@@ -13,8 +13,8 @@ interface IPurchase extends Document {
 // Define the schema for the Purchases model
 const purchaseSchema = new Schema<IPurchase>(
   {
-    period: {
-      type: String,
+    periods: {
+      type: [String],
       required: true,
     },
     company: {

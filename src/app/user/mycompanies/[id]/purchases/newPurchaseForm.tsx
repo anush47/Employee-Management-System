@@ -1,29 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  TextField,
-  MenuItem,
   Typography,
   CircularProgress,
   Alert,
   Snackbar,
-  Slide,
+  Grid,
+  Paper,
+  Chip,
+  CardHeader,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
 } from "@mui/material";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
 import { ArrowBack } from "@mui/icons-material";
+import dayjs from "dayjs";
+import Slide from "@mui/material/Slide";
+import { companyId } from "../clientComponents/companySideBar";
 
-const NewPurchaseForm: React.FC<{
-  user: { id: string; name: string; email: string };
-  handleBackClick: () => void;
-}> = ({ user, handleBackClick }) => {
-  const [period, setPeriod] = useState<string>("");
+interface ChipData {
+  key: number;
+  label: string;
+}
+
+const validatePeriod = (value: string) => {
+  const regex = /^(0?[1-9]|1[0-2])-(19|20)\d\d$/;
+  return regex.test(value);
+};
+
+const isValidMonthYear = (value: string) => {
+  if (!validatePeriod(value)) return false;
+
+  const [monthStr, yearStr] = value.split("-");
+  const month = parseInt(monthStr, 10);
+  const year = parseInt(yearStr, 10);
+
+  return year >= 1990 && year <= 2026 && month >= 1 && month <= 12;
+};
+
+const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
+
+const formatPeriod = (value: string) => {
+  const [monthStr, yearStr] = value.split("-");
+  const month = monthStr.padStart(2, "0"); // Add leading zero if necessary
+  const year = yearStr.padStart(4, "0"); // Ensure year is 4 digits
+  return `${month}-${year}`;
+};
+
+const formatPrice = (price: number) => {
+  return price.toLocaleString("en-LK", {
+    style: "currency",
+    currency: "LKR",
+  });
+};
+
+const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
+  handleBackClick,
+}) => {
+  const [periods, setPeriods] = useState<ChipData[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const [price, setPrice] = useState<number | null>(null);
-  const [request, setRequest] = useState<string>("");
-  const [requestDay, setRequestDay] = useState<dayjs.Dayjs | null>(null);
-  const [approvedStatus, setApprovedStatus] = useState<string>("pending");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -31,26 +71,135 @@ const NewPurchaseForm: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
+    null
+  );
+  const [purchasedPeriods, setPurchasedPeriods] = useState<string[]>([]); // New state for purchased periods
+
+  useEffect(() => {
+    // Set the default month to the current month in "MM-YYYY" format
+    const currentMonth = dayjs().format("MM");
+    const currentYear = dayjs().format("YYYY");
+    setSelectedPeriod(`${currentMonth}-${currentYear}`);
+
+    const fetchCompany = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/companies/one?companyId=${companyId}`);
+        const data = await res.json();
+        setPrice(data.company.monthlyPrice);
+      } catch (err) {
+        setError("Failed to fetch company details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchPurchases = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/purchases/?companyId=${companyId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch purchases");
+        }
+        const data = await response.json();
+        const purchases = data.purchases
+          .map((purchase: any) => purchase.periods)
+          .flat();
+        setPurchasedPeriods(purchases);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompany();
+    fetchPurchases();
+  }, []);
+
+  useEffect(() => {
+    if (image) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(image);
+    } else {
+      setImagePreview(null);
+    }
+  }, [image]);
+
+  const handleAddPeriod = () => {
+    if (
+      selectedPeriod &&
+      isValidMonthYear(selectedPeriod) &&
+      !periods.find((p) => p.label === formatPeriod(selectedPeriod))
+    ) {
+      if (purchasedPeriods.includes(formatPeriod(selectedPeriod))) {
+        setError("Period already purchased");
+        return;
+      }
+      setError("");
+      const formattedPeriod = formatPeriod(selectedPeriod);
+      setPeriods([...periods, { key: periods.length, label: formattedPeriod }]);
+
+      //selected period is in "09-2024"
+      const [month, year] = selectedPeriod.split("-");
+      //get next month
+      const nextMonth = parseInt(month) + 1;
+      //if next month is 13, set to 1 and increase year
+      if (nextMonth > 12) {
+        setSelectedPeriod(`01-${parseInt(year) + 1}`);
+      } else {
+        setSelectedPeriod(`${nextMonth}-${year}`);
+      }
+    } else {
+      setError("Period already added or invalid");
+    }
+  };
+
+  const handleDeletePeriod = (chipToDelete: ChipData) => () => {
+    setPeriods((chips) =>
+      chips.filter((chip) => chip.key !== chipToDelete.key)
+    );
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setImage(event.target.files[0]);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
+    // Construct the payload object
+    const payload = {
+      periods: periods.map((p) => p.label),
+      price: price ?? 0,
+      company: companyId,
+      // Convert image to base64 if you want to include it in the JSON payload
+      // Note: Handling large files as base64 can be inefficient
+      // If you want to avoid using base64, you need to handle image separately
+      request: image ? await convertImageToBase64(image) : null,
+    };
+
     try {
+      // Send JSON payload in the request
       const response = await fetch("/api/purchases", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          period,
-          price,
-          request,
-          requestDay: requestDay ? requestDay.format("YYYY-MM-DD") : null,
-          approvedStatus,
-          company: user.id, // Assuming company ID is the same as user ID
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -59,9 +208,11 @@ const NewPurchaseForm: React.FC<{
         throw new Error(result.message || "Failed to create purchase");
       }
 
-      setSnackbarMessage("Purchase created successfully");
+      setSnackbarMessage("Purchase Requested successfully");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
+      //wait
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       handleBackClick();
     } catch (error: any) {
       setError(error.message);
@@ -71,6 +222,18 @@ const NewPurchaseForm: React.FC<{
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to convert image to base64
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleSnackbarClose = (
@@ -83,82 +246,181 @@ const NewPurchaseForm: React.FC<{
     setSnackbarOpen(false);
   };
 
+  const oneMonthPrice = price ?? 0;
+  const totalPrice = oneMonthPrice * periods.length;
+
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }}
-    >
-      <Typography variant="h5" gutterBottom>
-        New Purchase
-      </Typography>
-      <TextField
-        label="Period"
-        value={period}
-        onChange={(e) => setPeriod(e.target.value)}
-        required
+    <Box>
+      <CardHeader
+        title={
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h5">
+              <Tooltip title="Discard and go back" arrow>
+                <IconButton sx={{ mr: 2 }} onClick={handleBackClick}>
+                  <ArrowBack />
+                </IconButton>
+              </Tooltip>
+              New Purchase
+            </Typography>
+          </Box>
+        }
       />
-      <TextField
-        label="Price"
-        type="number"
-        value={price ?? ""}
-        onChange={(e) => setPrice(parseFloat(e.target.value))}
-        required
-      />
-      <TextField
-        label="Request"
-        value={request}
-        onChange={(e) => setRequest(e.target.value)}
-        required
-      />
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker
-          label="Request Day"
-          value={requestDay}
-          onChange={(newValue) => setRequestDay(newValue)}
-        />
-      </LocalizationProvider>
-      <TextField
-        label="Approved Status"
-        select
-        value={approvedStatus}
-        onChange={(e) => setApprovedStatus(e.target.value)}
-        required
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }}
       >
-        <MenuItem value="approved">Approved</MenuItem>
-        <MenuItem value="pending">Pending</MenuItem>
-        <MenuItem value="rejected">Rejected</MenuItem>
-      </TextField>
-      {error && <Alert severity="error">{error}</Alert>}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={handleBackClick}
-          startIcon={<ArrowBack />}
-        >
-          Back
-        </Button>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} /> : "Create Purchase"}
-        </Button>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="h6" sx={{ m: 1 }}>
+              Months to Purchase - {periods.length}
+            </Typography>
+            <Paper
+              sx={{
+                display: "flex",
+                justifyContent: "left",
+                flexWrap: "wrap",
+                listStyle: "none",
+                p: 0.5,
+                m: 0,
+              }}
+              component="ul"
+            >
+              {periods.map((data) => (
+                <li key={data.key}>
+                  <Chip
+                    label={data.label}
+                    onDelete={handleDeletePeriod(data)}
+                    sx={{
+                      m: 0.5,
+                      backgroundColor: (theme) => theme.palette.primary.main,
+                      color: (theme) => theme.palette.primary.contrastText,
+                      fontSize: "1.2rem",
+                      borderRadius: "16px",
+                      "& .MuiChip-deleteIcon": {
+                        color: (theme) => theme.palette.primary.contrastText,
+                      },
+                    }}
+                  />
+                </li>
+              ))}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Period"
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              placeholder="MM-YYYY"
+              fullWidth
+              error={!isValidMonthYear(selectedPeriod) && selectedPeriod !== ""}
+              helperText={
+                !isValidMonthYear(selectedPeriod) && selectedPeriod !== ""
+                  ? "Enter a valid month and year (MM-YYYY)"
+                  : error
+              }
+            />
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleAddPeriod}
+              sx={{ mt: 1 }}
+            >
+              Add Period
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Card variant="outlined">
+              <CardContent>
+                <div>
+                  <Typography variant="h6">Bank Details</Typography>
+                  <Typography variant="body2">
+                    Account Number: 123456789
+                  </Typography>
+                  <Typography variant="body2">Bank: Example Bank</Typography>
+                </div>
+                <hr className="my-2" />
+                <div>
+                  <Typography variant="h6">Price Details</Typography>
+                  <Typography variant="body1">
+                    Price per Month: {formatPrice(oneMonthPrice)}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{ fontWeight: "bold", color: "primary.main" }}
+                  >
+                    Total Price: {formatPrice(totalPrice)}
+                  </Typography>
+                </div>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Please make the payment and upload the payment slip to request.
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              component="label"
+              disabled={totalPrice <= 0}
+            >
+              Upload Payment Slip
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageChange}
+              />
+            </Button>
+            {imagePreview && (
+              <Box sx={{ mt: 2, justifyContent: "left" }}>
+                <img
+                  src={imagePreview as string}
+                  alt="Uploaded Preview"
+                  style={{ maxWidth: "100px", height: "auto" }}
+                />
+              </Box>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            <Tooltip title="Create purchase" arrow>
+              <span>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleSubmit}
+                  disabled={loading || totalPrice === 0 || !image}
+                  startIcon={loading ? <CircularProgress size={24} /> : null}
+                >
+                  {loading ? "Purchasing..." : "Purchase"}
+                </Button>
+              </span>
+            </Tooltip>
+          </Grid>
+        </Grid>
       </Box>
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={5000}
-        onClose={handleSnackbarClose}
-        TransitionComponent={(props) => <Slide {...props} direction="up" />}
+        TransitionComponent={SlideTransition}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        action={
+          <Button color="inherit" onClick={handleSnackbarClose}>
+            Close
+          </Button>
+        }
       >
         <Alert
           onClose={handleSnackbarClose}
           severity={snackbarSeverity}
-          variant="filled"
           sx={{ width: "100%" }}
         >
           {snackbarMessage}

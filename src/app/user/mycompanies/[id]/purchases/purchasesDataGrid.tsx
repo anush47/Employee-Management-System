@@ -49,8 +49,8 @@ const PurchasesDataGrid: React.FC<{
 
   const columns: GridColDef[] = [
     {
-      field: "period",
-      headerName: "Period",
+      field: "periods",
+      headerName: "Periods",
       flex: 1,
     },
     {
@@ -62,18 +62,13 @@ const PurchasesDataGrid: React.FC<{
       headerAlign: "left",
     },
     {
-      field: "request",
-      headerName: "Request",
-      flex: 1,
-    },
-    {
       field: "requestDay",
       headerName: "Request Day",
       flex: 1,
     },
     {
       field: "approvedStatus",
-      headerName: "Approved Status",
+      headerName: "Status",
       flex: 1,
       type: "singleSelect",
       valueOptions: ["approved", "pending", "rejected"],
