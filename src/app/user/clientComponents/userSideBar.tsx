@@ -19,6 +19,7 @@ import {
   Menu,
   MenuItem,
   Breadcrumbs,
+  AvatarGroup,
 } from "@mui/material";
 import {
   Home,
@@ -27,6 +28,7 @@ import {
   Menu as MenuIcon,
   NavigateNext,
   ShoppingBag,
+  Groups,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -35,7 +37,12 @@ import { useSearchParams } from "next/navigation";
 const drawerWidth = 300;
 
 //export selected type
-export type Selected = "dashboard" | "mycompanies" | "settings" | "purchases";
+export type Selected =
+  | "dashboard"
+  | "mycompanies"
+  | "settings"
+  | "purchases"
+  | "employees";
 
 interface Props {
   window?: Window | undefined;
@@ -56,7 +63,13 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   }
   //if wrong params default to dashboard
   if (
-    !["dashboard", "mycompanies", "settings", "purchases"].includes(selected)
+    ![
+      "dashboard",
+      "mycompanies",
+      "settings",
+      "purchases",
+      "employees",
+    ].includes(selected)
   ) {
     selected = "dashboard";
   }
@@ -88,6 +101,11 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       name: "Settings",
       key: "settings",
       icon: <Settings />,
+    },
+    {
+      name: "Employees",
+      key: "employees",
+      icon: <Groups />,
     },
   ];
 

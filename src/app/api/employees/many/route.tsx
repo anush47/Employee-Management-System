@@ -21,22 +21,30 @@ export async function GET(req: NextRequest) {
     // Validate userId
     userIdSchema.parse(userId);
 
-    //get the companyId from url
+    // Get the companyId from URL
     const companyId = req.nextUrl.searchParams.get("companyId");
     // Validate companyId
     companyIdSchema.parse(companyId);
 
-    // Create filter
-    const filter = { user: userId, _id: companyId };
-    if (user?.role === "admin") {
-      // Remove user from filter
-      delete filter.user;
-    }
-
     // Connect to the database
     await dbConnect();
 
-    //check if company exists without fetching data
+    let filter = {};
+
+    if (user?.role === "admin") {
+      // Admin can see all employees
+      filter = {};
+    } else if (companyId === "all") {
+      // User can see all employees of their companies
+      const userCompanies = await Company.find({ user: userId }).select("_id");
+      const companyIds = userCompanies.map((company) => company._id);
+      filter = { company: { $in: companyIds } };
+    } else {
+      // User can see employees of a specific company
+      filter = { user: userId, company: companyId };
+    }
+
+    // Check if company exists without fetching data
     const companyExists = await Company.exists(filter);
     if (!companyExists) {
       return NextResponse.json(
@@ -44,10 +52,11 @@ export async function GET(req: NextRequest) {
         { status: 404 }
       );
     }
-    //find employees with company as company ID
-    const employees = await Employee.find({ company: companyId });
 
-    //return employees
+    // Find employees based on the filter
+    const employees = await Employee.find(filter);
+
+    // Return employees
     return NextResponse.json({ employees });
   } catch (error) {
     // Handle Zod validation errors

@@ -13,7 +13,6 @@ import {
   Snackbar,
   Slide,
 } from "@mui/material";
-import { companyId } from "../../clientComponents/companySideBar";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/en-gb";
@@ -185,7 +184,9 @@ const EmployeesDataGrid: React.FC<{
       flex: 1,
       renderCell: (params) => (
         <Link
-          href={`/user/mycompanies/${companyId}?companyPageSelect=employees&employeeId=${params.id}`}
+          href={`/user/mycompanies/${
+            employees.find((employee) => employee.id === params.id)?.company
+          }?companyPageSelect=employees&employeeId=${params.id}`}
         >
           <Button variant="text">View</Button>
         </Link>
@@ -197,9 +198,7 @@ const EmployeesDataGrid: React.FC<{
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/many?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/employees/many?companyId=${"all"}`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }
@@ -221,7 +220,7 @@ const EmployeesDataGrid: React.FC<{
     };
 
     fetchEmployees();
-  }, [user, companyId]);
+  }, [user]);
 
   const validate = (newEmployee: {
     id: string;
@@ -229,6 +228,7 @@ const EmployeesDataGrid: React.FC<{
     memberNo: string;
     nic: string;
     basic: string;
+    company: string;
   }) => {
     const errors: {
       name?: string;
@@ -246,7 +246,8 @@ const EmployeesDataGrid: React.FC<{
       const existingEmployee = employees.find((employee) => {
         return (
           employee.memberNo === parseInt(newEmployee.memberNo) &&
-          employee.id !== newEmployee.id
+          employee.id !== newEmployee.id &&
+          employee.company === newEmployee.company
         );
       });
       if (existingEmployee) {
@@ -364,12 +365,12 @@ const EmployeesDataGrid: React.FC<{
 
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
-      _id: false,
-      company: false,
       id: false,
       startedAt: false,
       resignedAt: false,
       nic: false,
+      company: false,
+      _id: false,
     });
 
   return (

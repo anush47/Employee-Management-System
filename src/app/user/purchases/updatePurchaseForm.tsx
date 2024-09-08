@@ -133,6 +133,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
     const payload = {
       approvedStatus: status,
       _id: purchaseId,
+      request: image ? null : "delete",
     };
 
     try {
@@ -177,6 +178,11 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
 
   const oneMonthPrice = price ?? 0;
   const totalPrice = oneMonthPrice * periods.length;
+
+  function handleImageDelete(event: React.MouseEvent<HTMLButtonElement>): void {
+    event.preventDefault();
+    setImage(null);
+  }
 
   return (
     <Box>
@@ -265,18 +271,40 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
               </CardContent>
             </Card>
           </Grid>
+          {image && (
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                {imagePreview && (
+                  <img
+                    src={imagePreview as string}
+                    alt="Preview"
+                    style={{ width: "100%", borderRadius: "8px" }}
+                  />
+                )}
+              </FormControl>
+            </Grid>
+          )}
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              {imagePreview && (
-                <img
-                  src={imagePreview as string}
-                  alt="Preview"
-                  style={{ width: "100%", borderRadius: "8px" }}
-                />
-              )}
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
+            {image && (
+              <>
+                <Tooltip title="Delete Image" arrow>
+                  <span className="mb-2">
+                    <Button
+                      variant="outlined"
+                      color={"error"}
+                      onClick={handleImageDelete}
+                      disabled={loading}
+                      startIcon={
+                        loading ? <CircularProgress size={24} /> : null
+                      }
+                    >
+                      {loading ? "Updating..." : "Delete Image"}
+                    </Button>
+                  </span>
+                </Tooltip>
+                <div className="mb-5" />
+              </>
+            )}
             <FormControl fullWidth>
               <InputLabel id="status-label">Status</InputLabel>
               <Select

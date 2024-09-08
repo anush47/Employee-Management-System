@@ -4,6 +4,7 @@ import { Box, Toolbar, LinearProgress, CircularProgress } from "@mui/material";
 import "@fontsource/roboto/400.css";
 import { selected } from "./userSideBar";
 import Purchases from "../purchases/purchases";
+import Employees from "../employees/employees";
 
 // Lazy load the components
 const Dashboard = lazy(() => import("../dashboard/dashboard"));
@@ -40,6 +41,8 @@ const UserMainBox = ({
               return <MyCompanies user={user} />;
             case "settings":
               return <Settings user={user} />;
+            case "employees":
+              return <Employees user={user} />;
             case "purchases":
               return <Purchases user={user} />;
             default:

@@ -69,6 +69,7 @@ const CompaniesDataGrid = ({
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
+      _id: false,
       address: false,
     });
 

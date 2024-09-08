@@ -5,7 +5,7 @@ interface IPurchase extends Document {
   periods: string[];
   company: Schema.Types.ObjectId;
   price: number;
-  request: string;
+  request: string | null;
   requestDay: string;
   approvedStatus: "approved" | "pending" | "rejected";
 }
@@ -28,7 +28,6 @@ const purchaseSchema = new Schema<IPurchase>(
     },
     request: {
       type: String,
-      required: true,
     },
     requestDay: {
       type: String,

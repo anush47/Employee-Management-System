@@ -5,6 +5,7 @@ import dbConnect from "@/app/lib/db";
 import Purchase from "@/app/models/Purchase";
 import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
+import { request } from "http";
 
 // Define schema for purchase validation
 const purchaseSchema = z.object({
@@ -186,6 +187,7 @@ export async function POST(req: NextRequest) {
 const purchaseUpdateSchema = z.object({
   _id: z.string().min(1, "Purchase ID is required"),
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
+  request: z.union([z.string().optional(), z.null()]),
 });
 
 // PUT: Update an existing purchase
@@ -208,6 +210,10 @@ export async function PUT(req: NextRequest) {
 
     const body = await req.json();
     const parsedBody = purchaseUpdateSchema.parse(body);
+    if (parsedBody.request == "delete") {
+      parsedBody.request = null;
+    }
+    console.log(parsedBody);
     await dbConnect();
 
     const existingPurchase = await Purchase.findById(parsedBody._id);
