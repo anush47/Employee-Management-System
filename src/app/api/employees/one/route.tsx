@@ -31,8 +31,18 @@ export async function GET(req: NextRequest) {
     // Fetch employee from the database
     const employee = await Employee.findById(employeeId); // Use .lean() for better performance
 
-    const company = await Company.findById(employee?.company);
-    if (!company || company.user.toString() !== userId) {
+    // Create filter
+    const filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: employee?.company,
+    };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
+
+    const company = await Company.findOne(filter);
+    if (!company) {
       return NextResponse.json(
         { message: "Access denied. You cannot add employees to this company." },
         { status: 403 }
@@ -127,9 +137,19 @@ export async function PUT(req: NextRequest) {
     // Connect to the database
     await dbConnect();
 
+    // Create filter
+    const filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: parsedBody?.company,
+    };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
+
     // Find the company by ID to ensure it exists and belongs to the user
-    const company = await Company.findById(parsedBody.company);
-    if (!company || company.user.toString() !== userId) {
+    const company = await Company.findOne(filter);
+    if (!company) {
       return NextResponse.json(
         {
           message:
@@ -238,9 +258,15 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    // Create filter
+    const filter = { user: userId, _id: employee?.company };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter?.user;
+    }
     // Find the company to ensure it belongs to the user
-    const company = await Company.findById(employee.company);
-    if (!company || company.user.toString() !== userId) {
+    const company = await Company.findOne(filter);
+    if (!company) {
       return NextResponse.json(
         {
           message:

@@ -21,8 +21,13 @@ export async function GET(req: NextRequest) {
 
     // Convert userId to ObjectId
 
+    // Create filter if usertype is not admin
     // Create filter
     const filter = { user: userId };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
 
     // Connect to the database
     await dbConnect();

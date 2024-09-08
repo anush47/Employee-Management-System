@@ -28,6 +28,10 @@ export async function GET(req: NextRequest) {
 
     // Create filter
     const filter = { user: userId, _id: companyId };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
 
     // Connect to the database
     await dbConnect();

@@ -63,9 +63,19 @@ export async function POST(req: NextRequest) {
     // Connect to the database
     await dbConnect();
 
+    // Create filter
+    const filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: parsedBody.company,
+    };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
+
     // Find the company by ID to ensure it exists and belongs to the user
     const company = await Company.findById(parsedBody.company);
-    if (!company || company.user.toString() !== userId) {
+    if (!company) {
       return NextResponse.json(
         { message: "Access denied. You cannot add employees to this company." },
         { status: 403 }
@@ -86,7 +96,7 @@ export async function POST(req: NextRequest) {
     // Create and save the new employee
     const newEmployee = new Employee({
       ...parsedBody,
-      user: userId,
+      user: company.user,
     });
     await newEmployee.save();
 

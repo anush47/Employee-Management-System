@@ -50,8 +50,15 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      const company = await Company.findById(purchase.company);
-      if (!company || company.user.toString() !== userId) {
+      // Create filter
+      const filter = { user: userId, _id: purchase.company };
+      if (user?.role === "admin") {
+        // Remove user from filter
+        delete (filter as { user?: string }).user;
+      }
+
+      const company = await Company.findOne(filter);
+      if (!company) {
         return NextResponse.json(
           { message: "Access denied." },
           { status: 403 }
@@ -122,8 +129,17 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
-    const company = await Company.findById(parsedBody.company);
-    if (!company || company.user.toString() !== userId) {
+    // Create filter
+    const filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: parsedBody?.company,
+    };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
+    const company = await Company.findOne(filter);
+    if (!company) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
@@ -180,8 +196,17 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const company = await Company.findById(existingPurchase.company);
-    if (!company || company.user.toString() !== userId) {
+    // Create filter
+    const filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: existingPurchase?.company,
+    };
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
+    const company = await Company.findOne(filter);
+    if (!company) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
