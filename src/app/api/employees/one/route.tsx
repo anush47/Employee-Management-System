@@ -101,7 +101,7 @@ const employeeSchema = z.object({
     .optional(),
 });
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
     // Get user session
     const session = await getServerSession(options);

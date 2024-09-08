@@ -3,7 +3,7 @@ import { Schema, model, models, Document } from "mongoose";
 // Define an interface for the Purchases document
 interface IPurchase extends Document {
   period: string;
-  company: string;
+  company: Schema.Types.ObjectId;
   price: number;
   request: string;
   approvedStatus: "approved" | "pending" | "rejected";
@@ -17,7 +17,8 @@ const purchaseSchema = new Schema<IPurchase>(
       required: true,
     },
     company: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "Company",
       required: true,
     },
     price: {
