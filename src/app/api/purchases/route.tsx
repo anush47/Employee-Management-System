@@ -16,7 +16,7 @@ const purchaseSchema = z.object({
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
 });
 
-// GET: Fetch a purchase by ID
+// GET: Fetch a purchase by ID or all purchases of the company
 export async function GET(req: NextRequest) {
   try {
     // Get user session
@@ -34,29 +34,50 @@ export async function GET(req: NextRequest) {
 
     // Get the purchase ID from the URL query
     const purchaseId = req.nextUrl.searchParams.get("purchaseId");
-    purchaseIdSchema.parse(purchaseId);
 
     // Connect to the database
     await dbConnect();
 
-    // Fetch the purchase from the database
-    const purchase = await Purchase.findById(purchaseId);
+    // Fetch the purchase(s) from the database
+    if (purchaseId) {
+      // Fetch a specific purchase by ID
+      purchaseIdSchema.parse(purchaseId);
 
-    if (!purchase) {
-      return NextResponse.json(
-        { message: "Purchase not found" },
-        { status: 404 }
-      );
+      const purchase = await Purchase.findById(purchaseId);
+
+      if (!purchase) {
+        return NextResponse.json(
+          { message: "Purchase not found" },
+          { status: 404 }
+        );
+      }
+
+      // Ensure the purchase belongs to the user's company
+      const company = await Company.findById(purchase.company);
+      if (!company || company.user.toString() !== userId) {
+        return NextResponse.json(
+          { message: "Access denied." },
+          { status: 403 }
+        );
+      }
+
+      // Return the purchase data
+      return NextResponse.json({ purchase });
+    } else {
+      // Fetch all purchases of the company
+      const company = await Company.findOne({ user: userId });
+
+      if (!company) {
+        return NextResponse.json(
+          { message: "Company not found" },
+          { status: 404 }
+        );
+      }
+
+      const purchases = await Purchase.find({ company: company._id });
+
+      return NextResponse.json({ purchases });
     }
-
-    // Ensure the purchase belongs to the user's company
-    const company = await Company.findById(purchase.company);
-    if (!company || company.user.toString() !== userId) {
-      return NextResponse.json({ message: "Access denied." }, { status: 403 });
-    }
-
-    // Return the purchase data
-    return NextResponse.json({ purchase });
   } catch (error) {
     return NextResponse.json(
       {

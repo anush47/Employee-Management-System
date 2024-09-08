@@ -40,8 +40,6 @@ export const employeeSchema = z.object({
   company: z.string().length(24, "Company ID must be a valid ObjectId"),
 });
 
-// Define the schema as shown earlier
-
 export async function POST(req: NextRequest) {
   try {
     // Get user session
@@ -58,12 +56,9 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate the request body
     const body = await req.json();
-    //change memberNo to int
+    // Convert memberNo to int
     body.memberNo = parseInt(body.memberNo);
-    console.log(body);
     const parsedBody = employeeSchema.parse(body);
-    //print
-    console.log(parsedBody);
 
     // Connect to the database
     await dbConnect();
@@ -77,10 +72,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    //check employees in company to see if member no exists
-    const employees = await Employee.find({
-      company: parsedBody.company,
-    });
+    // Check if the memberNo already exists within the company
+    const employees = await Employee.find({ company: parsedBody.company });
     for (let i = 0; i < employees.length; i++) {
       if (employees[i].memberNo === parsedBody.memberNo) {
         return NextResponse.json(
@@ -90,20 +83,33 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create new employee
+    // Create and save the new employee
     const newEmployee = new Employee({
       ...parsedBody,
       user: userId,
     });
-
-    // Save the new employee to the database
     await newEmployee.save();
+
+    // Count the number of employees in the company
+    const employeeCount = await Employee.countDocuments({
+      company: parsedBody.company,
+    });
+
+    // Update the company's monthlyPrice based on employee count ranges
+    if (employeeCount <= 5) {
+      company.monthlyPrice = 3000; // Price for 0-5 employees
+    } else if (employeeCount > 5 && employeeCount <= 10) {
+      company.monthlyPrice = 5000; // Price for 6-10 employees
+    } else {
+      company.monthlyPrice = 7000; // Price for 11+ employees
+    }
+    // Save the updated company data
+    await company.save();
 
     // Return success response
     return NextResponse.json({ message: "Employee added successfully" });
   } catch (error) {
     // Handle Zod validation errors
-    console.log(error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: error.errors[0].message },

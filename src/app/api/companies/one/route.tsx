@@ -64,6 +64,7 @@ const companyUpdateSchema = z.object({
   paymentMethod: z.string().optional(),
   startedAt: z.string().optional(),
   endedAt: z.string().optional(),
+  monthlyPrice: z.number().optional(),
 });
 
 export async function POST(req: NextRequest) {

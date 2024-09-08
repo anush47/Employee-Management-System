@@ -15,6 +15,7 @@ const companySchema = z.object({
   address: z.string().optional(),
   startedAt: z.string().optional(),
   paymentMethod: z.string().optional(),
+  monthlyPrice: z.number(),
 });
 
 export async function POST(req: NextRequest) {
@@ -33,6 +34,8 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate the request body
     const body = await req.json();
+    //setMonthlyPrice
+    body.monthlyPrice = 3000;
     const parsedBody = companySchema.parse(body);
 
     console.log(parsedBody);
