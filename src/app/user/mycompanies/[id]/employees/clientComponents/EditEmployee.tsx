@@ -51,7 +51,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { TransitionProps } from "@mui/material/transitions";
-import { categories } from "./AddEmployee";
+import { categories, otMethods } from "./AddEmployee";
 import { Shifts } from "../../companyDetails/shifts";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
@@ -72,6 +72,7 @@ const EditEmployeeForm: React.FC<{
     active: true,
     startedAt: "",
     resignedAt: "",
+    otMethod: "",
     shifts: [],
     paymentStructure: {
       additions: [],
@@ -190,6 +191,7 @@ const EditEmployeeForm: React.FC<{
           nic: "",
           startedAt: "",
           active: true,
+          otMethod: "",
           resignedAt: "",
           shifts: [],
           paymentStructure: {
@@ -251,6 +253,7 @@ const EditEmployeeForm: React.FC<{
           nic: "",
           startedAt: "",
           resignedAt: "",
+          otMethod: "",
           shifts: [],
           paymentStructure: {
             additions: [],
@@ -453,6 +456,21 @@ const EditEmployeeForm: React.FC<{
                 variant="outlined"
               >
                 {categories}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.divideBy}>
+              <InputLabel id="otMethod-label">OT-Method</InputLabel>
+              <Select
+                labelId="otMethod-label"
+                label="OT Method"
+                name="otMethod"
+                value={formFields.otMethod}
+                onChange={handleChange}
+                variant="outlined"
+              >
+                {otMethods}
               </Select>
             </FormControl>
           </Grid>

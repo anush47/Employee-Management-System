@@ -14,6 +14,7 @@ export const employeeSchema = z.object({
   basic: z.number().min(1, "Basic salary is required"),
   divideBy: z.union([z.literal(240), z.literal(200)]).default(240),
   designation: z.string().optional(),
+  otMethod: z.string(),
   startedAt: z.string().optional(),
   active: z.boolean().default(true),
   shifts: z.array(

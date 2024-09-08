@@ -54,6 +54,7 @@ const AddEmployeeForm: React.FC<{
     basic: 16000,
     divideBy: 240,
     designation: "",
+    otMethod: "random",
     startedAt: "",
     resignedAt: "",
     shifts: [],
@@ -196,6 +197,7 @@ const AddEmployeeForm: React.FC<{
           nic: "",
           startedAt: "",
           resignedAt: "",
+          otMethod: "",
           shifts: [],
           paymentStructure: {
             additions: [],
@@ -397,6 +399,21 @@ const AddEmployeeForm: React.FC<{
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.divideBy}>
+              <InputLabel id="otMethod-label">OT-Method</InputLabel>
+              <Select
+                labelId="otMethod-label"
+                label="OT Method"
+                name="otMethod"
+                value={formFields.otMethod}
+                onChange={handleChange}
+                variant="outlined"
+              >
+                {otMethods}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.designation}>
               <TextField
                 label="Designation"
@@ -506,6 +523,16 @@ export const categories = [
   { value: 240, label: "240 ewun" },
   { value: 200, label: "200 ewun" },
   { value: 240, label: "160 ewun" },
+].map((category) => (
+  <MenuItem key={category.label} value={category.value}>
+    {category.label}
+  </MenuItem>
+));
+
+export const otMethods = [
+  { value: "random", label: "Random" },
+  { value: "noOT", label: "No OT" },
+  { value: "calc", label: "Calculate" },
 ].map((category) => (
   <MenuItem key={category.label} value={category.value}>
     {category.label}

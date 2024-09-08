@@ -32,6 +32,7 @@ export interface Employee {
   basic: number;
   divideBy: 240 | 200;
   active: boolean;
+  otMethod: string;
   shifts: {
     start: string;
     end: string;

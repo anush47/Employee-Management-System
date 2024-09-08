@@ -12,6 +12,7 @@ interface IEmployee extends Document {
   resignedAt: string;
   divideBy: 240 | 200;
   active: boolean;
+  otMethod: "random" | "noOT" | "calc";
   shifts: {
     start: string;
     end: string;
@@ -80,6 +81,11 @@ const employeeSchema = new Schema<IEmployee>(
       type: Number,
       enum: [240, 200],
       default: 240,
+    },
+    otMethod: {
+      type: String,
+      required: true,
+      default: "random",
     },
     active: {
       type: Boolean,
