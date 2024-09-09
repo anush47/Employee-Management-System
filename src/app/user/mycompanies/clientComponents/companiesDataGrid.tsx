@@ -72,6 +72,7 @@ const CompaniesDataGrid = ({
       id: false,
       _id: false,
       address: false,
+      user: false,
     });
 
   return (

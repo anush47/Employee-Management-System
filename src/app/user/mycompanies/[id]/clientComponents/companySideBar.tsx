@@ -19,6 +19,7 @@ import {
   Menu,
   MenuItem,
   Breadcrumbs,
+  useTheme,
 } from "@mui/material";
 import {
   Business,
@@ -37,6 +38,7 @@ import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
 import { useSearchParams, useParams } from "next/navigation";
 import { Company } from "../../clientComponents/companiesDataGrid";
+import { ThemeSwitch } from "@/app/theme-provider";
 
 const drawerWidth = 300;
 
@@ -61,6 +63,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [company, setCompany] = React.useState<Company | null>(null);
   const open = Boolean(anchorEl);
+  const theme = useTheme();
 
   //get id from params of url
   const params = useParams();
@@ -202,13 +205,12 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
           justifyContent: "center",
           flexDirection: "column",
           padding: 3,
-          backgroundColor: "#f5f5f5",
         }}
       >
         <Typography color="primary" variant="h6" noWrap component="div">
           {company?.name}
         </Typography>
-        <Typography color="textSecondary" variant="body2">
+        <Typography color="secondary" variant="body2">
           {user.name === "" ? "No email" : user.name}
         </Typography>
       </Box>
@@ -224,9 +226,9 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
                 /user/mycompanies/${companyId}?companyPageSelect=${menu.key}`}
               sx={{
                 "&.Mui-selected": {
-                  backgroundColor: "#e0f7fa",
+                  backgroundColor: theme.palette.action.selected,
                   "& .MuiListItemIcon-root": {
-                    color: "#00796b",
+                    color: theme.palette.primary.main,
                   },
                 },
               }}
@@ -271,8 +273,8 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          backgroundColor: "#fff",
-          color: "#333",
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.primary.main,
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
@@ -310,6 +312,9 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
           >
             {breadcrumbs}
           </Breadcrumbs>
+          <div className="mx-4">
+            <ThemeSwitch />
+          </div>
           <IconButton onClick={handleMenuClick} color="inherit">
             <Avatar></Avatar>
           </IconButton>

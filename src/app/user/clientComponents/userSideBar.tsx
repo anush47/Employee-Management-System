@@ -20,6 +20,7 @@ import {
   MenuItem,
   Breadcrumbs,
   AvatarGroup,
+  useTheme,
 } from "@mui/material";
 import {
   Home,
@@ -33,6 +34,7 @@ import {
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
 import { useSearchParams } from "next/navigation";
+import { ThemeSwitch } from "@/app/theme-provider";
 
 const drawerWidth = 300;
 
@@ -54,6 +56,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const theme = useTheme();
 
   //search params to get selected
   const searchParams = useSearchParams();
@@ -143,14 +146,13 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           justifyContent: "center",
           flexDirection: "column",
           padding: 3,
-          backgroundColor: "#f5f5f5",
         }}
       >
         <Avatar sx={{ width: 80, height: 80, mb: 2 }}></Avatar>
         <Typography color="primary" variant="h6" noWrap component="div">
           {user.name === "" ? "Stranger" : user.name}
         </Typography>
-        <Typography color="textSecondary" variant="body2">
+        <Typography color="secondary" variant="body2">
           {user.email === "" ? "No email" : user.email}
         </Typography>
       </Box>
@@ -165,9 +167,9 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
               href={`/user/?userPageSelect=${menu.key}`}
               sx={{
                 "&.Mui-selected": {
-                  backgroundColor: "#e0f7fa",
+                  backgroundColor: theme.palette.action.selected,
                   "& .MuiListItemIcon-root": {
-                    color: "#00796b",
+                    color: theme.palette.primary.main,
                   },
                 },
               }}
@@ -191,8 +193,8 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          backgroundColor: "#fff",
-          color: "#333",
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.primary.main,
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
@@ -230,6 +232,9 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           >
             {breadcrumbs}
           </Breadcrumbs>
+          <div className="mx-4">
+            <ThemeSwitch />
+          </div>
           <IconButton onClick={handleMenuClick} color="inherit">
             <Avatar></Avatar>
           </IconButton>
