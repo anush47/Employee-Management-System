@@ -55,6 +55,11 @@ const PurchasesDataGrid: React.FC<{
       flex: 1,
     },
     {
+      field: "company",
+      headerName: "Company ID",
+      flex: 1,
+    },
+    {
       field: "periods",
       headerName: "Periods",
       flex: 1,
@@ -231,6 +236,7 @@ const PurchasesDataGrid: React.FC<{
     React.useState<GridColumnVisibilityModel>({
       id: false,
       _id: false,
+      company: false,
       price: false,
       request: false,
     });

@@ -78,7 +78,7 @@ const EmployeesDataGrid: React.FC<{
     },
     {
       field: "company",
-      headerName: "CompanyID",
+      headerName: "Company ID",
       flex: 1,
     },
     {
