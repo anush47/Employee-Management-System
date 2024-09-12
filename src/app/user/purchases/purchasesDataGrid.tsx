@@ -50,19 +50,39 @@ const PurchasesDataGrid: React.FC<{
 
   const columns: GridColDef[] = [
     {
-      field: "_id",
-      headerName: "ID",
+      field: "employerNo",
+      headerName: "Employer No",
       flex: 1,
     },
     {
       field: "company",
-      headerName: "Company ID",
+      headerName: "Company",
       flex: 1,
     },
     {
       field: "periods",
-      headerName: "Periods",
+      headerName: "Period",
       flex: 1,
+      renderCell: (params) => {
+        const values = params.value;
+        if (values) {
+          return (
+            <div>
+              {values.map((value: any) => (
+                <Chip
+                  key={value}
+                  label={value}
+                  sx={{
+                    m: 0.2,
+                    textTransform: "capitalize",
+                  }}
+                />
+              ))}
+            </div>
+          );
+        }
+        return null;
+      },
     },
     {
       field: "price",
@@ -198,15 +218,50 @@ const PurchasesDataGrid: React.FC<{
     const fetchPurchases = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/purchases/?companyId=${"all"}`);
+
+        // Fetch purchases data
+        const response = await fetch(`/api/purchases/?companyId=all`);
         if (!response.ok) {
           throw new Error("Failed to fetch purchases");
         }
         const data = await response.json();
-        const purchasesWithId = data.purchases.map((purchase: any) => ({
-          ...purchase,
-          id: purchase._id,
-        }));
+
+        // Fetch company names and map them to purchases
+        const purchasesWithId = await Promise.all(
+          data.purchases.map(async (purchase: any) => {
+            try {
+              // Fetch the company name using the company ID
+              const companyResponse = await fetch(
+                `/api/companies/one?companyId=${purchase.company}`
+              );
+              if (!companyResponse.ok) {
+                throw new Error("Failed to fetch company name");
+              }
+              const companyData = await companyResponse.json();
+
+              // Add the company name to the purchase object
+              return {
+                ...purchase,
+                id: purchase._id,
+                company: companyData.company?.name || "Unknown",
+                employerNo: companyData.company?.employerNo || "Unknown",
+                price: `${
+                  purchase.periods.length
+                } x ${purchase.price.toLocaleString()} = ${(
+                  purchase.price * purchase.periods.length
+                ).toLocaleString()}`,
+              };
+            } catch {
+              return {
+                ...purchase,
+                id: purchase._id,
+                company: "Unknown", // Set "Unknown" if there's an error
+                employerNo: "Unknown",
+              };
+            }
+          })
+        );
+
         setPurchases(purchasesWithId);
       } catch (error) {
         setError(
@@ -236,8 +291,10 @@ const PurchasesDataGrid: React.FC<{
     React.useState<GridColumnVisibilityModel>({
       id: false,
       _id: false,
-      company: false,
-      price: false,
+      //company: false,
+      employerNo: false,
+      periods: false,
+      //price: false,
       request: false,
     });
 

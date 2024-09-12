@@ -53,6 +53,26 @@ const PurchasesDataGrid: React.FC<{
       field: "periods",
       headerName: "Periods",
       flex: 1,
+      renderCell: (params) => {
+        const values = params.value;
+        if (values) {
+          return (
+            <div>
+              {values.map((value: any) => (
+                <Chip
+                  key={value}
+                  label={value}
+                  sx={{
+                    m: 0.2,
+                    textTransform: "capitalize",
+                  }}
+                />
+              ))}
+            </div>
+          );
+        }
+        return null;
+      },
     },
     {
       field: "price",

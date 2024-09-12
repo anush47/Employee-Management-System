@@ -71,13 +71,13 @@ const EmployeesDataGrid: React.FC<{
 
   const columns: GridColDef[] = [
     {
-      field: "_id",
-      headerName: "ID",
+      field: "employerNo",
+      headerName: "Employer No",
       flex: 1,
     },
     {
       field: "company",
-      headerName: "CompanyID",
+      headerName: "Company",
       flex: 1,
     },
     {
@@ -198,16 +198,46 @@ const EmployeesDataGrid: React.FC<{
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/employees/many?companyId=${"all"}`);
+
+        // Fetch employees data
+        const response = await fetch(`/api/employees/many?companyId=all`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }
         const data = await response.json();
-        const employeesWithId = data.employees.map((employee: any) => ({
-          ...employee,
-          id: employee._id,
-        }));
-        setEmployees(employeesWithId);
+
+        // Fetch company names and map them to employees
+        const employeesWithCompany = await Promise.all(
+          data.employees.map(async (employee: any) => {
+            try {
+              // Fetch the company name using the company ID
+              const companyResponse = await fetch(
+                `/api/companies/one?companyId=${employee.company}`
+              );
+              if (!companyResponse.ok) {
+                throw new Error("Failed to fetch company name");
+              }
+              const companyData = await companyResponse.json();
+
+              // Add the company name to the employee object
+              return {
+                ...employee,
+                id: employee._id,
+                company: companyData.company?.name || "Unknown",
+                employerNo: companyData.company?.employerNo || "Unknown",
+              };
+            } catch {
+              return {
+                ...employee,
+                id: employee._id,
+                company: "Unknown", // Set "Unknown" if there's an error
+                employerNo: "Unknown",
+              };
+            }
+          })
+        );
+
+        setEmployees(employeesWithCompany);
       } catch (error) {
         setError(
           error instanceof Error
@@ -369,7 +399,8 @@ const EmployeesDataGrid: React.FC<{
       startedAt: false,
       resignedAt: false,
       nic: false,
-      company: false,
+      //company: false,
+      employerNo: false,
       _id: false,
     });
 

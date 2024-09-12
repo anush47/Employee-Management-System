@@ -29,8 +29,9 @@ const UserPage = async () => {
                 name: user.name ?? "",
                 email: user.email ?? "",
                 id: user.id ?? "",
+                role: user.role ?? "",
               }
-            : { name: "", email: "", id: "" }
+            : { name: "", email: "", id: "", role: "" }
         }
       />
     </Box>

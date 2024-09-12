@@ -14,7 +14,7 @@ const Settings = lazy(() => import("../settings/settings"));
 const UserMainBox = ({
   user,
 }: {
-  user: { name: string; email: string; id: string };
+  user: { name: string; email: string; id: string; role: string };
 }) => {
   const RenderComponent = () => {
     // Simulate a delay

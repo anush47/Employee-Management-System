@@ -5,8 +5,8 @@ import {
   GridColumnVisibilityModel,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { Box, Alert, CircularProgress } from "@mui/material";
-import { columns } from "./coloumnDefinitions";
+import { Box, Alert, CircularProgress, Button } from "@mui/material";
+import Link from "next/link";
 
 export interface Company {
   shifts: any;
@@ -33,26 +33,79 @@ export interface Company {
 const CompaniesDataGrid = ({
   user,
 }: {
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; role: string };
 }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const columns: GridColDef[] = [
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "employerNo", headerName: "Employer No", flex: 1 },
+    { field: "address", headerName: "Address", flex: 1 },
+    { field: "paymentMethod", headerName: "Payment Method", flex: 1 },
+    { field: "active", headerName: "Active", flex: 1, type: "boolean" },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      renderCell: (params) => (
+        <Link href={`/user/mycompanies/${params.id}/`}>
+          <Button variant="text">View</Button>
+        </Link>
+      ),
+    },
+  ];
+
+  if (user.role === "admin") {
+    columns.push(
+      { field: "userName", headerName: "User Name", flex: 1 },
+      { field: "userEmail", headerName: "User Email", flex: 1 }
+    );
+  }
+
   useEffect(() => {
-    const fetchCompanies = async () => {
+    const fetchCompaniesAndUsers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/companies/many`);
-        if (!response.ok) {
+
+        // Fetch companies
+        const companiesResponse = await fetch(`/api/companies/many`);
+        if (!companiesResponse.ok) {
           throw new Error("Failed to fetch companies");
         }
-        const data = await response.json();
-        const companiesWithId = data.companies.map((company: any) => ({
-          ...company,
-          id: company._id,
-        }));
-        setCompanies(companiesWithId);
+        const companiesData = await companiesResponse.json();
+
+        // Fetch user details for each company
+        const companiesWithUserNames = await Promise.all(
+          companiesData.companies.map(async (company: any) => {
+            // Fetch the user for each company
+            if (company.user && user.role === "admin") {
+              const userResponse = await fetch(
+                `/api/auth/users?user=${company.user}`
+              );
+              if (!userResponse.ok) {
+                throw new Error("Failed to fetch user details");
+              }
+              const userData = await userResponse.json();
+              return {
+                ...company,
+                id: company._id,
+                userName: userData.user.name || "Unknown", // Include the user name
+                userEmail: userData.user.email || "Unknown", // Include the user email
+              };
+            } else {
+              return {
+                ...company,
+                id: company._id,
+                userName: "Unknown", // Default for companies without a user
+                userEmail: "Unknown", // Default for companies without a user
+              };
+            }
+          })
+        );
+
+        setCompanies(companiesWithUserNames);
       } catch (error) {
         setError(
           error instanceof Error
@@ -64,7 +117,7 @@ const CompaniesDataGrid = ({
       }
     };
 
-    fetchCompanies();
+    fetchCompaniesAndUsers();
   }, [user]);
 
   const [columnVisibilityModel, setColumnVisibilityModel] =
@@ -72,7 +125,8 @@ const CompaniesDataGrid = ({
       id: false,
       _id: false,
       address: false,
-      user: false,
+      userName: false,
+      userEmail: false,
     });
 
   return (
