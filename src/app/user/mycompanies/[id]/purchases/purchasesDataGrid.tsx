@@ -62,6 +62,7 @@ const PurchasesDataGrid: React.FC<{
                 <Chip
                   key={value}
                   label={value}
+                  color="primary"
                   sx={{
                     m: 0.2,
                     textTransform: "capitalize",

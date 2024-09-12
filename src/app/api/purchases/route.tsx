@@ -17,6 +17,7 @@ const purchaseSchema = z.object({
   price: z.number().min(0, "Price must be a positive number"),
   request: z.string().min(1, "Request is required"),
   requestDay: z.string().min(1, "Request day is required"),
+  remark: z.string().optional(),
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
 });
 
@@ -98,8 +99,17 @@ export async function GET(req: NextRequest) {
         const purchases = await Purchase.find(filter).select("-request");
         return NextResponse.json({ purchases });
       } else {
-        const purchases = await Purchase.find().select("-request");
-        return NextResponse.json({ purchases });
+        // const purchases = await Purchase.find().select("-request");
+        // return NextResponse.json({ purchases });
+        const purchases = await Purchase.find().lean();
+
+        // Map through purchases and add request flag without fetching the actual image
+        const purchasesWithRequestFlag = purchases.map((purchase) => ({
+          ...purchase,
+          request: purchase.request ? true : false, // Add request flag
+        }));
+
+        return NextResponse.json({ purchases: purchasesWithRequestFlag });
       }
     } else {
       return NextResponse.json(
@@ -188,6 +198,7 @@ const purchaseUpdateSchema = z.object({
   _id: z.string().min(1, "Purchase ID is required"),
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
   request: z.union([z.string().optional(), z.null()]),
+  remark: z.string().optional(),
 });
 
 // PUT: Update an existing purchase

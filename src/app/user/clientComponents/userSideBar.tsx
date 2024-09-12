@@ -128,11 +128,22 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
         Home
       </LinkM>,
       <LinkM underline="none" key="2" color="text.primary">
-        {selected === "dashboard"
-          ? "Dashboard"
-          : selected === "mycompanies"
-          ? "My Companies"
-          : "Settings"}
+        {(() => {
+          switch (selected) {
+            case "dashboard":
+              return "Dashboard";
+            case "mycompanies":
+              return "My Companies";
+            case "employees":
+              return "Employees";
+            case "purchases":
+              return "Purchases";
+            case "settings":
+              return "Settings";
+            default:
+              return "";
+          }
+        })()}
       </LinkM>,
     ]);
   }, [selected]);

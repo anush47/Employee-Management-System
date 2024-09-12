@@ -127,6 +127,7 @@ const CompaniesDataGrid = ({
       address: false,
       userName: false,
       userEmail: false,
+      paymentMethod: false,
     });
 
   return (

@@ -50,6 +50,12 @@ const PurchasesDataGrid: React.FC<{
 
   const columns: GridColDef[] = [
     {
+      //id
+      field: "_id",
+      headerName: "ID",
+      flex: 1,
+    },
+    {
       field: "employerNo",
       headerName: "Employer No",
       flex: 1,
@@ -72,6 +78,7 @@ const PurchasesDataGrid: React.FC<{
                 <Chip
                   key={value}
                   label={value}
+                  color="primary"
                   sx={{
                     m: 0.2,
                     textTransform: "capitalize",
@@ -91,6 +98,12 @@ const PurchasesDataGrid: React.FC<{
       type: "number",
       align: "left",
       headerAlign: "left",
+    },
+    {
+      field: "request",
+      headerName: "Request",
+      flex: 1,
+      type: "boolean",
     },
     {
       field: "requestDay",
@@ -125,6 +138,13 @@ const PurchasesDataGrid: React.FC<{
       },
     },
     {
+      field: "remark",
+      headerName: "Remarks",
+      flex: 1,
+      type: "string",
+      editable: isEditingPurchaseInHome,
+    },
+    {
       field: "actions",
       headerName: "Actions",
       flex: 1,
@@ -143,6 +163,7 @@ const PurchasesDataGrid: React.FC<{
     const payload = {
       _id: newPurchase.id,
       approvedStatus: newPurchase.approvedStatus,
+      remark: newPurchase.remark,
     };
 
     try {
@@ -238,6 +259,7 @@ const PurchasesDataGrid: React.FC<{
                 throw new Error("Failed to fetch company name");
               }
               const companyData = await companyResponse.json();
+              console.log(purchase);
 
               // Add the company name to the purchase object
               return {
@@ -296,6 +318,7 @@ const PurchasesDataGrid: React.FC<{
       periods: false,
       //price: false,
       request: false,
+      remark: false,
     });
 
   return (

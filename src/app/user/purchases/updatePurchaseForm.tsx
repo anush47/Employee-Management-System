@@ -20,6 +20,7 @@ import {
   Select,
   MenuItem,
   Slide,
+  TextField,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 
@@ -48,6 +49,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
 }) => {
   const [periods, setPeriods] = useState<ChipData[]>([]);
   const [price, setPrice] = useState<number | null>(null);
+  const [remark, setRemark] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +96,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
           }))
         );
         setStatus(data.purchase.approvedStatus);
+        setRemark(data.purchase.remark);
         setCompanyId(data.purchase.company);
         if (data.purchase.request) {
           const imageResponse = await fetch(data.purchase.request);
@@ -133,6 +136,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
     const payload = {
       approvedStatus: status,
       _id: purchaseId,
+      remark,
       request: image ? null : "delete",
     };
 
@@ -305,6 +309,20 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
                 <div className="mb-5" />
               </>
             )}
+            <FormControl fullWidth>
+              <TextField
+                label="Remark"
+                variant="outlined"
+                name="remark"
+                value={remark}
+                onChange={(event) => setRemark(event.target.value)}
+                multiline
+                rows={2}
+                sx={{
+                  mb: 2,
+                }}
+              />
+            </FormControl>
             <FormControl fullWidth>
               <InputLabel id="status-label">Status</InputLabel>
               <Select
