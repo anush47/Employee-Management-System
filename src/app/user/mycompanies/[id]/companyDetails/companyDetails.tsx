@@ -42,7 +42,7 @@ const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 const CompanyDetails = ({
   user,
 }: {
-  user: { name: string; email: string; id: string };
+  user: { name: string; email: string; id: string; role: string };
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -66,6 +66,10 @@ const CompanyDetails = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [companyUser, setCompanyUser] = useState<{
+    userName: string;
+    userEmail: string;
+  }>();
   const [snackbarSeverity, setSnackbarSeverity] = useState<
     "success" | "error" | "info" | "warning"
   >("success");
@@ -74,17 +78,43 @@ const CompanyDetails = ({
   );
 
   useEffect(() => {
-    const fetchCompany = async () => {
+    const fetchCompanyAndUser = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
+
+        // Fetch company details
+        const companyResponse = await fetch(
           `/api/companies/one?companyId=${companyId}`
         );
-        if (!response.ok) {
+        if (!companyResponse.ok) {
           throw new Error("Failed to fetch company");
         }
-        const data = await response.json();
-        const companyWithId = { ...data.company, id: data.company._id };
+        const companyData = await companyResponse.json();
+        const companyWithId = {
+          ...companyData.company,
+          id: companyData.company._id,
+        };
+
+        // Fetch associated user details (if company has a user)
+        if (companyWithId.user && user.role === "admin") {
+          const userResponse = await fetch(
+            `/api/auth/users?user=${companyWithId.user}`
+          );
+          if (!userResponse.ok) {
+            throw new Error("Failed to fetch user details");
+          }
+          const userData = await userResponse.json();
+
+          // Add user name and email
+          setCompanyUser(
+            userData.user && {
+              userName: userData.user.name,
+              userEmail: userData.user.email,
+            }
+          );
+        }
+
+        // Set the company and form fields with the extended data
         setCompany(companyWithId);
         setFormFields(companyWithId);
       } catch (error) {
@@ -98,8 +128,9 @@ const CompanyDetails = ({
       }
     };
 
+    // Validate companyId and fetch data
     if (companyId?.length === 24) {
-      fetchCompany();
+      fetchCompanyAndUser();
     } else {
       setError("Invalid ID");
     }
@@ -519,6 +550,15 @@ const CompanyDetails = ({
                   }}
                 />
               </Grid>
+
+              {companyUser && (
+                <Grid item xs={12}>
+                  <Typography variant="h6">Associated User</Typography>
+                  <br />
+                  <Typography>Name: {companyUser.userName}</Typography>
+                  <Typography>Email: {companyUser.userEmail}</Typography>
+                </Grid>
+              )}
 
               <Grid item xs={12}>
                 <Button

@@ -23,7 +23,7 @@ const Purchases = lazy(() => import("../purchases/purchases"));
 const CompanyMainBox = ({
   user,
 }: {
-  user: { name: string; email: string; id: string };
+  user: { name: string; email: string; id: string; role: string };
 }) => {
   const RenderComponent = () => {
     // Simulate a delay
