@@ -2,8 +2,7 @@ import { Schema, model, models, Document } from "mongoose";
 
 // Define an interface for the Salary document
 interface ISalary extends Document {
-  company: Schema.Types.ObjectId;
-  memberNo: number;
+  employee: Schema.Types.ObjectId;
   period: string;
   basic: number;
   noPay: {
@@ -31,13 +30,9 @@ interface ISalary extends Document {
 // Define the schema for the Salary model
 const salarySchema = new Schema<ISalary>(
   {
-    company: {
+    employee: {
       type: Schema.Types.ObjectId,
-      ref: "Company",
-      required: true,
-    },
-    memberNo: {
-      type: Number,
+      ref: "Employee",
       required: true,
     },
     period: {
