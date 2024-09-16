@@ -46,17 +46,10 @@ const CompaniesDataGrid = ({
     { field: "employerNo", headerName: "Employer No", flex: 1 },
     { field: "address", headerName: "Address", flex: 1 },
     { field: "paymentMethod", headerName: "Payment Method", flex: 1 },
+
     { field: "active", headerName: "Active", flex: 1, type: "boolean" },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: (params) => (
-        <Link href={`/user/mycompanies/${params.id}/`}>
-          <Button variant="text">View</Button>
-        </Link>
-      ),
-    },
+    { field: "mode", headerName: "Mode", flex: 1 },
+    { field: "monthlyPrice", headerName: "Monthly Price", flex: 1 },
   ];
 
   if (user.role === "admin") {
@@ -65,6 +58,17 @@ const CompaniesDataGrid = ({
       { field: "userEmail", headerName: "User Email", flex: 1 }
     );
   }
+
+  columns.push({
+    field: "actions",
+    headerName: "Actions",
+    flex: 1,
+    renderCell: (params) => (
+      <Link href={`/user/mycompanies/${params.id}/`}>
+        <Button variant="text">View</Button>
+      </Link>
+    ),
+  });
 
   useEffect(() => {
     const fetchCompaniesAndUsers = async () => {
@@ -130,6 +134,8 @@ const CompaniesDataGrid = ({
       userName: false,
       userEmail: false,
       paymentMethod: false,
+      mode: false,
+      monthlyPrice: false,
     });
 
   return (

@@ -533,6 +533,11 @@ const CompanyDetails = ({
                         value={formFields.active}
                         onChange={handleChange}
                         disabled={!isEditing || loading}
+                        sx={{
+                          "& .MuiSvgIcon-root": {
+                            color: formFields.active ? "green" : "red",
+                          },
+                        }}
                       />
                     }
                     label="Is Active ?"
@@ -616,9 +621,14 @@ const CompanyDetails = ({
                     </FormControl>
                   </>
                 ) : (
-                  <Typography>
-                    Mode: {modeTexts[company.mode as keyof typeof modeTexts]}
-                  </Typography>
+                  <>
+                    <Typography>
+                      Mode: {modeTexts[company.mode as keyof typeof modeTexts]}
+                    </Typography>
+                    <Typography>
+                      Price: LKR {company.monthlyPrice.toLocaleString()}
+                    </Typography>
+                  </>
                 )}
               </Grid>
               <Grid item xs={12}>
