@@ -360,7 +360,7 @@ const CompanyDetails = ({
           // Display the company details with form controls if editing
           !loading && !error && company && (
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={8}>
                 <FormControl fullWidth error={!!errors.name}>
                   <TextField
                     label="Name"
@@ -377,7 +377,7 @@ const CompanyDetails = ({
                   )}
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <FormControl fullWidth error={!!errors.employerNo}>
                   <TextField
                     label="Employer Number"

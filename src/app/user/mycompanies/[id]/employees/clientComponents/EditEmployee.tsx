@@ -388,7 +388,7 @@ const EditEmployeeForm: React.FC<{
       />
       <CardContent>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormControl fullWidth error={!!errors.name}>
               <TextField
                 label="Name"
@@ -396,6 +396,9 @@ const EditEmployeeForm: React.FC<{
                 value={formFields.name}
                 onChange={handleChange}
                 variant="filled"
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
               />
               {errors.name && <FormHelperText>{errors.name}</FormHelperText>}
             </FormControl>
@@ -409,6 +412,9 @@ const EditEmployeeForm: React.FC<{
                 value={formFields.memberNo}
                 onChange={handleChange}
                 variant="filled"
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
               />
               {errors.memberNo && (
                 <FormHelperText>{errors.memberNo}</FormHelperText>
@@ -569,6 +575,12 @@ const EditEmployeeForm: React.FC<{
                   value={formFields.active}
                   onChange={handleChange}
                   disabled={!isEditing || loading}
+                  //disabled colour fix
+                  sx={{
+                    "& .MuiSvgIcon-root": {
+                      color: formFields.active ? "green" : "red",
+                    },
+                  }}
                 />
               }
               label="Is Active ?"

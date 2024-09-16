@@ -131,6 +131,7 @@ const AddEmployeeForm: React.FC<{
 
     if (companyId?.length === 24) {
       fetchCompany();
+      onFetchMemberNoClick();
     } else {
       setSnackbarMessage("Invalid Company ID");
       setSnackbarSeverity("error");
@@ -247,7 +248,7 @@ const AddEmployeeForm: React.FC<{
       setFormFields((prevFields) => ({ ...prevFields, memberNo: newMemberNo }));
 
       // Show success snackbar with the fetched name
-      setSnackbarMessage(`New Member No.: ${newMemberNo}`);
+      setSnackbarMessage(`New Member No. - ${newMemberNo}`);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (error) {
@@ -317,7 +318,7 @@ const AddEmployeeForm: React.FC<{
       />
       <CardContent>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormControl fullWidth error={!!errors.name}>
               <TextField
                 label="Name"
