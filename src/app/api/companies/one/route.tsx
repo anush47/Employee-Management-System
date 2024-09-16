@@ -70,6 +70,7 @@ const companyUpdateSchema = z.object({
   endedAt: z.string().optional(),
   monthlyPrice: z.number().optional(),
   active: z.boolean().optional(),
+  mode: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -90,6 +91,11 @@ export async function POST(req: NextRequest) {
     // Validate companyId
     companyIdSchema.parse(companyId);
 
+    //parse price
+    if (companyData.monthlyPrice) {
+      companyData.monthlyPrice = parseInt(companyData.monthlyPrice);
+    }
+
     // Validate companyData
     companyUpdateSchema.parse(companyData);
 
@@ -98,6 +104,11 @@ export async function POST(req: NextRequest) {
 
     if (user?.role === "admin") {
       delete filter.user;
+    } else {
+      //delete mode
+      delete companyData.mode;
+      //delete monthlyPrice
+      delete companyData.monthlyPrice;
     }
 
     // Connect to the database

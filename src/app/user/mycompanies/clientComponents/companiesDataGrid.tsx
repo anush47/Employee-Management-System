@@ -14,8 +14,10 @@ export interface Company {
   name: string;
   employerNo: string;
   address: string;
+  mode: string;
   active: boolean;
   paymentMethod: String;
+  monthlyPrice: String;
   startedAt: Date | String;
   endedAt: Date | String;
   paymentStructure: {

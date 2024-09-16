@@ -11,6 +11,7 @@ interface ICompany extends Document {
   paymentMethod: String;
   active: boolean;
   monthlyPrice: number;
+  mode: "self" | "visit" | "aided";
   shifts: {
     start: string;
     end: string;
@@ -65,6 +66,12 @@ const companySchema = new Schema<ICompany>(
     },
     paymentMethod: {
       type: String,
+    },
+    mode: {
+      type: String,
+      required: true,
+      default: "self",
+      enum: ["self", "visit", "aided"],
     },
     shifts: {
       type: [

@@ -24,6 +24,9 @@ import {
   DialogTitle,
   FormControlLabel,
   Checkbox,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { Save, Cancel, Edit, Delete } from "@mui/icons-material";
 import { Company } from "../../clientComponents/companiesDataGrid";
@@ -53,8 +56,10 @@ const CompanyDetails = ({
     name: "",
     employerNo: "",
     address: "",
+    monthlyPrice: "",
     paymentMethod: "",
     startedAt: "",
+    mode: "",
     endedAt: "",
     active: true,
     paymentStructure: {
@@ -76,6 +81,20 @@ const CompanyDetails = ({
   const [errors, setErrors] = useState<{ name?: string; employerNo?: string }>(
     {}
   );
+  const modeTexts = {
+    self: "Self",
+    visit: "Visit",
+    aided: "Aided",
+  };
+  const modes = [
+    { label: modeTexts.self, value: "self" },
+    { label: modeTexts.visit, value: "visit" },
+    { label: modeTexts.aided, value: "aided" },
+  ].map((category) => (
+    <MenuItem key={category.label} value={category.value}>
+      {category.label}
+    </MenuItem>
+  ));
 
   useEffect(() => {
     const fetchCompanyAndUser = async () => {
@@ -137,7 +156,7 @@ const CompanyDetails = ({
   }, [companyId, user]);
 
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any> | any
   ) => {
     let { name, value } = event.target;
     if (name === "active") {
@@ -158,7 +177,9 @@ const CompanyDetails = ({
         id: "",
         name: "",
         employerNo: "",
+        monthlyPrice: "",
         address: "",
+        mode: "",
         paymentMethod: "",
         startedAt: "",
         endedAt: "",
@@ -550,16 +571,56 @@ const CompanyDetails = ({
                   }}
                 />
               </Grid>
+              <Grid item xs={12}>
+                <hr className="my-2" />
+                <Typography variant="h6">Associated User</Typography>
+                <br />
+                {companyUser && (
+                  <>
+                    <Typography>Name: {companyUser.userName}</Typography>
+                    <Typography>Email: {companyUser.userEmail}</Typography>
+                  </>
+                )}
 
-              {companyUser && (
-                <Grid item xs={12}>
-                  <Typography variant="h6">Associated User</Typography>
-                  <br />
-                  <Typography>Name: {companyUser.userName}</Typography>
-                  <Typography>Email: {companyUser.userEmail}</Typography>
-                </Grid>
-              )}
-
+                {user.role === "admin" ? ( //for admin make it a select
+                  <>
+                    <div className="mt-3" />
+                    <FormControl fullWidth>
+                      <InputLabel id="mode-label">Mode</InputLabel>
+                      <Select
+                        labelId="mode-label"
+                        label="Mode"
+                        name="mode"
+                        value={formFields.mode}
+                        onChange={handleChange}
+                        variant="outlined"
+                        readOnly={!isEditing}
+                      >
+                        {modes}
+                      </Select>
+                    </FormControl>
+                    {/* monthly price */}
+                    <div className="mt-3" />
+                    <FormControl fullWidth>
+                      <TextField
+                        label="Monthly Price"
+                        name="monthlyPrice"
+                        type="number"
+                        value={formFields.monthlyPrice}
+                        onChange={handleChange}
+                        variant="filled"
+                        InputProps={{
+                          readOnly: !isEditing,
+                        }}
+                      />
+                    </FormControl>
+                  </>
+                ) : (
+                  <Typography>
+                    Mode: {modeTexts[company.mode as keyof typeof modeTexts]}
+                  </Typography>
+                )}
+              </Grid>
               <Grid item xs={12}>
                 <Button
                   variant="outlined"
