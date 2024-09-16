@@ -85,6 +85,17 @@ const employeeSchema = z.object({
   resignedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
   company: z.string().min(1, "Company ID is required"),
   otMethod: z.string(),
+  workingDays: z
+    .object({
+      mon: z.string(),
+      tue: z.string(),
+      wed: z.string(),
+      thu: z.string(),
+      fri: z.string(),
+      sat: z.string(),
+      sun: z.string(),
+    })
+    .optional(),
   shifts: z
     .array(
       z.object({

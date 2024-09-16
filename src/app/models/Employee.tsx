@@ -10,6 +10,9 @@ interface IEmployee extends Document {
   designation: string;
   startedAt: string;
   resignedAt: string;
+  workingDays: {
+    [key: string]: "full" | "half" | "off";
+  };
   divideBy: 240 | 200;
   active: boolean;
   otMethod: "random" | "noOT" | "calc";
@@ -76,6 +79,52 @@ const employeeSchema = new Schema<IEmployee>(
     },
     resignedAt: {
       type: String,
+    },
+    workingDays: {
+      type: {
+        mon: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        tue: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        wed: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        thu: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        fri: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        sat: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "half",
+          required: true,
+        },
+        sun: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "off",
+          required: true,
+        },
+      },
     },
     divideBy: {
       type: Number,

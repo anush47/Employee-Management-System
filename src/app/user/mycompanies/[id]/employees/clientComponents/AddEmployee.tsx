@@ -36,6 +36,7 @@ import { PaymentStructure } from "../../companyDetails/paymentStructure";
 import { companyId } from "../../clientComponents/companySideBar";
 import { Company } from "../../../clientComponents/companiesDataGrid";
 import { Shifts } from "../../companyDetails/shifts";
+import { WorkingDays } from "../../companyDetails/workingDays";
 //import { Company } from "./companiesDataGrid";
 //import { CompanyValidation } from "./companyValidation";
 
@@ -57,6 +58,7 @@ const AddEmployeeForm: React.FC<{
     otMethod: "random",
     startedAt: "",
     resignedAt: "",
+    workingDays: {},
     shifts: [],
     paymentStructure: {
       additions: [],
@@ -105,6 +107,17 @@ const AddEmployeeForm: React.FC<{
             data.company.shifts && data.company.shifts.length > 0
               ? data.company.shifts
               : [{ start: "08:00", end: "17:00" }],
+          workingDays: data.company.workingDays
+            ? data.company.workingDays
+            : {
+                mon: "full",
+                tue: "full",
+                wed: "full",
+                thu: "full",
+                fri: "full",
+                sat: "half",
+                sun: "off",
+              },
           paymentStructure:
             data.company.paymentStructure &&
             data.company.paymentStructure.additions.length > 0 &&
@@ -195,6 +208,7 @@ const AddEmployeeForm: React.FC<{
           designation: "",
           divideBy: 240,
           active: true,
+          workingDays: {},
           nic: "",
           startedAt: "",
           resignedAt: "",
@@ -481,7 +495,21 @@ const AddEmployeeForm: React.FC<{
             }}
           />
         </Grid>
+        <div className="my-5" />
 
+        <Grid item xs={12}>
+          <WorkingDays
+            isEditing={true}
+            workingDays={formFields.workingDays}
+            setWorkingDays={(workingDays) => {
+              setFormFields((prev) => ({
+                ...prev,
+                workingDays,
+              }));
+              console.log("Setting working days:", formFields); // Debugging
+            }}
+          />
+        </Grid>
         <div className="my-5" />
 
         <Grid item xs={12}>

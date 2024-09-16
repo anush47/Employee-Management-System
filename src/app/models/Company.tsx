@@ -16,6 +16,9 @@ interface ICompany extends Document {
     start: string;
     end: string;
   }[];
+  workingDays: {
+    [key: string]: "full" | "half" | "off";
+  };
   paymentStructure: {
     additions: {
       name: string;
@@ -66,6 +69,52 @@ const companySchema = new Schema<ICompany>(
     },
     paymentMethod: {
       type: String,
+    },
+    workingDays: {
+      type: {
+        mon: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        tue: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        wed: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        thu: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        fri: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "full",
+          required: true,
+        },
+        sat: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "half",
+          required: true,
+        },
+        sun: {
+          type: String,
+          enum: ["full", "half", "off"],
+          default: "off",
+          required: true,
+        },
+      },
     },
     mode: {
       type: String,

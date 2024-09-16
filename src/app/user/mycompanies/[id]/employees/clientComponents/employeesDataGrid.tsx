@@ -30,6 +30,9 @@ export interface Employee {
   memberNo: number;
   nic: string;
   basic: number;
+  workingDays: {
+    [key: string]: "full" | "half" | "off";
+  };
   divideBy: 240 | 200;
   active: boolean;
   otMethod: string;

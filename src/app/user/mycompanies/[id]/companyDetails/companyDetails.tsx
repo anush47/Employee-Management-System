@@ -40,6 +40,7 @@ import { ddmmyyyy_to_mmddyyyy } from "../employees/clientComponents/employeesDat
 import dayjs from "dayjs";
 import { Shifts } from "./shifts";
 import { start } from "repl";
+import { WorkingDays } from "./workingDays";
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const CompanyDetails = ({
@@ -59,6 +60,7 @@ const CompanyDetails = ({
     monthlyPrice: "",
     paymentMethod: "",
     startedAt: "",
+    workingDays: {},
     mode: "",
     endedAt: "",
     active: true,
@@ -184,6 +186,15 @@ const CompanyDetails = ({
         startedAt: "",
         endedAt: "",
         active: true,
+        workingDays: {
+          mon: "full",
+          tue: "full",
+          wed: "full",
+          thu: "full",
+          fri: "full",
+          sat: "half",
+          sun: "off",
+        },
         paymentStructure: {
           additions: [],
           deductions: [],
@@ -323,9 +334,9 @@ const CompanyDetails = ({
     <Card
       //set height to viewport height and make scrollable only on larger screens
       sx={{
-        height: "85vh",
+        height: "87vh",
         overflowY: "auto",
-        "@media (max-width: 600px)": {
+        "@media (max-width: 650px)": {
           height: "auto",
         },
       }}
@@ -560,6 +571,21 @@ const CompanyDetails = ({
                 />
               </Grid>
 
+              <div className="my-5" />
+
+              <Grid item xs={12}>
+                <WorkingDays
+                  isEditing={isEditing}
+                  workingDays={formFields.workingDays}
+                  setWorkingDays={(workingDays) => {
+                    setFormFields((prev) => ({
+                      ...prev,
+                      workingDays,
+                    }));
+                    console.log("Setting working days:", formFields); // Debugging
+                  }}
+                />
+              </Grid>
               <div className="my-5" />
 
               <Grid item xs={12}>

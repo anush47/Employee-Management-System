@@ -71,6 +71,17 @@ const companyUpdateSchema = z.object({
   monthlyPrice: z.number().optional(),
   active: z.boolean().optional(),
   mode: z.string().optional(),
+  workingDays: z
+    .object({
+      mon: z.string().optional(),
+      tue: z.string().optional(),
+      wed: z.string().optional(),
+      thu: z.string().optional(),
+      fri: z.string().optional(),
+      sat: z.string().optional(),
+      sun: z.string().optional(),
+    })
+    .optional(),
 });
 
 export async function POST(req: NextRequest) {

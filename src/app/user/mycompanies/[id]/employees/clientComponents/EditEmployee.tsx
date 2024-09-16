@@ -53,6 +53,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { TransitionProps } from "@mui/material/transitions";
 import { categories, otMethods } from "./AddEmployee";
 import { Shifts } from "../../companyDetails/shifts";
+import { WorkingDays } from "../../companyDetails/workingDays";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -70,6 +71,7 @@ const EditEmployeeForm: React.FC<{
     basic: 16000,
     designation: "",
     active: true,
+    workingDays: {},
     startedAt: "",
     resignedAt: "",
     otMethod: "",
@@ -189,6 +191,7 @@ const EditEmployeeForm: React.FC<{
           divideBy: 240,
           designation: "",
           nic: "",
+          workingDays: {},
           startedAt: "",
           active: true,
           otMethod: "",
@@ -253,6 +256,7 @@ const EditEmployeeForm: React.FC<{
           nic: "",
           startedAt: "",
           resignedAt: "",
+          workingDays: {},
           otMethod: "",
           shifts: [],
           paymentStructure: {
@@ -598,6 +602,21 @@ const EditEmployeeForm: React.FC<{
                 ...prev,
                 paymentStructure,
               }));
+            }}
+          />
+        </Grid>
+        <div className="my-5" />
+
+        <Grid item xs={12}>
+          <WorkingDays
+            isEditing={isEditing}
+            workingDays={formFields.workingDays}
+            setWorkingDays={(workingDays) => {
+              setFormFields((prev) => ({
+                ...prev,
+                workingDays,
+              }));
+              console.log("Setting working days:", formFields); // Debugging
             }}
           />
         </Grid>

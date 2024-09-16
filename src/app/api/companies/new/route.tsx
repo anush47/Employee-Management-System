@@ -16,6 +16,15 @@ const companySchema = z.object({
   startedAt: z.string().optional(),
   paymentMethod: z.string().optional(),
   monthlyPrice: z.number(),
+  workingDays: z.object({
+    mon: z.string().optional(),
+    tue: z.string().optional(),
+    wed: z.string().optional(),
+    thu: z.string().optional(),
+    fri: z.string().optional(),
+    sat: z.string().optional(),
+    sun: z.string().optional(),
+  }),
   active: z.boolean().default(true),
 });
 
@@ -37,6 +46,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     //setMonthlyPrice
     body.monthlyPrice = 3000;
+    body.workingDays = {
+      mon: "full",
+      tue: "full",
+      wed: "full",
+      thu: "full",
+      fri: "full",
+      sat: "half",
+      sun: "off",
+    };
     const parsedBody = companySchema.parse(body);
 
     console.log(parsedBody);

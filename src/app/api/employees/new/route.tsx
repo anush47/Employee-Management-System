@@ -17,6 +17,15 @@ export const employeeSchema = z.object({
   otMethod: z.string(),
   startedAt: z.string().optional(),
   active: z.boolean().default(true),
+  workingDays: z.object({
+    mon: z.string().optional(),
+    tue: z.string().optional(),
+    wed: z.string().optional(),
+    thu: z.string().optional(),
+    fri: z.string().optional(),
+    sat: z.string().optional(),
+    sun: z.string().optional(),
+  }),
   shifts: z.array(
     z.object({
       start: z.string().min(1, "Start time is required"),

@@ -20,6 +20,9 @@ export interface Company {
   monthlyPrice: String;
   startedAt: Date | String;
   endedAt: Date | String;
+  workingDays: {
+    [key: string]: "full" | "half" | "off";
+  };
   paymentStructure: {
     additions: {
       name: string;

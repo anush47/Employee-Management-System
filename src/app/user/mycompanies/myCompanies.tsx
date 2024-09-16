@@ -25,7 +25,7 @@ const CompaniesDataGrid = lazy(
 const MyCompanies = ({
   user,
 }: {
-  user: { name: string; email: string; id: string };
+  user: { name: string; email: string; id: string; role: string };
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const theme = useTheme();

@@ -55,7 +55,7 @@ const Purchases = ({
         <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
           <Card
             sx={{
-              height: "85vh",
+              height: "87vh",
               overflowY: "auto",
               "@media (max-width: 600px)": {
                 height: "auto",
@@ -68,7 +68,7 @@ const Purchases = ({
       ) : (
         <Card
           sx={{
-            height: "85vh",
+            height: "87vh",
             overflowY: "auto",
             "@media (max-width: 600px)": {
               height: "auto",

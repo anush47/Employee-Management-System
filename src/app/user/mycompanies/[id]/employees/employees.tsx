@@ -79,7 +79,7 @@ const MyCompanies = ({
           <Card
             //set height to viewport height and make scrollable only on larger screens
             sx={{
-              height: "85vh",
+              height: "87vh",
               overflowY: "auto",
               "@media (max-width: 600px)": {
                 height: "auto",
@@ -94,7 +94,7 @@ const MyCompanies = ({
           <Card
             //set height to viewport height and make scrollable only on larger screens
             sx={{
-              height: "85vh",
+              height: "87vh",
               overflowY: "auto",
               "@media (max-width: 600px)": {
                 height: "auto",
@@ -112,7 +112,7 @@ const MyCompanies = ({
         <Card
           //set height to viewport height and make scrollable only on larger screens
           sx={{
-            height: "85vh",
+            height: "87vh",
             overflowY: "auto",
             "@media (max-width: 600px)": {
               height: "auto",
