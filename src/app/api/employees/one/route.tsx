@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
         { status: 403 }
       );
     }
-    console.log(employee);
 
     // Return the employee data
     return NextResponse.json({ employee });

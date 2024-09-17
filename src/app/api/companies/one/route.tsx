@@ -36,7 +36,6 @@ export async function GET(req: NextRequest) {
 
     // Fetch companies from the database
     const company = await Company.findOne(filter).lean(); // Use .lean() for better performance
-    console.log(company);
     // Return the company data
     return NextResponse.json({ company });
   } catch (error) {
@@ -125,14 +124,11 @@ export async function POST(req: NextRequest) {
     // Connect to the database
     await dbConnect();
 
-    console.log(companyData);
-
     // Update the company in the database
     const updatedCompany = await Company.findOneAndUpdate(filter, companyData, {
       new: true,
       runValidators: true,
     }).lean(); // Use .lean() for better performance
-    console.log(updatedCompany);
 
     if (!updatedCompany) {
       return NextResponse.json(

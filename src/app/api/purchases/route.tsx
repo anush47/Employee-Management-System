@@ -97,8 +97,6 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        console.log(filter);
-
         const purchases = await Purchase.find(filter).select("-request");
         return NextResponse.json({ purchases });
       } else {
@@ -236,7 +234,6 @@ export async function PUT(req: NextRequest) {
     if (parsedBody.request == "delete") {
       parsedBody.request = null;
     }
-    console.log(parsedBody);
     await dbConnect();
 
     const existingPurchase = await Purchase.findById(parsedBody._id);
