@@ -47,6 +47,11 @@ const CompaniesDataGrid = ({
   const columns: GridColDef[] = [
     { field: "name", headerName: "Name", flex: 1 },
     { field: "employerNo", headerName: "Employer No", flex: 1 },
+    {
+      field: "noOfEmployees",
+      headerName: "Employees",
+      flex: 1,
+    },
     { field: "address", headerName: "Address", flex: 1 },
     { field: "paymentMethod", headerName: "Payment Method", flex: 1 },
 
@@ -84,6 +89,7 @@ const CompaniesDataGrid = ({
           throw new Error("Failed to fetch companies");
         }
         const companiesData = await companiesResponse.json();
+        console.log(companiesData);
 
         // Fetch user details for each company
         const companiesWithUserNames = await Promise.all(

@@ -52,11 +52,18 @@ interface AppThemeProviderProps {
 }
 
 const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(darkTheme);
+  const [theme, setTheme] = useState<Theme>(
+    localStorage.getItem("theme") === "dark" ? darkTheme : lightTheme
+  );
 
   const toggleTheme = () => {
     setTheme((prevTheme) =>
       prevTheme.palette.mode === "dark" ? lightTheme : darkTheme
+    );
+    //save to local storage
+    localStorage.setItem(
+      "theme",
+      theme.palette.mode === "dark" ? "light" : "dark"
     );
   };
 

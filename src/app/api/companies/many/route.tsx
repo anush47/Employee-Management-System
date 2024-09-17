@@ -5,6 +5,7 @@ import Company from "@/app/models/Company";
 import { options } from "../../auth/[...nextauth]/options";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
+import Employee from "@/app/models/Employee";
 
 // Define schema for validation
 const userIdSchema = z.string().min(1, "User ID is required");
@@ -19,24 +20,38 @@ export async function GET(req: NextRequest) {
     // Validate userId
     userIdSchema.parse(userId);
 
-    // Convert userId to ObjectId
-
     // Create filter if usertype is not admin
-    // Create filter
-    const filter = { user: userId };
-    if (user?.role === "admin") {
-      // Remove user from filter
-      delete filter.user;
-    }
+    const filter = user?.role === "admin" ? {} : { user: userId };
 
     // Connect to the database
     await dbConnect();
 
     // Fetch companies from the database
-    const companies = await Company.find(filter).lean(); // Use .lean() for better performance
-    //console.log(companies);
-    // Return the company data
-    return NextResponse.json({ companies });
+    const companies = await Company.find(filter).lean();
+
+    // Add the number of employees for each company in a single batch operation
+    const companyIds = companies.map((company) => company._id);
+
+    // Get employee counts in bulk for all companies
+    const employeeCounts = await Employee.aggregate([
+      { $match: { company: { $in: companyIds }, active: true } },
+      { $group: { _id: "$company", count: { $sum: 1 } } },
+    ]);
+
+    // Create a mapping of companyId to employee count
+    const employeeCountMap = employeeCounts.reduce((acc, { _id, count }) => {
+      acc[_id] = count;
+      return acc;
+    }, {});
+
+    // Add employee counts to companies
+    const companiesWithEmployeeCount = companies.map((company) => ({
+      ...company,
+      noOfEmployees: employeeCountMap[company._id as string] || 0, // Default to 0 if no employees
+    }));
+
+    // Return the response
+    return NextResponse.json({ companies: companiesWithEmployeeCount });
   } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {

@@ -615,7 +615,7 @@ const CompanyDetails = ({
 
                 {user.role === "admin" ? ( //for admin make it a select
                   <>
-                    <div className="mt-3" />
+                    <div className="mt-5" />
                     <FormControl fullWidth>
                       <InputLabel id="mode-label">Mode</InputLabel>
                       <Select
