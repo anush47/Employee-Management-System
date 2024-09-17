@@ -6,6 +6,8 @@ import Purchase from "@/app/models/Purchase";
 import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
 import { request } from "http";
+import Employee from "@/app/models/Employee";
+import { calculateTotalPrice } from "./price/route";
 
 // Define schema for purchase validation
 const purchaseSchema = z.object({
@@ -15,6 +17,7 @@ const purchaseSchema = z.object({
     .min(1, "Company ID is required")
     .refine((id) => /^[0-9a-fA-F]{24}$/.test(id), "Invalid company ID"),
   price: z.number().min(0, "Price must be a positive number"),
+  totalPrice: z.number().min(0, "Total price must be a positive number"),
   request: z.string().min(1, "Request is required"),
   requestDay: z.string().min(1, "Request day is required"),
   remark: z.string().optional(),
@@ -154,9 +157,9 @@ export async function POST(req: NextRequest) {
 
     // Add zeros if necessary
     body.requestDay = `${date}-${month}-${year}`;
+    body.totalPrice = 0;
 
-    const parsedBody = purchaseSchema.parse(body);
-    console.log(parsedBody);
+    let parsedBody = purchaseSchema.parse(body);
 
     await dbConnect();
 
@@ -173,6 +176,11 @@ export async function POST(req: NextRequest) {
     if (!company) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
+    parsedBody.totalPrice = calculateTotalPrice(
+      company.monthlyPrice,
+      body.periods
+    ).finalTotalPrice;
+    parsedBody = purchaseSchema.parse(parsedBody);
 
     const newPurchase = await Purchase.create(parsedBody);
     return NextResponse.json({
@@ -199,6 +207,10 @@ const purchaseUpdateSchema = z.object({
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
   request: z.union([z.string().optional(), z.null()]),
   remark: z.string().optional(),
+  totalPrice: z
+    .number()
+    .min(0, "Total price must be a positive number")
+    .optional(),
 });
 
 // PUT: Update an existing purchase

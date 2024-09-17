@@ -21,8 +21,10 @@ import {
   MenuItem,
   Slide,
   TextField,
+  useTheme,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import Link from "next/link";
 
 interface ChipData {
   key: number;
@@ -51,6 +53,8 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
   const [price, setPrice] = useState<number | null>(null);
   const [remark, setRemark] = useState<string>("");
   const [status, setStatus] = useState<string>("");
+  const [totalPrice, setTotalPrice] = useState<string>("");
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -65,6 +69,8 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [employerNo, setEmployerNo] = useState<string | null>(null);
+
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -98,6 +104,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
         setStatus(data.purchase.approvedStatus);
         setRemark(data.purchase.remark);
         setCompanyId(data.purchase.company);
+        setTotalPrice(data.purchase.totalPrice);
         if (data.purchase.request) {
           const imageResponse = await fetch(data.purchase.request);
           const imageBlob = await imageResponse.blob();
@@ -138,6 +145,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
       _id: purchaseId,
       remark,
       request: image ? null : "delete",
+      totalPrice: parseInt(totalPrice),
     };
 
     try {
@@ -181,7 +189,6 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
   };
 
   const oneMonthPrice = price ?? 0;
-  const totalPrice = oneMonthPrice * periods.length;
 
   function handleImageDelete(event: React.MouseEvent<HTMLButtonElement>): void {
     event.preventDefault();
@@ -254,6 +261,14 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
                   <Typography variant="h6">Company Details</Typography>
                   <Typography variant="body1">
                     Company Name: {companyName}
+                    <Link
+                      className="mx-2"
+                      href={`user/mycompanies/${companyId}?companyPageSelect=details`}
+                    >
+                      <IconButton color="primary">
+                        <ArrowForward />
+                      </IconButton>
+                    </Link>
                   </Typography>
                   <Typography variant="body1">
                     Employer No: {employerNo}
@@ -267,9 +282,24 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: "bold", color: "primary.main" }}
+                    sx={{
+                      color: "primary.main",
+                    }}
                   >
-                    Total Price: {formatPrice(totalPrice)}
+                    Total Price:{" "}
+                    {oneMonthPrice * periods.length !== Number(totalPrice) ? (
+                      <>
+                        <span style={{ textDecoration: "line-through" }}>
+                          {formatPrice(oneMonthPrice * periods.length)}
+                        </span>
+                        <span> {formatPrice(parseInt(totalPrice))}</span>
+                      </>
+                    ) : (
+                      formatPrice(oneMonthPrice * periods.length)
+                    )}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {periods.length} x {formatPrice(oneMonthPrice)}
                   </Typography>
                 </div>
               </CardContent>
@@ -318,6 +348,20 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
                 onChange={(event) => setRemark(event.target.value)}
                 multiline
                 rows={2}
+                sx={{
+                  mb: 2,
+                }}
+              />
+            </FormControl>
+            <FormControl fullWidth>
+              <TextField
+                label="Total Price"
+                variant="outlined"
+                name="totalPrice"
+                color="success"
+                value={totalPrice}
+                onChange={(event) => setTotalPrice(event.target.value)}
+                type="number"
                 sx={{
                   mb: 2,
                 }}

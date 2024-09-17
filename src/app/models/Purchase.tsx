@@ -5,6 +5,7 @@ interface IPurchase extends Document {
   periods: string[];
   company: Schema.Types.ObjectId;
   price: number;
+  totalPrice: number;
   request: string | null;
   requestDay: string;
   remark: string;
@@ -24,6 +25,10 @@ const purchaseSchema = new Schema<IPurchase>(
       required: true,
     },
     price: {
+      type: Number,
+      required: true,
+    },
+    totalPrice: {
       type: Number,
       required: true,
     },

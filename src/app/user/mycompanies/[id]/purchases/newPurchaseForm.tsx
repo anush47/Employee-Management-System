@@ -76,6 +76,8 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
     null
   );
   const [purchasedPeriods, setPurchasedPeriods] = useState<string[]>([]); // New state for purchased periods
+  const [totalPrice, setTotalPrice] = useState<number | null>(null); // New state for total price
+  const [finalTotalPrice, setFinalTotalPrice] = useState<number | null>(null); // New state for final total price
 
   useEffect(() => {
     // Set the default month to the current month in "MM-YYYY" format
@@ -246,8 +248,39 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
     setSnackbarOpen(false);
   };
 
+  useEffect(() => {
+    async function fetchPrice() {
+      setLoading(true);
+      try {
+        // Ensure periods and companyId are valid
+        if (!companyId || periods.length === 0) return;
+
+        // Construct the query parameter string for months
+        const monthsParam = periods.map((p) => p.label).join("+");
+
+        // Fetch price details from the API
+        const res = await fetch(
+          `/api/purchases/price?companyId=${companyId}&months=${monthsParam}`
+        );
+        if (!res.ok) {
+          throw new Error("Failed to fetch price details");
+        }
+
+        const data = await res.json();
+        setFinalTotalPrice(data.finalTotalPrice);
+        setTotalPrice(data.totalPrice); // Update with final total price
+      } catch (err) {
+        setError("Failed to fetch price details");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Fetch price if periods and companyId exist
+    if (periods && companyId) fetchPrice();
+  }, [companyId, periods]);
+
   const oneMonthPrice = price ?? 0;
-  const totalPrice = oneMonthPrice * periods.length;
 
   return (
     <Box>
@@ -348,15 +381,45 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
                 <hr className="my-2" />
                 <div>
                   <Typography variant="h6">Price Details</Typography>
-                  <Typography variant="body1">
-                    Price per Month: {formatPrice(oneMonthPrice)}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{ fontWeight: "bold", color: "primary.main" }}
-                  >
-                    Total Price: {formatPrice(totalPrice)}
-                  </Typography>
+                  {loading ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "30px",
+                      }}
+                    >
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <>
+                      <Typography variant="body1">
+                        Price per Month: {formatPrice(oneMonthPrice)}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: "bold", color: "primary.main" }}
+                      >
+                        Total Price:{" "}
+                        {
+                          // Show if finalTotalPrice and totalPrice are different as a strike-through to highlight discount
+                          finalTotalPrice !== totalPrice && (
+                            <span style={{ textDecoration: "line-through" }}>
+                              {formatPrice(totalPrice ?? 0)}
+                            </span>
+                          )
+                        }{" "}
+                        {formatPrice(finalTotalPrice ?? 0)}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        {periods.length} x {formatPrice(oneMonthPrice)}
+                      </Typography>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -369,7 +432,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
               variant="outlined"
               color="primary"
               component="label"
-              disabled={totalPrice <= 0}
+              disabled={(totalPrice ?? 0) <= 0}
             >
               Upload Payment Slip
               <input

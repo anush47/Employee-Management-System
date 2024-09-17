@@ -68,6 +68,9 @@ const EmployeesDataGrid: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+  const [companyCache, setCompanyCache] = useState<{
+    [key: string]: { companyName: string; employerNo: string };
+  }>({});
 
   const columns: GridColDef[] = [
     {
@@ -76,9 +79,21 @@ const EmployeesDataGrid: React.FC<{
       flex: 1,
     },
     {
-      field: "company",
+      field: "companyName",
       headerName: "Company",
       flex: 1,
+      renderCell: (params) => (
+        <Link
+          href={`user/mycompanies/${
+            //find key from companycache
+            Object.keys(companyCache).find(
+              (key) => companyCache[key].companyName == params.value
+            ) || ""
+          }?companyPageSelect=details`}
+        >
+          <Button variant="text">{params.value}</Button>
+        </Link>
+      ),
     },
     {
       field: "memberNo",
@@ -209,28 +224,48 @@ const EmployeesDataGrid: React.FC<{
         // Fetch company names and map them to employees
         const employeesWithCompany = await Promise.all(
           data.employees.map(async (employee: any) => {
+            const companyId = employee.company;
+
+            // Check if the company data is already in the local cache
+            if (companyCache[companyId]) {
+              const { companyName, employerNo } = companyCache[companyId];
+
+              return {
+                ...employee,
+                id: employee._id,
+                companyName: name,
+                employerNo: employerNo,
+              };
+            }
+
             try {
               // Fetch the company name using the company ID
               const companyResponse = await fetch(
-                `/api/companies/one?companyId=${employee.company}`
+                `/api/companies/one?companyId=${companyId}`
               );
               if (!companyResponse.ok) {
                 throw new Error("Failed to fetch company name");
               }
               const companyData = await companyResponse.json();
 
+              // Store the fetched company data in the local cache
+              companyCache[companyId] = {
+                companyName: companyData.company?.name || "Unknown",
+                employerNo: companyData.company?.employerNo || "Unknown",
+              };
+
               // Add the company name to the employee object
               return {
                 ...employee,
                 id: employee._id,
-                company: companyData.company?.name || "Unknown",
-                employerNo: companyData.company?.employerNo || "Unknown",
+                companyName: companyCache[companyId].companyName,
+                employerNo: companyCache[companyId].employerNo,
               };
             } catch {
               return {
                 ...employee,
                 id: employee._id,
-                company: "Unknown", // Set "Unknown" if there's an error
+                companyName: "Unknown", // Set "Unknown" if there's an error
                 employerNo: "Unknown",
               };
             }

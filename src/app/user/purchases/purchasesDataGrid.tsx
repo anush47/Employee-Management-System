@@ -47,6 +47,9 @@ const PurchasesDataGrid: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+  const [companyCache, setCompanyCache] = useState<{
+    [key: string]: { name: string; employerNo: string };
+  }>({});
 
   const columns: GridColDef[] = [
     {
@@ -64,6 +67,19 @@ const PurchasesDataGrid: React.FC<{
       field: "company",
       headerName: "Company",
       flex: 1,
+      //link to company details
+      renderCell: (params) => (
+        <Link
+          href={`user/mycompanies/${
+            //find key from companycache
+            Object.keys(companyCache).find(
+              (key) => companyCache[key].name == params.value
+            ) || ""
+          }?companyPageSelect=details`}
+        >
+          <Button variant="text">{params.value}</Button>
+        </Link>
+      ),
     },
     {
       field: "periods",
@@ -250,28 +266,48 @@ const PurchasesDataGrid: React.FC<{
         // Fetch company names and map them to purchases
         const purchasesWithId = await Promise.all(
           data.purchases.map(async (purchase: any) => {
+            const companyId = purchase.company;
+
+            // Check if the company data is already in the cache
+            if (companyCache[companyId]) {
+              const { name, employerNo } = companyCache[companyId];
+
+              return {
+                ...purchase,
+                id: purchase._id,
+                company: name,
+                employerNo: employerNo,
+                price: `${purchase.periods.length} x ${
+                  purchase.price?.toLocaleString() || "0"
+                } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
+              };
+            }
+
             try {
               // Fetch the company name using the company ID
               const companyResponse = await fetch(
-                `/api/companies/one?companyId=${purchase.company}`
+                `/api/companies/one?companyId=${companyId}`
               );
               if (!companyResponse.ok) {
                 throw new Error("Failed to fetch company name");
               }
               const companyData = await companyResponse.json();
-              console.log(purchase);
+
+              // Store the fetched company data in the cache
+              companyCache[companyId] = {
+                name: companyData.company?.name || "Unknown",
+                employerNo: companyData.company?.employerNo || "Unknown",
+              };
 
               // Add the company name to the purchase object
               return {
                 ...purchase,
                 id: purchase._id,
-                company: companyData.company?.name || "Unknown",
-                employerNo: companyData.company?.employerNo || "Unknown",
-                price: `${
-                  purchase.periods.length
-                } x ${purchase.price.toLocaleString()} = ${(
-                  purchase.price * purchase.periods.length
-                ).toLocaleString()}`,
+                company: companyCache[companyId].name,
+                employerNo: companyCache[companyId].employerNo,
+                price: `${purchase.periods.length} x ${
+                  purchase.price?.toLocaleString() || "0"
+                } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
               };
             } catch {
               return {
