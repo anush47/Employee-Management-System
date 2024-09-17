@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material/styles";
-import { Button, IconButton, Tooltip, useTheme } from "@mui/material";
+import { IconButton, Tooltip, useTheme } from "@mui/material";
 import { DarkMode, LightMode } from "@mui/icons-material";
 
 // Define light and dark themes
@@ -52,15 +52,23 @@ interface AppThemeProviderProps {
 }
 
 const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(
-    localStorage.getItem("theme") === "dark" ? darkTheme : lightTheme
-  );
+  const [theme, setTheme] = useState<Theme>(darkTheme);
+
+  // Effect to load theme from localStorage (client-side only)
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme === "light") {
+      setTheme(lightTheme);
+    } else {
+      setTheme(darkTheme);
+    }
+  }, []); // Only runs once after mount
 
   const toggleTheme = () => {
     setTheme((prevTheme) =>
       prevTheme.palette.mode === "dark" ? lightTheme : darkTheme
     );
-    //save to local storage
+    // Save the new theme to localStorage
     localStorage.setItem(
       "theme",
       theme.palette.mode === "dark" ? "light" : "dark"
