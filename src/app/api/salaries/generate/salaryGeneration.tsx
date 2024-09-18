@@ -10,12 +10,13 @@ function parseValue(value: string, basic: number): number {
       Math.floor(Math.random() * ((max - min) / 100 + 1)) * 100 + min;
     return randomValue;
   } else if (value === "" || isNaN(Number(value))) {
-    // If the value is empty or not a number, set a random value based on basic salary (e.g., 5% to 15% of basic)
-    const randomValue = Math.floor(Math.random() * 0.1 * basic + 0.05 * basic);
-    return randomValue;
+    // If the value is empty or not a number, set a random value as a multiple of 100
+    // based on 5% to 15% of the basic salary
+    const randomValue = Math.floor((Math.random() * 0.1 + 0.05) * basic);
+    return Math.round(randomValue / 100) * 100; // Round to the nearest multiple of 100
   } else {
-    // Otherwise, it's a fixed value like "3000", so parse it as a number
-    return Number(value);
+    // Otherwise, it's a fixed value like "3000", so parse it as a number and round to nearest 100
+    return Math.round(Number(value) / 100) * 100;
   }
 }
 
@@ -25,16 +26,31 @@ export async function generateSalaryForOneEmployee(
   data: string | undefined
 ) {
   try {
-    // Calculate total additions and deductions by parsing each value
-    const totalAdditions = employee.paymentStructure.additions.reduce(
-      (total: number, addition: { name: string; amount: string }) =>
-        total + parseValue(addition.amount, employee.basic),
+    // Calculate additions with actual computed values
+    const parsedAdditions = employee.paymentStructure.additions.map(
+      (addition: { name: string; amount: string }) => ({
+        name: addition.name,
+        amount: parseValue(addition.amount, employee.basic), // Store the computed value
+      })
+    );
+
+    // Calculate deductions with actual computed values
+    const parsedDeductions = employee.paymentStructure.deductions.map(
+      (deduction: { name: string; amount: string }) => ({
+        name: deduction.name,
+        amount: parseValue(deduction.amount, employee.basic), // Store the computed value
+      })
+    );
+
+    // Calculate total additions and deductions
+    const totalAdditions = parsedAdditions.reduce(
+      (total: number, addition: { amount: number }) => total + addition.amount,
       0
     );
 
-    const totalDeductions = employee.paymentStructure.deductions.reduce(
-      (total: number, deduction: { name: string; amount: string }) =>
-        total + parseValue(deduction.amount, employee.basic),
+    const totalDeductions = parsedDeductions.reduce(
+      (total: number, deduction: { amount: number }) =>
+        total + deduction.amount,
       0
     );
 
@@ -51,7 +67,10 @@ export async function generateSalaryForOneEmployee(
         amount: 5000, // Example: Overtime payment
         reason: "Extra work hours", // Example reason for overtime
       },
-      paymentStructure: employee.paymentStructure, // Use the employee's payment structure
+      paymentStructure: {
+        additions: parsedAdditions, // Return the parsed additions with computed values
+        deductions: parsedDeductions, // Return the parsed deductions with computed values
+      },
       advanceAmount: 3000, // Example advance amount
       finalSalary:
         employee.basic + totalAdditions + 5000 - totalDeductions - 1000 - 3000, // Calculating final salary

@@ -127,6 +127,34 @@ const EmployeesDataGrid: React.FC<{
       headerAlign: "left",
     },
     {
+      field: "totalSalary",
+      headerName: "Total",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+      align: "left",
+      headerAlign: "left",
+      renderCell: (params) => {
+        const formatWithCommas = (value: number) => {
+          return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        };
+
+        const value = params.value;
+
+        if (typeof value === "string" && value.includes("-")) {
+          // Handle range like "2000-3000"
+          const [min, max] = value.split("-").map(Number);
+          return `${formatWithCommas(min)}-${formatWithCommas(max)}`;
+        } else {
+          //handle empty
+          if (Number.isNaN(Number(value))) {
+            return "-";
+          }
+          // Handle single value like "6000"
+          return formatWithCommas(Number(value));
+        }
+      },
+    },
+    {
       field: "startedAt",
       headerName: "Started At",
       flex: 1,
