@@ -375,7 +375,7 @@ const EmployeesDataGrid: React.FC<{
       try {
         // Perform POST request to update the employee
         const response = await fetch("/api/employees/one", {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },

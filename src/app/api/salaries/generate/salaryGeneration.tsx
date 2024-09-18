@@ -54,6 +54,8 @@ export async function generateSalaryForOneEmployee(
       0
     );
 
+    console.log(employee);
+
     // Generate the salary data
     const salaryData = {
       employee: employee._id,
