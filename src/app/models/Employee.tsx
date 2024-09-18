@@ -6,6 +6,7 @@ interface IEmployee extends Document {
   name: string;
   nic: string;
   basic: number;
+  totalSalary: string;
   company: Schema.Types.ObjectId;
   designation: string;
   startedAt: string;
@@ -50,6 +51,9 @@ const employeeSchema = new Schema<IEmployee>(
     basic: {
       type: Number,
       required: true,
+    },
+    totalSalary: {
+      type: String,
     },
     company: {
       type: Schema.Types.ObjectId,

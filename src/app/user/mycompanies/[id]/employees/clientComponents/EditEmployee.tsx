@@ -38,7 +38,10 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ddmmyyyy_to_mmddyyyy, Employee } from "./employeesDataGrid";
 import { LoadingButton } from "@mui/lab";
 import "dayjs/locale/en-gb";
-import { PaymentStructure } from "../../companyDetails/paymentStructure";
+import {
+  PaymentStructure,
+  validateAmountNumberString,
+} from "../../companyDetails/paymentStructure";
 import { companyId } from "../../clientComponents/companySideBar";
 import { Company } from "../../../clientComponents/companiesDataGrid";
 import { useSearchParams } from "next/navigation";
@@ -69,6 +72,7 @@ const EditEmployeeForm: React.FC<{
     nic: "",
     divideBy: 240,
     basic: 16000,
+    totalSalary: "",
     designation: "",
     active: true,
     workingDays: {},
@@ -90,6 +94,8 @@ const EditEmployeeForm: React.FC<{
     "success" | "error" | "warning" | "info"
   >("success");
   const [errors, setErrors] = useState<{
+    additions: any;
+    totalSalary: string;
     name?: string;
     memberNo?: string;
     basic?: string;
@@ -98,7 +104,18 @@ const EditEmployeeForm: React.FC<{
     divideBy?: string;
     startedAt?: string;
     resignedAt?: string;
-  }>({});
+  }>({
+    additions: {},
+    totalSalary: "",
+    name: "",
+    memberNo: "",
+    basic: "",
+    nic: "",
+    designation: "",
+    divideBy: "",
+    startedAt: "",
+    resignedAt: "",
+  });
   const [company, setEmployee] = useState<Company | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -152,6 +169,21 @@ const EditEmployeeForm: React.FC<{
     if (name === "active") {
       value = event.target.checked;
     }
+    if (name === "totalSalary") {
+      // Validate
+      console.log(value);
+      if (!validateAmountNumberString(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          totalSalary: "Invalid salary format",
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          totalSalary: "",
+        }));
+      }
+    }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -188,6 +220,7 @@ const EditEmployeeForm: React.FC<{
           name: "",
           memberNo: 0,
           basic: 16000,
+          totalSalary: "",
           divideBy: 240,
           designation: "",
           nic: "",
@@ -203,7 +236,18 @@ const EditEmployeeForm: React.FC<{
           },
           company: companyId,
         });
-        setErrors({});
+        setErrors({
+          additions: {},
+          totalSalary: "",
+          name: "",
+          memberNo: "",
+          basic: "",
+          nic: "",
+          designation: "",
+          divideBy: "",
+          startedAt: "",
+          resignedAt: "",
+        });
         handleBackClick();
       } else {
         setSnackbarMessage(
@@ -250,6 +294,7 @@ const EditEmployeeForm: React.FC<{
           name: "",
           memberNo: 0,
           basic: 16000,
+          totalSalary: "",
           divideBy: 240,
           designation: "",
           active: true,
@@ -265,7 +310,18 @@ const EditEmployeeForm: React.FC<{
           },
           company: companyId,
         });
-        setErrors({});
+        setErrors({
+          additions: {},
+          totalSalary: "",
+          name: "",
+          memberNo: "",
+          basic: "",
+          nic: "",
+          designation: "",
+          divideBy: "",
+          startedAt: "",
+          resignedAt: "",
+        });
         handleBackClick();
       } else {
         setSnackbarMessage(
@@ -566,30 +622,49 @@ const EditEmployeeForm: React.FC<{
               </LocalizationProvider>
             </FormControl>
           </Grid>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formFields.active}
-                  size="large"
-                  name="active"
-                  color="success"
-                  value={formFields.active}
-                  onChange={handleChange}
-                  disabled={!isEditing || loading}
-                  //disabled colour fix
-                  sx={{
-                    "& .MuiSvgIcon-root": {
-                      color: formFields.active ? "green" : "red",
-                    },
-                  }}
-                />
-              }
-              label="Is Active ?"
-            />
-          </FormControl>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Total Salary"
+                name="totalSalary"
+                variant="filled"
+                value={formFields.totalSalary}
+                onChange={handleChange}
+                helperText={errors.totalSalary}
+                error={!!errors.totalSalary}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">LKR</InputAdornment>
+                  ),
+                  readOnly: !isEditing,
+                }}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formFields.active}
+                    size="large"
+                    name="active"
+                    color="success"
+                    value={formFields.active}
+                    onChange={handleChange}
+                    disabled={!isEditing || loading}
+                    //disabled colour fix
+                    sx={{
+                      "& .MuiSvgIcon-root": {
+                        color: formFields.active ? "green" : "red",
+                      },
+                    }}
+                  />
+                }
+                label="Is Active ?"
+              />
+            </FormControl>
+          </Grid>
         </Grid>
         <Grid mt={3} item xs={12}>
           <PaymentStructure

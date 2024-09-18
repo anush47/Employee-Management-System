@@ -24,6 +24,7 @@ import Link from "next/link";
 dayjs.locale("en-gb");
 
 export interface Employee {
+  totalSalary: string;
   id: string;
   designation: string;
   name: string;
@@ -112,6 +113,14 @@ const EmployeesDataGrid: React.FC<{
       flex: 1,
       editable: isEditingEmployeeInHome,
       type: "number",
+      align: "left",
+      headerAlign: "left",
+    },
+    {
+      field: "totalSalary",
+      headerName: "Total",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
       align: "left",
       headerAlign: "left",
     },

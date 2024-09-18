@@ -80,6 +80,7 @@ const employeeSchema = z.object({
   divideBy: z.union([z.literal(240), z.literal(200)]).default(240),
   active: z.boolean().default(true),
   basic: z.number().min(0, "Basic salary must be a positive number"),
+  totalSalary: z.union([z.string(), z.number(), z.null()]),
   startedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
   resignedAt: z.string().optional(), // Assuming the date format is "DD-MM-YYYY"
   company: z.string().min(1, "Company ID is required"),

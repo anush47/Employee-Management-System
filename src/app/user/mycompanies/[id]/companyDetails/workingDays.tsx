@@ -68,17 +68,19 @@ export const WorkingDays = ({
             <Grid item xs={12} sm={6} md={4} key={day}>
               <FormControl fullWidth>
                 <Tooltip title={workingDays?.[day] ?? "off"}>
-                  <Button
-                    variant="outlined"
-                    style={{
-                      borderColor: getColor(workingDays?.[day] ?? "off"),
-                      color: getColor(workingDays?.[day] ?? "off"),
-                    }}
-                    onClick={() => handleDayChange(day)}
-                    disabled={!isEditing}
-                  >
-                    {day.toUpperCase()}: {workingDays?.[day] ?? "off"}
-                  </Button>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      style={{
+                        borderColor: getColor(workingDays?.[day] ?? "off"),
+                        color: getColor(workingDays?.[day] ?? "off"),
+                      }}
+                      onClick={() => handleDayChange(day)}
+                      disabled={!isEditing}
+                    >
+                      {day.toUpperCase()}: {workingDays?.[day] ?? "off"}
+                    </Button>
+                  </span>
                 </Tooltip>
               </FormControl>
             </Grid>

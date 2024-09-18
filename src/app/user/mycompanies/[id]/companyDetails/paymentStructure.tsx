@@ -29,7 +29,7 @@ interface PaymentStructureProps {
   isEditing: boolean;
 }
 
-const validateAmount = (value: string) => {
+export const validateAmountNumberString = (value: string) => {
   // Regex to allow either a single number, a range (number-number), or empty string
   const regex = /^(\d+(\.\d{2})?|\d+(\.\d{2})?-\d+(\.\d{2})?)?$/;
   //console.log(value);
@@ -113,7 +113,7 @@ export const PaymentStructure = ({
       newAdditions[index] = { ...newAdditions[index], [field]: value };
       setAdditions(newAdditions);
       newErrors.additions[index] =
-        (field === "amount" && validateAmount(value)) ||
+        (field === "amount" && validateAmountNumberString(value)) ||
         (field === "name" && value !== "")
           ? ""
           : "Invalid format";
@@ -123,7 +123,7 @@ export const PaymentStructure = ({
       newDeductions[index] = { ...newDeductions[index], [field]: value };
       setDeductions(newDeductions);
       newErrors.deductions[index] =
-        (field === "amount" && validateAmount(value)) ||
+        (field === "amount" && validateAmountNumberString(value)) ||
         (field === "name" && value !== "")
           ? ""
           : "Invalid format";
