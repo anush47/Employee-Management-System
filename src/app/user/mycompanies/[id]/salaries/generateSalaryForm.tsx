@@ -20,7 +20,7 @@ import {
   Slide,
   InputAdornment,
 } from "@mui/material";
-import { Cancel, Save, Search } from "@mui/icons-material";
+import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import dayjs from "dayjs";
 
@@ -190,26 +190,29 @@ const AddSalaryForm: React.FC<{
             }}
           >
             <Typography variant={isSmallScreen ? "h5" : "h4"}>
-              Add Salary Record
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1 }}>
               <Tooltip title="Discard and go back" arrow>
-                <IconButton color="error" onClick={handleBackClick}>
-                  <Cancel />
+                <IconButton
+                  sx={{
+                    mr: 2,
+                  }}
+                  onClick={handleBackClick}
+                >
+                  <ArrowBack />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Save new salary record" arrow>
-                <Button
-                  variant="outlined"
-                  color="success"
-                  startIcon={<Save />}
-                  onClick={onSaveClick}
-                  disabled={loading} // Disable button while loading
-                >
-                  {loading ? <CircularProgress size={24} /> : "Save"}
-                </Button>
-              </Tooltip>
-            </Box>
+              Generate Salary
+            </Typography>
+            <Tooltip title="Save new salary record" arrow>
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<Save />}
+                onClick={onSaveClick}
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? <CircularProgress size={24} /> : "Save"}
+              </Button>
+            </Tooltip>
           </Box>
         }
       />

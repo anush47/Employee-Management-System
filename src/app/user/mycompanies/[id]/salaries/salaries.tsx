@@ -43,88 +43,77 @@ const Salaries = ({
           },
         }}
       >
-        <CardHeader
-          title={
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                mb: 2,
-              }}
-            >
-              <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
-                Salaries
-                {isEditing ? (
-                  <IconButton
-                    sx={{
-                      marginLeft: 1,
-                    }}
-                    color="success"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    <Check />
-                  </IconButton>
-                ) : (
-                  <Tooltip title="Edit salaries" arrow>
-                    <IconButton
-                      sx={{
-                        marginLeft: 1,
-                      }}
-                      color="primary"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Edit />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Typography>
-
-              {/* Add Button to open the form */}
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Add />}
-                onClick={() => setShowAddForm(true)}
-              >
-                Add Salary
-              </Button>
-            </Box>
-          }
-        />
-        <CardContent>
-          <Suspense fallback={<CircularProgress />}>
-            <SalariesDataGrid user={user} isEditing={isEditing} />
-          </Suspense>
-        </CardContent>
-      </Card>
-
-      {/* Slide-in form for adding salary */}
-      <Dialog
-        open={showAddForm}
-        onClose={() => setShowAddForm(false)}
-        fullWidth
-        maxWidth="sm"
-        sx={{
-          "& .MuiDialog-paper": {
-            margin: 0,
-            width: "100%",
-            maxWidth: "none",
-            height: "100%",
-          },
-        }}
-      >
-        <Slide direction="right" in={showAddForm} mountOnEnter unmountOnExit>
-          <DialogContent>
-            <Suspense fallback={<CircularProgress />}>
+        {showAddForm ? (
+          <Slide direction="left" in={showAddForm} mountOnEnter unmountOnExit>
+            <div>
               <AddSalaryForm
                 user={user}
                 handleBackClick={() => setShowAddForm(false)}
               />
-            </Suspense>
-          </DialogContent>
-        </Slide>
-      </Dialog>
+            </div>
+          </Slide>
+        ) : (
+          <>
+            <CardHeader
+              title={
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    mb: 2,
+                  }}
+                >
+                  <Typography
+                    variant={isSmallScreen ? "h5" : "h4"}
+                    gutterBottom
+                  >
+                    Salaries
+                    {isEditing ? (
+                      <IconButton
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                        color="success"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        <Check />
+                      </IconButton>
+                    ) : (
+                      <Tooltip title="Edit salaries" arrow>
+                        <IconButton
+                          sx={{
+                            marginLeft: 1,
+                          }}
+                          color="primary"
+                          onClick={() => setIsEditing(true)}
+                        >
+                          <Edit />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Typography>
+
+                  {/* Add Button to open the form */}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<Add />}
+                    onClick={() => setShowAddForm(true)}
+                  >
+                    Generate Salary
+                  </Button>
+                </Box>
+              }
+            />
+            <CardContent>
+              <Suspense fallback={<CircularProgress />}>
+                <SalariesDataGrid user={user} isEditing={isEditing} />
+              </Suspense>
+            </CardContent>
+          </>
+        )}
+      </Card>
     </Box>
   );
 };
