@@ -32,7 +32,10 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Employee } from "./employeesDataGrid";
 import { LoadingButton } from "@mui/lab";
 import "dayjs/locale/en-gb";
-import { PaymentStructure } from "../../companyDetails/paymentStructure";
+import {
+  PaymentStructure,
+  validateAmountNumberString,
+} from "../../companyDetails/paymentStructure";
 import { companyId } from "../../clientComponents/companySideBar";
 import { Company } from "../../../clientComponents/companiesDataGrid";
 import { Shifts } from "../../companyDetails/shifts";
@@ -53,6 +56,7 @@ const AddEmployeeForm: React.FC<{
     nic: "",
     active: true,
     basic: 16000,
+    totalSalary: "",
     divideBy: 240,
     designation: "",
     otMethod: "random",
@@ -77,6 +81,7 @@ const AddEmployeeForm: React.FC<{
     name?: string;
     memberNo?: string;
     basic?: string;
+    totalSalary?: string;
     nic?: string;
     divideBy?: string;
     designation?: string;
@@ -165,6 +170,21 @@ const AddEmployeeForm: React.FC<{
     if (name === "active") {
       value = event.target.checked;
     }
+    if (name === "totalSalary") {
+      // Validate
+      console.log(value);
+      if (!validateAmountNumberString(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          totalSalary: "Invalid salary format",
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          totalSalary: "",
+        }));
+      }
+    }
     console.log(name, value); // Debugging
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
@@ -205,6 +225,7 @@ const AddEmployeeForm: React.FC<{
           name: "",
           memberNo: 0,
           basic: 16000,
+          totalSalary: "",
           designation: "",
           divideBy: 240,
           active: true,
@@ -461,6 +482,24 @@ const AddEmployeeForm: React.FC<{
                   }}
                 />
               </LocalizationProvider>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Total Salary"
+                name="totalSalary"
+                variant="filled"
+                value={formFields.totalSalary}
+                onChange={handleChange}
+                helperText={errors.totalSalary}
+                error={!!errors.totalSalary}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">LKR</InputAdornment>
+                  ),
+                }}
+              />
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>

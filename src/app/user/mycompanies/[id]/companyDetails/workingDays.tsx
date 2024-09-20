@@ -30,7 +30,7 @@ export const WorkingDays = ({
   const theme = useTheme();
 
   const handleDayChange = (day: string) => {
-    const currentValue = workingDays[day];
+    const currentValue = workingDays ? workingDays[day] : "off";
     const nextValue =
       currentValue === "full"
         ? "half"
@@ -68,7 +68,7 @@ export const WorkingDays = ({
             <Grid item xs={12} sm={6} md={4} key={day}>
               <FormControl fullWidth>
                 <Tooltip title={workingDays?.[day] ?? "off"}>
-                  <span>
+                  <>
                     <Button
                       variant="outlined"
                       style={{
@@ -80,7 +80,7 @@ export const WorkingDays = ({
                     >
                       {day.toUpperCase()}: {workingDays?.[day] ?? "off"}
                     </Button>
-                  </span>
+                  </>
                 </Tooltip>
               </FormControl>
             </Grid>

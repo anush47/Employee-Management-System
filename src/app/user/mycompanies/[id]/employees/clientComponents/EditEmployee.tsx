@@ -135,7 +135,19 @@ const EditEmployeeForm: React.FC<{
         }
         const data = await response.json();
         setEmployee(data.employee);
-        // Set default payment structure to payments from company
+        //set working days if undefined
+        if (!data.employee.workingDays) {
+          data.employee.workingDays = {
+            mon: "off",
+            tue: "off",
+            wed: "off",
+            thu: "off",
+            fri: "off",
+            sat: "off",
+            sun: "off",
+          };
+        }
+
         setFormFields(data.employee);
       } catch (error) {
         setSnackbarMessage(

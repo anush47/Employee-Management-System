@@ -47,6 +47,9 @@ const AddCompanyForm: React.FC<{
     startedAt: "",
     endedAt: "",
     active: true,
+    monthlyPrice: "",
+    mode: "",
+    workingDays: {},
     paymentMethod: "",
     paymentStructure: {
       additions: [],
@@ -126,6 +129,9 @@ const AddCompanyForm: React.FC<{
           active: true,
           endedAt: "",
           paymentMethod: "",
+          monthlyPrice: "",
+          mode: "",
+          workingDays: {},
           shifts: [],
           paymentStructure: {
             additions: [],
