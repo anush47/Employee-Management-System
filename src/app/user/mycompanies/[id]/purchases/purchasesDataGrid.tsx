@@ -128,6 +128,9 @@ const PurchasesDataGrid: React.FC<{
         const purchasesWithId = data.purchases.map((purchase: any) => ({
           ...purchase,
           id: purchase._id,
+          price: `${purchase.periods.length} x ${
+            purchase.price?.toLocaleString() || "0"
+          } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
         }));
         setPurchases(purchasesWithId);
       } catch (error) {
@@ -157,7 +160,6 @@ const PurchasesDataGrid: React.FC<{
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
-      price: false,
       request: false,
     });
 

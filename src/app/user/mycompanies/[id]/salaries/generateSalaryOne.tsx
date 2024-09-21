@@ -58,13 +58,7 @@ const GenerateSalaryOne = ({
     advanceAmount: 0,
     finalSalary: 0,
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({
-    basic: "",
-    finalSalary: "",
-    ot: "",
-    noPay: "",
-    advanceAmount: "",
-  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Fetch employee
   useEffect(() => {
