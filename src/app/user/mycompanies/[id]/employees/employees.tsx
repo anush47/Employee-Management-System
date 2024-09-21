@@ -26,7 +26,7 @@ const EmployeesDataGrid = lazy(
 
 export let employeeId: string | null;
 
-const MyCompanies = ({
+const Employees = ({
   user,
 }: {
   user: { name: string; email: string; id: string };
@@ -186,4 +186,4 @@ const MyCompanies = ({
   );
 };
 
-export default MyCompanies;
+export default Employees;

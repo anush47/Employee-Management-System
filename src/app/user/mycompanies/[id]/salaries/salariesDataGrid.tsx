@@ -12,8 +12,10 @@ import {
   Chip,
   Snackbar,
   Slide,
+  Button,
 } from "@mui/material";
 import { companyId } from "../clientComponents/companySideBar";
+import Link from "next/link";
 
 // Cache to store employee names
 const employeeCache: { [key: string]: string } = {};
@@ -52,43 +54,21 @@ const SalariesDataGrid: React.FC<{
     "success"
   );
 
-  const fetchEmployeeName = useCallback(async (employeeId: string) => {
-    if (employeeCache[employeeId]) {
-      // Return cached name if it exists
-      return employeeCache[employeeId];
-    } else {
-      // Fetch employee details if not cached
-      const response = await fetch(`/api/employees/${employeeId}`);
-      if (response.ok) {
-        const employeeData = await response.json();
-        const employeeName = employeeData.name;
-        // Cache the employee name
-        employeeCache[employeeId] = employeeName;
-        return employeeName;
-      } else {
-        throw new Error("Failed to fetch employee data");
-      }
-    }
-  }, []);
-
   const columns: GridColDef[] = [
     {
-      field: "employee",
-      headerName: "Employee",
+      field: "memberNo",
+      headerName: "Member No",
       flex: 1,
-      renderCell: (params) => {
-        const employeeId = params.value;
-
-        const [employeeName, setEmployeeName] = useState<string>("");
-
-        useEffect(() => {
-          fetchEmployeeName(employeeId)
-            .then(setEmployeeName)
-            .catch(() => setEmployeeName("Unknown Employee"));
-        }, [employeeId]);
-
-        return employeeName || "Loading...";
-      },
+    },
+    {
+      field: "name",
+      headerName: "Name",
+      flex: 1,
+    },
+    {
+      field: "nic",
+      headerName: "NIC",
+      flex: 1,
     },
     {
       field: "period",
@@ -102,36 +82,47 @@ const SalariesDataGrid: React.FC<{
       flex: 1,
       align: "left",
       headerAlign: "left",
+      editable: isEditing,
+    },
+    {
+      field: "ot",
+      headerName: "OT",
+      type: "number",
+      flex: 1,
+      align: "left",
+      headerAlign: "left",
+      editable: isEditing,
+    },
+    {
+      field: "otReason",
+      headerName: "OT Reason",
+      flex: 1,
+      editable: isEditing,
     },
     {
       field: "noPay",
       headerName: "No Pay",
+      type: "number",
       flex: 1,
-      renderCell: (params) => {
-        const { amount, reason } = params.value || {};
-        return amount ? (
-          <Chip
-            label={`LKR ${amount.toLocaleString()} - ${reason || "No reason"}`}
-            color="secondary"
-            sx={{ textTransform: "capitalize" }}
-          />
-        ) : null;
-      },
+      align: "left",
+      headerAlign: "left",
+      editable: isEditing,
     },
     {
-      field: "ot",
-      headerName: "Overtime",
+      field: "noPayReason",
+      headerName: "No Pay Reason",
       flex: 1,
-      renderCell: (params) => {
-        const { amount, reason } = params.value || {};
-        return amount ? (
-          <Chip
-            label={`LKR ${amount.toLocaleString()} - ${reason || "No reason"}`}
-            color="primary"
-            sx={{ textTransform: "capitalize" }}
-          />
-        ) : null;
-      },
+      editable: isEditing,
+    },
+
+    {
+      field: "advanceAmount",
+      headerName: "Advance Amount",
+      type: "number",
+      flex: 1,
+      align: "left",
+      headerAlign: "left",
+      editable: isEditing,
     },
     {
       field: "finalSalary",
@@ -140,6 +131,29 @@ const SalariesDataGrid: React.FC<{
       flex: 1,
       align: "left",
       headerAlign: "left",
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Link
+            href={`http://localhost:3000/user/mycompanies/${companyId}?companyPageSelect=salaries&salaryId=${params.id}`}
+          >
+            <Button
+              variant="text"
+              color="primary"
+              size="small"
+              onClick={() => {
+                console.log(params);
+              }}
+            >
+              View
+            </Button>
+          </Link>
+        );
+      },
     },
   ];
 
@@ -152,9 +166,14 @@ const SalariesDataGrid: React.FC<{
           throw new Error("Failed to fetch salaries");
         }
         const data = await response.json();
+        console.log(data);
         const salariesWithId = data.salaries.map((salary: any) => ({
           ...salary,
           id: salary._id,
+          ot: salary.ot.amount,
+          otReason: salary.ot.reason,
+          noPay: salary.noPay.amount,
+          noPayReason: salary.noPay.reason,
         }));
         setSalaries(salariesWithId);
       } catch (error) {
@@ -185,7 +204,9 @@ const SalariesDataGrid: React.FC<{
     React.useState<GridColumnVisibilityModel>({
       id: false,
       basic: false,
-      period: false,
+      otReason: false,
+      noPayReason: false,
+      nic: false,
     });
 
   return (

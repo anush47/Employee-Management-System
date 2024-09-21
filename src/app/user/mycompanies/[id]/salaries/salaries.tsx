@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,10 +17,15 @@ import {
   DialogContent,
 } from "@mui/material";
 import { Add, Check, Edit } from "@mui/icons-material";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { companyId } from "../clientComponents/companySideBar";
 
 // Lazily load SalariesDataGrid and AddSalaryForm
 const SalariesDataGrid = lazy(() => import("./salariesDataGrid"));
 const AddSalaryForm = lazy(() => import("./generateSalaryForm"));
+
+export let salaryId: string | null;
 
 const Salaries = ({
   user,
@@ -31,6 +36,16 @@ const Salaries = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  //fetch query from url
+  const searchParams = useSearchParams();
+  const gen = searchParams.get("gen");
+  salaryId = searchParams.get("salaryId");
+
+  //open the form if gen is true
+  useEffect(() => {
+    if (gen === "true") setShowAddForm(true);
+  }, [gen]);
 
   return (
     <Box>
@@ -43,12 +58,17 @@ const Salaries = ({
           },
         }}
       >
-        {showAddForm ? (
+        {salaryId ? (
+          <>Edit</>
+        ) : showAddForm ? (
           <Slide direction="left" in={showAddForm} mountOnEnter unmountOnExit>
             <div>
               <AddSalaryForm
                 user={user}
-                handleBackClick={() => setShowAddForm(false)}
+                handleBackClick={() => {
+                  //go back in browser
+                  window.history.back();
+                }}
               />
             </div>
           </Slide>
@@ -95,14 +115,17 @@ const Salaries = ({
                   </Typography>
 
                   {/* Add Button to open the form */}
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Add />}
-                    onClick={() => setShowAddForm(true)}
+                  <Link
+                    href={`http://localhost:3000/user/mycompanies/${companyId}?companyPageSelect=salaries&gen=true`}
                   >
-                    Generate Salary
-                  </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<Add />}
+                    >
+                      Generate Salary
+                    </Button>
+                  </Link>
                 </Box>
               }
             />

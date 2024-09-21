@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   CircularProgress,
@@ -19,12 +19,44 @@ import {
   Alert,
   Slide,
   InputAdornment,
+  Select,
+  InputLabel,
+  MenuItem,
+  Autocomplete,
 } from "@mui/material";
 import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import dayjs from "dayjs";
+import { companyId } from "../clientComponents/companySideBar";
+import GenerateSalaryAll from "./generateSalaryAll";
+import GenerateSalaryOne from "./generateSalaryOne";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
+export interface Salary {
+  employee: string;
+  period: string;
+  basic: string;
+  nopay: {
+    amount: string;
+    reason: string;
+  };
+  ot: {
+    amount: string;
+    reason: string;
+  };
+  paymentStructure: {
+    additions: {
+      name: string;
+      amount: string;
+    }[];
+    deductions: {
+      name: string;
+      amount: string;
+    }[];
+  };
+  advanceAmount: string;
+  finalSalary: string;
+}
 
 const AddSalaryForm: React.FC<{
   user: { id: string; name: string; email: string };
@@ -39,7 +71,21 @@ const AddSalaryForm: React.FC<{
     deductions: [] as string[],
     netSalary: "",
   });
+
+  //salary interface
+
+  const [generatedSalaries, setGeneratedSalaries] = useState<Salary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [employees, setEmployees] = useState<
+    {
+      _id: string;
+      memberNo: string;
+      name: string;
+      nic: string;
+    }[]
+  >([]);
+  const [employeeSelection, setEmployeeSelection] = useState<string>("all");
+  const [period, setPeriod] = useState<string>(dayjs().format("YYYY-MM"));
   const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
@@ -47,8 +93,8 @@ const AddSalaryForm: React.FC<{
     "success"
   );
   const [errors, setErrors] = useState<{
-    employeeNo?: string;
-    basicSalary?: string;
+    employee?: string;
+    basic?: string;
   }>({});
 
   const theme = useTheme();
@@ -125,6 +171,45 @@ const AddSalaryForm: React.FC<{
       setLoading(false);
     }
   };
+
+  // Fetch employees from the API
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/employees/many?companyId=${companyId}`,
+          {
+            method: "GET",
+          }
+        );
+        const result = await response.json();
+
+        setEmployees([
+          ...result.employees.map(
+            (employee: {
+              _id: string;
+              memberNo: string;
+              name: string;
+              nic: string;
+            }) => ({
+              _id: employee._id,
+              memberNo: employee.memberNo,
+              name: employee.name,
+              nic: employee.nic,
+            })
+          ),
+          { memberNo: "all", _id: "all", name: "ALL", nic: "all" }, // add all option
+        ]);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const onFetchEmployeeClick = async () => {
     setNameLoading(true);
@@ -203,15 +288,17 @@ const AddSalaryForm: React.FC<{
               Generate Salary
             </Typography>
             <Tooltip title="Save new salary record" arrow>
-              <Button
-                variant="outlined"
-                color="success"
-                startIcon={<Save />}
-                onClick={onSaveClick}
-                disabled={loading} // Disable button while loading
-              >
-                {loading ? <CircularProgress size={24} /> : "Save"}
-              </Button>
+              <>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  startIcon={<Save />}
+                  onClick={onSaveClick}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? <CircularProgress size={24} /> : "Save"}
+                </Button>
+              </>
             </Tooltip>
           </Box>
         }
@@ -219,107 +306,84 @@ const AddSalaryForm: React.FC<{
       <CardContent>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.employeeNo}>
-              <TextField
-                label="Employee Number"
-                name="employeeNo"
-                value={formFields.employeeNo}
-                onChange={handleChange}
-                variant="filled"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <LoadingButton
-                        variant="text"
-                        color="inherit"
-                        endIcon={<Search />}
-                        loading={nameLoading}
-                        loadingPosition="end"
-                        onClick={onFetchEmployeeClick}
-                        disabled={nameLoading} // Disable button while loading
-                        sx={{ marginTop: 1 }}
-                      />
-                    </InputAdornment>
-                  ),
+            <FormControl fullWidth error={!!errors.employee}>
+              <Autocomplete
+                options={employees}
+                getOptionLabel={(option) =>
+                  option._id === "all"
+                    ? `${option.name}`
+                    : `${option.memberNo} ${option.name}  ${option.nic}`
+                } // Display the employee name as the label
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    setFormFields((prevFields) => ({
+                      ...prevFields,
+                      employeeNo: newValue._id, // Store the selected employee ID
+                      employeeName: newValue.name, // Update the employee name in the form
+                    }));
+                    setEmployeeSelection(newValue._id);
+                  }
                 }}
+                value={
+                  employees.find(
+                    (employee) => employee._id === employeeSelection
+                  ) || null
+                } // Select the current employee or set to null
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Employee"
+                    variant="filled"
+                    fullWidth
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {/* all button */}
+                          <Button
+                            variant="text"
+                            color="primary"
+                            onClick={() => setEmployeeSelection("all")}
+                            sx={{
+                              ml: 1,
+                            }}
+                          >
+                            All
+                          </Button>
+                          {loading ? <CircularProgress size={20} /> : null}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                isOptionEqualToValue={(option, value) =>
+                  option._id === value._id
+                } // Ensure correct selection by comparing IDs
               />
-              {errors.employeeNo && (
-                <FormHelperText>{errors.employeeNo}</FormHelperText>
-              )}
             </FormControl>
           </Grid>
-
           <Grid item xs={12} sm={6}>
-            <TextField
-              label="Employee Name"
-              name="employeeName"
-              value={formFields.employeeName}
-              onChange={handleChange}
-              variant="filled"
-              disabled
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.basicSalary}>
+            <FormControl fullWidth>
               <TextField
-                label="Basic Salary"
-                name="basicSalary"
-                value={formFields.basicSalary}
-                onChange={handleChange}
+                label="Period"
+                name="period"
+                type="month"
                 variant="filled"
+                fullWidth
+                value={period}
+                onChange={(event) => setPeriod(event.target.value)}
               />
-              {errors.basicSalary && (
-                <FormHelperText>{errors.basicSalary}</FormHelperText>
-              )}
             </FormControl>
           </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Net Salary"
-              name="netSalary"
-              value={formFields.netSalary}
-              onChange={handleChange}
-              variant="filled"
-              fullWidth
-            />
-          </Grid>
-
-          {/* Additional fields for additions and deductions */}
           <Grid item xs={12}>
-            <TextField
-              label="Additions"
-              name="additions"
-              value={formFields.additions.join(", ")}
-              onChange={(e) =>
-                setFormFields((prevFields) => ({
-                  ...prevFields,
-                  additions: e.target.value.split(",").map((a) => a.trim()),
-                }))
-              }
-              variant="filled"
-              fullWidth
-              helperText="Separate additions with commas"
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Deductions"
-              name="deductions"
-              value={formFields.deductions.join(", ")}
-              onChange={(e) =>
-                setFormFields((prevFields) => ({
-                  ...prevFields,
-                  deductions: e.target.value.split(",").map((d) => d.trim()),
-                }))
-              }
-              variant="filled"
-              fullWidth
-              helperText="Separate deductions with commas"
-            />
+            {employeeSelection === "all" ? (
+              <GenerateSalaryAll period={period} />
+            ) : (
+              <GenerateSalaryOne
+                employeeId={employeeSelection}
+                period={period}
+              />
+            )}
           </Grid>
         </Grid>
       </CardContent>

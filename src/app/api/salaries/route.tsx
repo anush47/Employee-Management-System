@@ -57,14 +57,63 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
     }
+    await dbConnect();
 
     //const purchaseId = req.nextUrl.searchParams.get("purchaseId");
     const companyId = req.nextUrl.searchParams.get("companyId");
+    //create filter
+    if (!companyId) {
+      return NextResponse.json(
+        { message: "Company ID is required" },
+        { status: 400 }
+      );
+    }
 
-    await dbConnect();
+    const filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: companyId,
+    };
+
+    if (user?.role === "admin") {
+      // Remove user from filter
+      delete filter.user;
+    }
+
+    // Step 1: Fetch employee IDs along with name, memberNo, and nic for the specified company
+    const employees: {
+      _id: string;
+      name: string;
+      memberNo: number;
+      nic: string;
+    }[] = await Employee.find({ company: companyId })
+      .select("_id name memberNo nic") // Fetch _id, name, memberNo, and nic fields
+      .lean();
+
+    console.log(employees);
+
+    // Extract the list of IDs (just the _id values)
+    const employeeIdList = employees.map((emp) => emp._id);
+
+    // Step 2: Fetch salaries of employees with those IDs
+    const salaries = await Salary.find({
+      employee: { $in: employeeIdList }, // Match employees with the fetched IDs
+    });
+
+    // Step 3: Enrich the salary records with employee details
+    const enrichedSalaries = salaries.map((salary) => {
+      const employee = employees.find(
+        (emp) => String(emp._id) === String(salary.employee)
+      );
+      return {
+        ...salary._doc, // Spread the salary document data
+        name: employee?.name,
+        memberNo: employee?.memberNo,
+        nic: employee?.nic,
+      };
+    });
+
     //send salaries
-    const salaries = await Salary.find({ company: companyId }).lean();
-    return NextResponse.json({ salaries });
+    return NextResponse.json({ salaries: enrichedSalaries });
   } catch (error: any) {
     return NextResponse.json(
       {
@@ -93,6 +142,18 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    //convert all to numbers
+    body.basic = Number(body.basic);
+    body.advanceAmount = Number(body.advanceAmount);
+    body.finalSalary = Number(body.finalSalary);
+    body.noPay.amount = Number(body.noPay.amount);
+    body.ot.amount = Number(body.ot.amount);
+    body.paymentStructure.additions.forEach((addition: any) => {
+      addition.amount = Number(addition.amount);
+    });
+    body.paymentStructure.deductions.forEach((deduction: any) => {
+      deduction.amount = Number(deduction.amount);
+    });
 
     let parsedBody = salarySchema.parse(body);
 
