@@ -41,8 +41,13 @@ export async function GET(req: NextRequest) {
     }
 
     let filter: { user?: string; _id?: string } = {
-      //user: userId
+      user: userId,
     };
+
+    //remove user if admin
+    if (user?.role === "admin") {
+      delete filter.user;
+    }
 
     if (companyId) {
       // Validate companyId
@@ -96,6 +101,7 @@ export async function GET(req: NextRequest) {
       // Find the company of the employee
       filter._id = employee.company;
       const company = await Company.findOne(filter);
+      console.log(filter);
       if (!company) {
         return NextResponse.json(
           { message: "Company not found" },

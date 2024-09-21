@@ -16,7 +16,7 @@ interface IEmployee extends Document {
   };
   divideBy: 240 | 200;
   active: boolean;
-  otMethod: "random" | "noOT" | "calc";
+  otMethod: "random" | "noOt" | "calc";
   shifts: {
     start: string;
     end: string;

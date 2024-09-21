@@ -599,7 +599,7 @@ export const categories = [
 
 export const otMethods = [
   { value: "random", label: "Random" },
-  { value: "noOT", label: "No OT" },
+  { value: "noOt", label: "No OT" },
   { value: "calc", label: "Calculate" },
 ].map((category) => (
   <MenuItem key={category.label} value={category.value}>

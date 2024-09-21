@@ -155,6 +155,76 @@ const EmployeesDataGrid: React.FC<{
       },
     },
     {
+      field: "designation",
+      headerName: "Designation",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "workingDays",
+      headerName: "Working Days",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+      renderCell: (params) => {
+        const value = params.value;
+        if (typeof value === "object") {
+          return Object.values(value).join(", ");
+        }
+        return value;
+      },
+    },
+    {
+      field: "divideBy",
+      headerName: "Divide By",
+      flex: 1,
+      type: "singleSelect",
+      valueOptions: [200, 240],
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "otMethod",
+      headerName: "OT Method",
+      flex: 1,
+      type: "singleSelect",
+      valueOptions: ["random", "noOt", "calc"],
+      //choose from "random,calc,noOt"
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "shifts",
+      headerName: "Shifts",
+      flex: 1,
+      renderCell: (params) => {
+        const value = params.value;
+        if (Array.isArray(value)) {
+          return value
+            .map((shift) => `${shift.start} - ${shift.end}`)
+            .join(", ");
+        }
+        return value;
+      },
+    },
+    {
+      field: "paymentStructure",
+      headerName: "Payment Structure",
+      flex: 1,
+      renderCell: (params) => {
+        const value = params.value;
+        if (typeof value === "object") {
+          const additions = value.additions.map(
+            (addition: { name: string; amount: number }) =>
+              `${addition.name}: ${addition.amount}`
+          );
+          const deductions = value.deductions.map(
+            (deduction: { name: string; amount: number }) =>
+              `${deduction.name}: ${deduction.amount}`
+          );
+          return [...additions, ...deductions].join(", ");
+        }
+        return value;
+      },
+    },
+    {
       field: "startedAt",
       headerName: "Started At",
       flex: 1,
@@ -465,6 +535,10 @@ const EmployeesDataGrid: React.FC<{
       //company: false,
       employerNo: false,
       _id: false,
+      designation: false,
+      divideBy: false,
+      paymentStructure: false,
+      shifts: false,
     });
 
   return (

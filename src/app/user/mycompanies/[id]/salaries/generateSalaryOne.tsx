@@ -61,6 +61,9 @@ const GenerateSalaryOne = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({
     basic: "",
     finalSalary: "",
+    ot: "",
+    noPay: "",
+    advanceAmount: "",
   });
 
   // Fetch employee
@@ -120,7 +123,7 @@ const GenerateSalaryOne = ({
           throw new Error("Failed to fetch Salary");
         }
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
         setFormFields(data.salary);
       } catch (error) {
         setSnackbarMessage(
@@ -177,12 +180,11 @@ const GenerateSalaryOne = ({
 
   const onSaveClick = async () => {
     //const newErrors = SalaryValidation(formFields);
-    //setErrors(newErrors);
-    //const isValid = Object.keys(newErrors).length === 0;
+    const isValid = Object.keys(errors).length === 0;
 
-    // if (!isValid) {
-    //   return;
-    // }
+    if (!isValid) {
+      return;
+    }
 
     console.log(formFields);
 
@@ -262,6 +264,12 @@ const GenerateSalaryOne = ({
 
         <CardContent>
           <Grid container spacing={3}>
+            {employee?.otMethod === "calc" && (
+              <Grid item xs={12}>
+                upload
+              </Grid>
+            )}
+
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>
                 <TextField
@@ -321,7 +329,6 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   multiline
-                  minRows={2}
                   InputProps={{
                     readOnly: loading,
                   }}
@@ -356,7 +363,6 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   multiline
-                  minRows={2}
                   InputProps={{
                     readOnly: loading,
                   }}
@@ -385,7 +391,6 @@ const GenerateSalaryOne = ({
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              {" "}
               <Tooltip title="Save new salary record" arrow>
                 <>
                   <Button

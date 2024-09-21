@@ -166,7 +166,6 @@ const SalariesDataGrid: React.FC<{
           throw new Error("Failed to fetch salaries");
         }
         const data = await response.json();
-        console.log(data);
         const salariesWithId = data.salaries.map((salary: any) => ({
           ...salary,
           id: salary._id,
