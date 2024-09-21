@@ -168,7 +168,9 @@ const EmployeesDataGrid: React.FC<{
       renderCell: (params) => {
         const value = params.value;
         if (typeof value === "object") {
-          return Object.values(value).join(", ");
+          return Object.entries(value)
+            .map(([key, val]) => `${key}:${val}`)
+            .join(", ");
         }
         return value;
       },

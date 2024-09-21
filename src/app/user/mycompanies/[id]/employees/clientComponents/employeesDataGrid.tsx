@@ -154,11 +154,12 @@ const EmployeesDataGrid: React.FC<{
       field: "workingDays",
       headerName: "Working Days",
       flex: 1,
-      editable: isEditingEmployeeInHome,
       renderCell: (params) => {
         const value = params.value;
         if (typeof value === "object") {
-          return Object.values(value).join(", ");
+          return Object.entries(value)
+            .map(([key, val]) => `${key}:${val}`)
+            .join(", ");
         }
         return value;
       },
