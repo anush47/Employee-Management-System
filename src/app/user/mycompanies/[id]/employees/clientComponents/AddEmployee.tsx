@@ -57,6 +57,7 @@ const AddEmployeeForm: React.FC<{
     active: true,
     basic: 16000,
     totalSalary: "",
+    remark: "",
     divideBy: 240,
     designation: "",
     otMethod: "random",
@@ -80,6 +81,7 @@ const AddEmployeeForm: React.FC<{
   const [errors, setErrors] = useState<{
     name?: string;
     memberNo?: string;
+    remark?: string;
     basic?: string;
     totalSalary?: string;
     nic?: string;
@@ -231,6 +233,7 @@ const AddEmployeeForm: React.FC<{
           active: true,
           workingDays: {},
           nic: "",
+          remark: "",
           startedAt: "",
           resignedAt: "",
           otMethod: "",
@@ -516,6 +519,18 @@ const AddEmployeeForm: React.FC<{
                   />
                 }
                 label="Is Active ?"
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.remark}>
+              <TextField
+                label="Remark"
+                name="remark"
+                value={formFields.remark}
+                onChange={handleChange}
+                variant="filled"
+                multiline
               />
             </FormControl>
           </Grid>

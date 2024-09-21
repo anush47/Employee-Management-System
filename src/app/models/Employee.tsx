@@ -11,6 +11,7 @@ interface IEmployee extends Document {
   designation: string;
   startedAt: string;
   resignedAt: string;
+  remark: string;
   workingDays: {
     [key: string]: "full" | "half" | "off";
   };
@@ -61,6 +62,9 @@ const employeeSchema = new Schema<IEmployee>(
       required: true,
     },
     designation: {
+      type: String,
+    },
+    remark: {
       type: String,
     },
     shifts: {

@@ -72,6 +72,7 @@ const EditEmployeeForm: React.FC<{
     nic: "",
     divideBy: 240,
     basic: 16000,
+    remark: "",
     totalSalary: "",
     designation: "",
     active: true,
@@ -97,6 +98,7 @@ const EditEmployeeForm: React.FC<{
     additions: any;
     totalSalary: string;
     name?: string;
+    remark?: string;
     memberNo?: string;
     basic?: string;
     nic?: string;
@@ -240,6 +242,7 @@ const EditEmployeeForm: React.FC<{
           startedAt: "",
           active: true,
           otMethod: "",
+          remark: "",
           resignedAt: "",
           shifts: [],
           paymentStructure: {
@@ -309,6 +312,7 @@ const EditEmployeeForm: React.FC<{
           totalSalary: "",
           divideBy: 240,
           designation: "",
+          remark: "",
           active: true,
           nic: "",
           startedAt: "",
@@ -674,6 +678,23 @@ const EditEmployeeForm: React.FC<{
                   />
                 }
                 label="Is Active ?"
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Remark"
+                name="remark"
+                variant="filled"
+                value={formFields.remark}
+                multiline
+                onChange={handleChange}
+                helperText={errors.remark}
+                error={!!errors.remark}
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
               />
             </FormControl>
           </Grid>

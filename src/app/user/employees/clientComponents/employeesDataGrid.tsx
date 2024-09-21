@@ -32,6 +32,11 @@ export interface Employee {
   divideBy: 240 | 200;
   active: boolean;
   otMethod: string;
+  totalSalary: string;
+  workingDays: {
+    [key: string]: "full" | "half" | "off";
+  };
+  remark: string;
   shifts: {
     start: string;
     end: string;
@@ -157,6 +162,12 @@ const EmployeesDataGrid: React.FC<{
     {
       field: "designation",
       headerName: "Designation",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "remark",
+      headerName: "Remark",
       flex: 1,
       editable: isEditingEmployeeInHome,
     },
@@ -543,6 +554,8 @@ const EmployeesDataGrid: React.FC<{
       shifts: false,
       otMethod: false,
       workingDays: false,
+      totalSalary: false,
+      remark: false,
     });
 
   return (
