@@ -476,6 +476,8 @@ const EmployeesDataGrid: React.FC<{
       divideBy: false,
       paymentStructure: false,
       shifts: false,
+      otMethod: false,
+      workingDays: false,
     });
 
   return (

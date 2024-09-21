@@ -101,7 +101,6 @@ export async function GET(req: NextRequest) {
       // Find the company of the employee
       filter._id = employee.company;
       const company = await Company.findOne(filter);
-      console.log(filter);
       if (!company) {
         return NextResponse.json(
           { message: "Company not found" },
@@ -110,8 +109,12 @@ export async function GET(req: NextRequest) {
       }
 
       let data;
-      if (employee.otMethod !== "random") {
-        data = await req.json();
+      if (employee.otMethod === "calc") {
+        try {
+          data = await req.json();
+        } catch (error) {
+          data = "";
+        }
       }
 
       // Generate salary for the employee
