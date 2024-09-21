@@ -20,6 +20,7 @@ import { Add, Check, Edit } from "@mui/icons-material";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { companyId } from "../clientComponents/companySideBar";
+import EditSalaryForm from "./editSalaryForm";
 
 // Lazily load SalariesDataGrid and AddSalaryForm
 const SalariesDataGrid = lazy(() => import("./salariesDataGrid"));
@@ -59,7 +60,13 @@ const Salaries = ({
         }}
       >
         {salaryId ? (
-          <>Edit</>
+          <EditSalaryForm
+            user={user}
+            handleBackClick={() => {
+              //go back in browser
+              window.history.back();
+            }}
+          />
         ) : showAddForm ? (
           <Slide direction="left" in={showAddForm} mountOnEnter unmountOnExit>
             <div>

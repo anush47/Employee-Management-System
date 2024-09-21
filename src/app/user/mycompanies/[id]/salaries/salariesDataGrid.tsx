@@ -139,7 +139,7 @@ const SalariesDataGrid: React.FC<{
       renderCell: (params) => {
         return (
           <Link
-            href={`http://localhost:3000/user/mycompanies/${companyId}?companyPageSelect=salaries&salaryId=${params.id}`}
+            href={`/user/mycompanies/${companyId}?companyPageSelect=salaries&salaryId=${params.id}`}
           >
             <Button
               variant="text"

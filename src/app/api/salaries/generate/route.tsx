@@ -6,6 +6,7 @@ import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
 import { generateSalaryForOneEmployee } from "./salaryGeneration";
 import Employee from "@/app/models/Employee";
+import { checkPurchased } from "../../purchases/check/route";
 
 const IdSchema = z.string().min(1, "ID is required");
 const periodSchema = z
@@ -106,6 +107,23 @@ export async function GET(req: NextRequest) {
           { message: "Company not found" },
           { status: 404 }
         );
+      }
+
+      // check if purchsed
+      if (!employee.company || !period) {
+        return NextResponse.json(
+          { message: "Employee company or period is missing" },
+          { status: 400 }
+        );
+      }
+      if (!(user?.role === "admin" && company.mode === "visit")) {
+        const purchasedStatus = await checkPurchased(employee.company, period);
+        if (purchasedStatus !== "approved") {
+          return NextResponse.json(
+            { message: "Month not Purchased. Purchase is " + purchasedStatus },
+            { status: 400 }
+          );
+        }
       }
 
       let data;

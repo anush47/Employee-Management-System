@@ -21,6 +21,7 @@ import { ArrowBack } from "@mui/icons-material";
 import dayjs from "dayjs";
 import Slide from "@mui/material/Slide";
 import { companyId } from "../clientComponents/companySideBar";
+import { useSearchParams } from "next/navigation";
 
 interface ChipData {
   key: number;
@@ -79,6 +80,23 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
   const [totalPrice, setTotalPrice] = useState<number | null>(null); // New state for total price
   const [finalTotalPrice, setFinalTotalPrice] = useState<number | null>(null); // New state for final total price
 
+  const searchParams = useSearchParams();
+  const periodsInitial = searchParams.get("periods");
+
+  useEffect(() => {
+    if (periodsInitial) {
+      const periods = periodsInitial.split(" ");
+      //validate and add
+      const validPeriods = periods.filter((period) => isValidMonthYear(period));
+      setPeriods(
+        validPeriods.map((period, index) => ({
+          key: index,
+          label: formatPeriod(period),
+        }))
+      );
+    }
+  }, [periodsInitial]);
+
   useEffect(() => {
     // Set the default month to the current month in "MM-YYYY" format
     const currentMonth = dayjs().format("MM");
@@ -107,6 +125,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
         }
         const data = await response.json();
         const purchases = data.purchases
+          .filter((purchase: any) => purchase.approvedStatus !== "rejected")
           .map((purchase: any) => purchase.periods)
           .flat();
         setPurchasedPeriods(purchases);
@@ -459,7 +478,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
                   variant="contained"
                   color="success"
                   onClick={handleSubmit}
-                  disabled={loading || totalPrice === 0 || !image}
+                  disabled={loading || totalPrice === 0}
                   startIcon={loading ? <CircularProgress size={24} /> : null}
                 >
                   {loading ? "Purchasing..." : "Purchase"}

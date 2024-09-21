@@ -6,38 +6,55 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
   InputAdornment,
   Slide,
   Snackbar,
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Employee } from "../employees/clientComponents/employeesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
-import { Save } from "@mui/icons-material";
+import { ArrowBack, Edit, Save } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
+import { salaryId } from "./salaries";
+import { LoadingButton } from "@mui/lab";
 
-const GenerateSalaryOne = ({
-  period,
-  employeeId,
-}: {
-  period: string;
-  employeeId: string;
-}) => {
+const EditSalaryForm: React.FC<{
+  user: { id: string; name: string; email: string };
+  handleBackClick: () => void;
+}> = ({ user, handleBackClick }) => {
   const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
-  const [employee, setEmployee] = useState<Employee>();
+  const [salary, setSalary] = useState<Salary>();
+  const [employee, setEmployee] = useState<{
+    memberNo: string;
+    name: string;
+    nic: string;
+    companyName: string;
+    companyEmployerNo: string;
+  }>();
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
     "success" | "error" | "warning" | "info"
   >("success");
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [formFields, setFormFields] = useState<Salary>({
     id: "",
@@ -63,29 +80,33 @@ const GenerateSalaryOne = ({
 
   // Fetch employee
   useEffect(() => {
-    const fetchEmployee = async () => {
+    const fetchSalary = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/one?employeeId=${employeeId}`
-        );
+        const response = await fetch(`/api/salaries/?salaryId=${salaryId}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch Employee");
+          throw new Error("Failed to fetch Salary");
         }
         const data = await response.json();
-        setEmployee(data.employee);
-        // Set working days if undefined
-        if (!data.employee.workingDays) {
-          data.employee.workingDays = {
-            mon: "off",
-            tue: "off",
-            wed: "off",
-            thu: "off",
-            fri: "off",
-            sat: "off",
-            sun: "off",
-          };
-        }
+        console.log(data);
+        setFormFields({
+          id: data.salary._id,
+          employee: data.salary.employee,
+          period: data.salary.period,
+          basic: data.salary.basic,
+          noPay: data.salary.noPay,
+          ot: data.salary.ot,
+          paymentStructure: data.salary.paymentStructure,
+          advanceAmount: data.salary.advanceAmount,
+          finalSalary: data.salary.finalSalary,
+        });
+        setEmployee({
+          memberNo: data.salary.memberNo,
+          name: data.salary.name,
+          nic: data.salary.nic,
+          companyName: data.salary.companyName,
+          companyEmployerNo: data.salary.companyEmployerNo,
+        });
       } catch (error) {
         setSnackbarMessage(
           error instanceof Error ? error.message : "Error fetching company."
@@ -98,58 +119,13 @@ const GenerateSalaryOne = ({
     };
 
     if (companyId?.length === 24) {
-      fetchEmployee();
+      fetchSalary();
     } else {
       setSnackbarMessage("Invalid Company ID");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
-  }, [employeeId]);
-
-  // Fetch salary
-  useEffect(() => {
-    const fetchSalary = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/salaries/generate?employeeId=${employeeId}&period=${period}`
-        );
-        if (!response.ok) {
-          setFormFields((prevFields) => ({
-            ...prevFields,
-            period,
-          }));
-          const data = await response.json();
-          if (
-            typeof data?.message === "string" &&
-            data.message.startsWith("Month not Purchased")
-          ) {
-            throw new Error(data.message);
-          } else {
-            throw new Error("Failed to fetch Salary");
-          }
-        }
-        const data = await response.json();
-        setFormFields(data.salary);
-      } catch (error) {
-        setSnackbarMessage(
-          error instanceof Error ? error.message : "Error fetching company."
-        );
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (employeeId?.length === 24) {
-      fetchSalary();
-    } else {
-      setSnackbarMessage("Invalid Employee ID");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  }, [employeeId, period]);
+  }, [salaryId]);
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -228,7 +204,7 @@ const GenerateSalaryOne = ({
     try {
       // Perform POST request to add a new salary record
       const response = await fetch("/api/salaries", {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -270,14 +246,161 @@ const GenerateSalaryOne = ({
     }
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [employeeName, setEmployeeName] = useState<string | null>(null);
+  const handleDeleteClick = (employeeName: string) => {
+    setEmployeeName(employeeName);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (confirmed: boolean) => {
+    setDialogOpen(false);
+    if (confirmed) {
+      // Perform the delete action here
+      console.log(`Deleting salary record for ${employeeName}`);
+    }
+  };
+
+  interface ConfirmationDialogProps {
+    open: boolean;
+    onClose: (confirmed: boolean) => void;
+    title: string;
+    message: string;
+  }
+
+  const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+    open,
+    onClose,
+    title,
+    message,
+  }) => {
+    const handleConfirm = () => {
+      onClose(true);
+    };
+
+    const handleCancel = () => {
+      onClose(false);
+    };
+
+    return (
+      <Dialog open={open} onClose={() => onClose(false)}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <LoadingButton
+            onClick={onDeleteClick}
+            color="primary"
+            autoFocus
+            loading={loading}
+          >
+            Confirm
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+  const onDeleteClick = async () => {
+    setLoading(true);
+    try {
+      // Perform DELETE request to delete the salary record
+      const response = await fetch(`/api/salaries/?salaryId=${salaryId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSnackbarMessage("Salary record deleted successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        // Wait before clearing the form
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Clear the form after successful save
+        // setFormFields({
+        // });
+        setErrors({});
+        window.history.back();
+      } else {
+        // Handle validation or other errors returned by the API
+        setSnackbarMessage(
+          result.message || "Error deleting salary. Please try again."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error deleting salary:", error);
+
+      setSnackbarMessage("Error deleting salary. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Card>
         <CardHeader
           title={
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              Generate Salary
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <Typography variant={isSmallScreen ? "h5" : "h4"}>
+                <Tooltip title="Discard and go back" arrow>
+                  <IconButton
+                    sx={{
+                      mr: 2,
+                    }}
+                    onClick={handleBackClick}
+                  >
+                    <ArrowBack />
+                  </IconButton>
+                </Tooltip>
+                Salary Details
+                {isEditing ? (
+                  <Tooltip title="Save new company" arrow>
+                    <span>
+                      <Button
+                        variant="outlined"
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                        color="success"
+                        startIcon={<Save />}
+                        onClick={onSaveClick}
+                        disabled={loading} // Disable button while loading
+                      >
+                        {loading ? <CircularProgress size={24} /> : "Save"}
+                      </Button>
+                    </span>
+                  </Tooltip>
+                ) : (
+                  <IconButton
+                    sx={{
+                      marginLeft: 1,
+                    }}
+                    color="primary"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    {loading ? <CircularProgress size={24} /> : <Edit />}
+                  </IconButton>
+                )}
+              </Typography>
+            </Box>
           }
           subheader={
             loading ? (
@@ -291,7 +414,13 @@ const GenerateSalaryOne = ({
                   NIC: {employee?.nic}
                 </Typography>
                 <Typography variant="subtitle1" color="textSecondary">
-                  Period: {period}
+                  Period: {formFields?.period}
+                </Typography>
+                <Typography variant="subtitle1" color="textSecondary">
+                  Company: {employee?.companyName}
+                </Typography>
+                <Typography variant="subtitle1" color="textSecondary">
+                  Employer No: {employee?.companyEmployerNo}
                 </Typography>
               </Box>
             )
@@ -300,12 +429,6 @@ const GenerateSalaryOne = ({
 
         <CardContent>
           <Grid container spacing={3}>
-            {employee?.otMethod === "calc" && (
-              <Grid item xs={12}>
-                upload
-              </Grid>
-            )}
-
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>
                 <TextField
@@ -316,7 +439,7 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: loading || !isEditing,
                   }}
                 />
                 {errors.name && <FormHelperText>{errors.name}</FormHelperText>}
@@ -350,7 +473,7 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: loading || !isEditing,
                   }}
                 />
                 {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}
@@ -366,7 +489,7 @@ const GenerateSalaryOne = ({
                   variant="filled"
                   multiline
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: loading || !isEditing,
                   }}
                 />
                 {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}
@@ -374,7 +497,7 @@ const GenerateSalaryOne = ({
             </Grid>
             <Grid mt={3} item xs={12}>
               <PaymentStructure
-                isEditing={true}
+                isEditing={isEditing}
                 handleChange={handleChange}
                 paymentStructure={formFields.paymentStructure}
                 setPaymentStructure={(paymentStructure) => {
@@ -397,7 +520,7 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: loading || !isEditing,
                   }}
                 />
                 {errors.noPay && (
@@ -415,7 +538,7 @@ const GenerateSalaryOne = ({
                   variant="filled"
                   multiline
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: loading || !isEditing,
                   }}
                 />
                 {errors.noPay && (
@@ -433,7 +556,7 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: loading || !isEditing,
                   }}
                 />
                 {errors.advanceAmount && (
@@ -441,24 +564,35 @@ const GenerateSalaryOne = ({
                 )}
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Tooltip title="Save new salary record" arrow>
-                <>
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    startIcon={<Save />}
-                    onClick={onSaveClick}
-                    disabled={loading} // Disable button while loading
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Save"}
-                  </Button>
-                </>
-              </Tooltip>
-            </Grid>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              {isEditing && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => handleDeleteClick(employee?.name || "")}
+                  disabled={loading}
+                >
+                  Delete
+                </Button>
+              )}
+            </Box>
           </Grid>
         </CardContent>
       </Card>
+      <ConfirmationDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete the salary record for ${employeeName}?`}
+      />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={5000}
@@ -479,4 +613,4 @@ const GenerateSalaryOne = ({
   );
 };
 
-export default GenerateSalaryOne;
+export default EditSalaryForm;

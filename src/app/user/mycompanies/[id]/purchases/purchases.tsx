@@ -17,11 +17,14 @@ import {
 import { Add, ArrowBack } from "@mui/icons-material";
 import { useSearchParams } from "next/navigation";
 import NewPurchaseForm from "./newPurchaseForm";
+import Link from "next/link";
+import { companyId } from "../clientComponents/companySideBar";
 
 // Lazily load PurchasesDataGrid
 const PurchasesDataGrid = lazy(() => import("./purchasesDataGrid"));
 
 export let purchaseId: string | null;
+export let newPurchase: string | null;
 
 const Purchases = ({
   user,
@@ -34,20 +37,18 @@ const Purchases = ({
 
   const searchParams = useSearchParams();
   purchaseId = searchParams.get("purchaseId");
-
-  const handleAddClick = () => {
-    setIsAdding(true);
-  };
+  newPurchase = searchParams.get("newPurchase");
 
   const handleBackClick = () => {
-    setIsAdding(false);
+    //go back
+    window.history.back();
   };
 
   useEffect(() => {
-    if (purchaseId) {
-      setIsAdding(false);
+    if (newPurchase === "true") {
+      setIsAdding(true);
     }
-  }, [purchaseId]);
+  }, [newPurchase]);
 
   return (
     <Box>
@@ -89,14 +90,17 @@ const Purchases = ({
                   Purchases
                 </Typography>
                 <Tooltip title="New Purchase" arrow>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Add />}
-                    onClick={handleAddClick}
+                  <Link
+                    href={`http://localhost:3000/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true`}
                   >
-                    New Purchase
-                  </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<Add />}
+                    >
+                      New Purchase
+                    </Button>
+                  </Link>
                 </Tooltip>
               </Box>
             }

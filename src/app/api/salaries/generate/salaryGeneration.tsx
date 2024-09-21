@@ -54,7 +54,8 @@ export async function generateSalaryForOneEmployee(
       0
     );
 
-    console.log(employee);
+    const ot = 5000;
+    const noPay = 1000;
 
     // Generate the salary data
     const salaryData = {
@@ -66,16 +67,16 @@ export async function generateSalaryForOneEmployee(
         reason: "Unapproved leaves", // Example reason for no pay
       },
       ot: {
-        amount: 5000, // Example: Overtime payment
+        amount: ot, // Example: Overtime payment
         reason: "Extra work hours", // Example reason for overtime
       },
       paymentStructure: {
         additions: parsedAdditions, // Return the parsed additions with computed values
         deductions: parsedDeductions, // Return the parsed deductions with computed values
       },
-      advanceAmount: 3000, // Example advance amount
+      advanceAmount: 0, // Example advance amount
       finalSalary:
-        employee.basic + totalAdditions + 5000 - totalDeductions - 1000 - 3000, // Calculating final salary
+        employee.basic + totalAdditions + ot - totalDeductions - noPay, // Calculating final salary
     };
 
     return salaryData;

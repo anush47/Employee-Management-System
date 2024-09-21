@@ -8,6 +8,7 @@ import { options } from "../auth/[...nextauth]/options";
 import { request } from "http";
 import Employee from "@/app/models/Employee";
 import Salary from "@/app/models/Salary";
+import { checkPurchased } from "../purchases/check/route";
 
 const noPaySchema = z.object({
   amount: z.number().min(0, "No Pay amount must be a positive number"),
@@ -33,7 +34,9 @@ const paymentStructureSchema = z.object({
     })
   ),
 });
+
 const salarySchema = z.object({
+  id: z.string().optional(),
   employee: z.string().min(1, "Employee ID is required"),
   period: z.string().min(1, "Period is required"),
   basic: z.number().min(1, "Basic salary is required"),
@@ -59,9 +62,58 @@ export async function GET(req: NextRequest) {
     }
     await dbConnect();
 
-    //const purchaseId = req.nextUrl.searchParams.get("purchaseId");
-    const companyId = req.nextUrl.searchParams.get("companyId");
+    const salaryId = req.nextUrl.searchParams.get("salaryId");
+    let companyId = req.nextUrl.searchParams.get("companyId");
     //create filter
+    if (!companyId && !salaryId) {
+      return NextResponse.json(
+        { message: "Company ID or salary ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (salaryId) {
+      //fetch one
+      const salary = await Salary.findById(salaryId);
+      if (!salary) {
+        return NextResponse.json(
+          { message: "Salary not found" },
+          { status: 404 }
+        );
+      }
+      //get company from employeeId and add company id
+      const employee = await Employee.findById(salary.employee);
+      companyId = employee?.company;
+      const filter: {
+        user?: string;
+        _id: string;
+      } = {
+        user: userId,
+        _id: companyId as string,
+      };
+      if (user?.role === "admin") {
+        delete filter.user;
+      }
+      const company = await Company.findOne(filter);
+      if (!company) {
+        return NextResponse.json(
+          { message: "Access denied." },
+          { status: 403 }
+        );
+      }
+      //enriched salary
+      const enrichedSalary = {
+        ...salary._doc,
+        name: employee?.name,
+        memberNo: employee?.memberNo,
+        nic: employee?.nic,
+        companyName: company.name,
+        companyEmployerNo: company.employerNo,
+      };
+      console.log(enrichedSalary);
+      return NextResponse.json({ salary: enrichedSalary });
+    }
+
     if (!companyId) {
       return NextResponse.json(
         { message: "Company ID is required" },
@@ -79,6 +131,11 @@ export async function GET(req: NextRequest) {
       delete filter.user;
     }
 
+    const company = await Company.findOne(filter);
+    if (!company) {
+      return NextResponse.json({ message: "Access denied." }, { status: 403 });
+    }
+
     // Step 1: Fetch employee IDs along with name, memberNo, and nic for the specified company
     const employees: {
       _id: string;
@@ -88,8 +145,6 @@ export async function GET(req: NextRequest) {
     }[] = await Employee.find({ company: companyId })
       .select("_id name memberNo nic") // Fetch _id, name, memberNo, and nic fields
       .lean();
-
-    console.log(employees);
 
     // Extract the list of IDs (just the _id values)
     const employeeIdList = employees.map((emp) => emp._id);
@@ -192,6 +247,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    //check if purchased
+    if (!(user?.role === "admin" && company.mode === "visit")) {
+      const purchasedStatus = await checkPurchased(
+        employee.company,
+        parsedBody.period
+      );
+      if (purchasedStatus !== "approved") {
+        return NextResponse.json(
+          { message: "Month not Purchased. Purchase is " + purchasedStatus },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Calculate total additions
+    const totalAdditions = parsedBody.paymentStructure.additions.reduce(
+      (total: number, addition: { amount: number }) => total + addition.amount,
+      0
+    );
+
+    // Calculate total deductions
+    const totalDeductions = parsedBody.paymentStructure.deductions.reduce(
+      (total: number, deduction: { amount: number }) =>
+        total + deduction.amount,
+      0
+    );
+
+    // Calculate final salary
+    const finalSalary =
+      parsedBody.basic +
+      totalAdditions +
+      (parsedBody.ot.amount || 0) -
+      totalDeductions -
+      (parsedBody.noPay.amount || 0);
+    // Update the parsedBody with the calculated final salary
+    parsedBody.finalSalary = finalSalary;
+
     //create and save new salary
     const newSalary = new Salary({
       ...parsedBody,
@@ -216,19 +308,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-//update schema
-const purchaseUpdateSchema = z.object({
-  _id: z.string().min(1, "Purchase ID is required"),
-  approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
-  request: z.union([z.string().optional(), z.null()]),
-  remark: z.string().optional(),
-  totalPrice: z
-    .number()
-    .min(0, "Total price must be a positive number")
-    .optional(),
-});
-
-// PUT: Update an existing purchase
+// PUT: Update an existing salary
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(options);
@@ -242,32 +322,78 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    if (user.role !== "admin") {
-      return NextResponse.json({ message: "Access denied" }, { status: 403 });
-    }
-
+    // parse the request body
     const body = await req.json();
-    const parsedBody = purchaseUpdateSchema.parse(body);
-    if (parsedBody.request == "delete") {
-      parsedBody.request = null;
-    }
+    //convert to numbers
+    body.basic = Number(body.basic);
+    body.advanceAmount = Number(body.advanceAmount);
+    body.finalSalary = Number(body.finalSalary);
+    body.noPay.amount = Number(body.noPay.amount);
+    body.ot.amount = Number(body.ot.amount);
+    body.paymentStructure.additions.forEach((addition: any) => {
+      addition.amount = Number(addition.amount);
+    });
+    body.paymentStructure.deductions.forEach((deduction: any) => {
+      deduction.amount = Number(deduction.amount);
+    });
+    console.log(body);
+    const parsedBody = salarySchema.parse(body);
+
+    // Calculate total additions
+    const totalAdditions = parsedBody.paymentStructure.additions.reduce(
+      (total: number, addition: { amount: number }) => total + addition.amount,
+      0
+    );
+
+    // Calculate total deductions
+    const totalDeductions = parsedBody.paymentStructure.deductions.reduce(
+      (total: number, deduction: { amount: number }) =>
+        total + deduction.amount,
+      0
+    );
+
+    // Calculate final salary
+    const finalSalary =
+      parsedBody.basic +
+      totalAdditions +
+      (parsedBody.ot.amount || 0) -
+      totalDeductions -
+      (parsedBody.noPay.amount || 0);
+    // Update the parsedBody with the calculated final salary
+    parsedBody.finalSalary = finalSalary;
+
     await dbConnect();
 
-    const existingPurchase = await Purchase.findById(parsedBody._id);
-    if (!existingPurchase) {
-      return NextResponse.json(
-        { message: "Purchase not found" },
-        { status: 404 }
-      );
+    //get employee.company from employee
+    const employee = await Employee.findById(parsedBody.employee).select(
+      "company"
+    );
+
+    let filter: { user?: string; _id: string } = {
+      user: userId,
+      _id: employee.company,
+    };
+
+    if (user.role === "admin") {
+      delete filter.user;
     }
 
-    const company = await Company.findById(existingPurchase.company);
+    const company = await Company.findOne(filter);
     if (!company) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
-    const updatedPurchase = await Purchase.findByIdAndUpdate(
-      parsedBody._id,
+    console.log(parsedBody);
+    const existingSalary = await Salary.findById(parsedBody.id);
+    if (!existingSalary) {
+      return NextResponse.json(
+        { message: "Salary not found" },
+        { status: 404 }
+      );
+    }
+
+    const updatedPurchase = await Salary.findByIdAndUpdate(
+      parsedBody.id,
       parsedBody,
       {
         new: true,
@@ -296,6 +422,125 @@ export async function PUT(req: NextRequest) {
             : "An unexpected error occurred",
       },
       { status: error instanceof z.ZodError ? 400 : 500 }
+    );
+  }
+}
+
+// DELETE: Delete an existing salary
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(options);
+    const user = session?.user || null;
+    const userId = user?.id;
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const salaryId = req.nextUrl.searchParams.get("salaryId");
+    const companyId = req.nextUrl.searchParams.get("companyId");
+    const period = req.nextUrl.searchParams.get("period");
+    if (!salaryId && !companyId && !period) {
+      return NextResponse.json({ message: "ID is required" }, { status: 400 });
+    }
+
+    //if salaryId
+    if (salaryId) {
+      await dbConnect();
+      const salary = await Salary.findById(salaryId);
+      if (!salary) {
+        return NextResponse.json(
+          { message: "Salary not found" },
+          { status: 404 }
+        );
+      }
+
+      //get employee.company from employee
+      const employee = await Employee.findById(salary.employee).select(
+        "company"
+      );
+      if (!employee) {
+        return NextResponse.json(
+          { message: "Employee not found" },
+          { status: 404 }
+        );
+      }
+      //check if user is the owner of the company
+      let filter: { user?: string; _id: string } = {
+        user: userId,
+        _id: employee.company,
+      };
+      if (user.role === "admin") {
+        delete filter.user;
+      }
+      const company = await Company.findOne(filter);
+      if (!company) {
+        return NextResponse.json(
+          { message: "Access denied." },
+          { status: 403 }
+        );
+      }
+      await Salary.findByIdAndDelete(salaryId);
+      return NextResponse.json(
+        { message: "Salary deleted successfully" },
+        { status: 200 }
+      );
+    } else if (companyId && period) {
+      await dbConnect();
+      // Create filter
+      const filter: { user?: string; _id: string } = {
+        user: userId,
+        _id: companyId,
+      };
+      if (user?.role === "admin") {
+        // Remove user from filter
+        delete filter.user;
+      }
+      const company = await Company.findOne(filter);
+      if (!company) {
+        return NextResponse.json(
+          { message: "Access denied." },
+          { status: 403 }
+        );
+      }
+
+      //find employee ids of that company
+      const employees = await Employee.find({ company: companyId }).select(
+        "_id"
+      );
+      const employeeIds = employees.map((employee) => employee._id);
+      //delete all salaries of that company of that period
+      await Salary.deleteMany({
+        employee: { $in: employeeIds },
+        period: period,
+      });
+      return NextResponse.json(
+        { message: "Salaries deleted successfully" },
+        { status: 200 }
+      );
+    }
+
+    const salary = await Salary.findById(salaryId);
+    if (!salary) {
+      return NextResponse.json(
+        { message: "Salary not found" },
+        { status: 404 }
+      );
+    }
+
+    await Salary.findByIdAndDelete(salaryId);
+
+    return NextResponse.json(
+      { message: "Salary deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Error deleting salary:", error);
+    return NextResponse.json(
+      { message: "An unexpected error occurred" },
+      { status: 500 }
     );
   }
 }

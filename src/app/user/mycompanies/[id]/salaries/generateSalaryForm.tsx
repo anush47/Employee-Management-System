@@ -24,12 +24,19 @@ import {
   MenuItem,
   Autocomplete,
 } from "@mui/material";
-import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
+import {
+  ArrowBack,
+  Cancel,
+  Save,
+  Search,
+  ShoppingBag,
+} from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import dayjs from "dayjs";
 import { companyId } from "../clientComponents/companySideBar";
 import GenerateSalaryAll from "./generateSalaryAll";
 import GenerateSalaryOne from "./generateSalaryOne";
+import Link from "next/link";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 export interface Salary {
@@ -96,6 +103,7 @@ const AddSalaryForm: React.FC<{
     employee?: string;
     basic?: string;
   }>({});
+  const [purchased, setPurchased] = useState<boolean>(true);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -138,6 +146,34 @@ const AddSalaryForm: React.FC<{
 
     fetchEmployees();
   }, []);
+
+  useEffect(() => {
+    const checkPurchased = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/purchases/check?companyId=${companyId}&month=${period}`,
+          {
+            method: "GET",
+          }
+        );
+        try {
+          const result = await response.json();
+          console.log(result);
+          setPurchased(result?.purchased === "approved");
+        } catch (error) {
+          console.error("Error parsing JSON or updating state:", error);
+          setPurchased(false); // or handle the error state as needed
+        }
+      } catch (error) {
+        console.error("Error fetching salaries:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkPurchased();
+  }, [period]);
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -185,7 +221,7 @@ const AddSalaryForm: React.FC<{
                 getOptionLabel={(option) =>
                   option._id === "all"
                     ? `${option.name}`
-                    : `${option.memberNo} ${option.name}  ${option.nic}`
+                    : `${option.memberNo} - ${option.name} - ${option.nic}`
                 } // Display the employee name as the label
                 onChange={(event, newValue) => {
                   if (newValue) {
@@ -217,9 +253,6 @@ const AddSalaryForm: React.FC<{
                             variant="text"
                             color="primary"
                             onClick={() => setEmployeeSelection("all")}
-                            sx={{
-                              ml: 1,
-                            }}
                           >
                             All
                           </Button>
@@ -245,6 +278,26 @@ const AddSalaryForm: React.FC<{
                 fullWidth
                 value={period}
                 onChange={(event) => setPeriod(event.target.value)}
+                //end adormnt button
+                InputProps={{
+                  endAdornment: !purchased ? (
+                    <InputAdornment position="end">
+                      <Link
+                        href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true&periods=${
+                          period.split("-")[1]
+                        }-${period.split("-")[0]}`}
+                      >
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<ShoppingBag />}
+                        >
+                          Purchase
+                        </Button>
+                      </Link>
+                    </InputAdornment>
+                  ) : null,
+                }}
               />
             </FormControl>
           </Grid>
