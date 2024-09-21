@@ -100,78 +100,6 @@ const AddSalaryForm: React.FC<{
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Unified handle change for all fields
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>
-  ) => {
-    let { name, value } = event.target;
-    setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
-  };
-
-  const onSaveClick = async () => {
-    //const newErrors = SalaryValidation(formFields);
-    //setErrors(newErrors);
-    //const isValid = Object.keys(newErrors).length === 0;
-
-    // if (!isValid) {
-    //   return;
-    // }
-
-    setLoading(true);
-    try {
-      // Perform POST request to add a new salary record
-      const response = await fetch("/api/salary/new", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formFields,
-          userId: user.id, // Include user ID
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSnackbarMessage("Salary record saved successfully!");
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
-
-        // Wait before clearing the form
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        // Clear the form after successful save
-        setFormFields({
-          id: "",
-          employeeNo: "",
-          employeeName: "",
-          basicSalary: "",
-          additions: [],
-          deductions: [],
-          netSalary: "",
-        });
-        setErrors({});
-        handleBackClick();
-      } else {
-        // Handle validation or other errors returned by the API
-        setSnackbarMessage(
-          result.message || "Error saving salary. Please try again."
-        );
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-      }
-    } catch (error) {
-      console.error("Error saving salary:", error);
-
-      setSnackbarMessage("Error saving salary. Please try again.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Fetch employees from the API
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -211,48 +139,6 @@ const AddSalaryForm: React.FC<{
     fetchEmployees();
   }, []);
 
-  const onFetchEmployeeClick = async () => {
-    setNameLoading(true);
-    try {
-      // Simulate fetching employee name by employee number
-      const response = await fetch("/api/employees/getName", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeNo: formFields.employeeNo,
-        }),
-      });
-      const result = await response.json();
-
-      const name = result.employeeName;
-      if (!name) {
-        setSnackbarMessage("Employee not found. Please try again.");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-        return;
-      }
-      setFormFields((prevFields) => ({
-        ...prevFields,
-        employeeName: name.toUpperCase(),
-      }));
-
-      // Show success snackbar with the fetched employee name
-      setSnackbarMessage(`Employee found: ${name}`);
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Error fetching employee name:", error);
-
-      setSnackbarMessage("Error fetching employee name. Please try again.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    } finally {
-      setNameLoading(false);
-    }
-  };
-
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
     reason?: string
@@ -287,19 +173,6 @@ const AddSalaryForm: React.FC<{
               </Tooltip>
               Generate Salary
             </Typography>
-            <Tooltip title="Save new salary record" arrow>
-              <>
-                <Button
-                  variant="outlined"
-                  color="success"
-                  startIcon={<Save />}
-                  onClick={onSaveClick}
-                  disabled={loading} // Disable button while loading
-                >
-                  {loading ? <CircularProgress size={24} /> : "Save"}
-                </Button>
-              </>
-            </Tooltip>
           </Box>
         }
       />
