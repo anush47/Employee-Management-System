@@ -27,11 +27,18 @@ interface PaymentStructureProps {
     deductions: { name: string; amount: string }[];
   }) => void;
   isEditing: boolean;
+  isSalary?: boolean;
 }
 
-export const validateAmountNumberString = (value: string) => {
+export const validateAmountNumberString = (
+  value: string,
+  isSalary: boolean = false
+) => {
   // Regex to allow either a single number, a range (number-number), or empty string
-  const regex = /^(\d+(\.\d{2})?|\d+(\.\d{2})?-\d+(\.\d{2})?)?$/;
+  //if isSalary only allow number
+  const regex = isSalary
+    ? /^\d+$/
+    : /^(\d+(\.\d{2})?|\d+(\.\d{2})?-\d+(\.\d{2})?)?$/;
   //console.log(value);
   if (!regex.test(value)) {
     //if undefined
@@ -46,6 +53,7 @@ export const PaymentStructure = ({
   paymentStructure,
   setPaymentStructure,
   isEditing,
+  isSalary = false,
 }: PaymentStructureProps) => {
   useEffect(() => {
     //do once only when company fetched
@@ -113,7 +121,7 @@ export const PaymentStructure = ({
       newAdditions[index] = { ...newAdditions[index], [field]: value };
       setAdditions(newAdditions);
       newErrors.additions[index] =
-        (field === "amount" && validateAmountNumberString(value)) ||
+        (field === "amount" && validateAmountNumberString(value, isSalary)) ||
         (field === "name" && value !== "")
           ? ""
           : "Invalid format";
@@ -123,7 +131,7 @@ export const PaymentStructure = ({
       newDeductions[index] = { ...newDeductions[index], [field]: value };
       setDeductions(newDeductions);
       newErrors.deductions[index] =
-        (field === "amount" && validateAmountNumberString(value)) ||
+        (field === "amount" && validateAmountNumberString(value, isSalary)) ||
         (field === "name" && value !== "")
           ? ""
           : "Invalid format";
@@ -201,7 +209,7 @@ export const PaymentStructure = ({
                   </FormControl>
                 </Grid>
                 <Grid item xs={2}>
-                  {isEditing && (
+                  {isEditing && !isSalary && (
                     <Tooltip title="Remove" arrow>
                       <IconButton
                         color="error"
@@ -214,7 +222,7 @@ export const PaymentStructure = ({
                 </Grid>
               </Grid>
             ))}
-            {isEditing && (
+            {isEditing && !isSalary && (
               <Button
                 variant="outlined"
                 startIcon={<Add />}
@@ -283,7 +291,7 @@ export const PaymentStructure = ({
                   </FormControl>
                 </Grid>
                 <Grid item xs={2}>
-                  {isEditing && (
+                  {isEditing && !isSalary && (
                     <Tooltip title="Remove" arrow>
                       <IconButton
                         color="error"
@@ -296,7 +304,7 @@ export const PaymentStructure = ({
                 </Grid>
               </Grid>
             ))}
-            {isEditing && (
+            {isEditing && !isSalary && (
               <Button
                 variant="outlined"
                 startIcon={<Add />}

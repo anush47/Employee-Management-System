@@ -21,6 +21,7 @@ import { Employee } from "../employees/clientComponents/employeesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
 import { Save } from "@mui/icons-material";
+import { PaymentStructure } from "../companyDetails/paymentStructure";
 
 const GenerateSalaryOne = ({
   period,
@@ -330,6 +331,21 @@ const GenerateSalaryOne = ({
                 {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}
               </FormControl>
             </Grid>
+            <Grid mt={3} item xs={12}>
+              <PaymentStructure
+                isEditing={true}
+                handleChange={handleChange}
+                paymentStructure={formFields.paymentStructure}
+                setPaymentStructure={(paymentStructure) => {
+                  //console.log("Setting payment structure:", paymentStructure); // Debugging
+                  setFormFields((prev) => ({
+                    ...prev,
+                    paymentStructure,
+                  }));
+                }}
+                isSalary={true}
+              />
+            </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.noPay}>
                 <TextField
@@ -351,7 +367,7 @@ const GenerateSalaryOne = ({
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.noPay}>
                 <TextField
-                  label="NoPay Reason"
+                  label="No Pay Reason"
                   name="noPay-reason"
                   value={formFields.noPay.reason}
                   onChange={handleChange}

@@ -34,8 +34,8 @@ export interface Salary {
     reason: string;
   };
   paymentStructure: {
-    additions: { name: string; amount: number }[];
-    deductions: { name: string; amount: number }[];
+    additions: { name: string; amount: string }[];
+    deductions: { name: string; amount: string }[];
   };
   advanceAmount: number;
   finalSalary: number;
