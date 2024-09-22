@@ -159,7 +159,6 @@ const AddSalaryForm: React.FC<{
         );
         try {
           const result = await response.json();
-          console.log(result);
           setPurchased(result?.purchased === "approved");
         } catch (error) {
           console.error("Error parsing JSON or updating state:", error);

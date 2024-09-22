@@ -419,7 +419,6 @@ const SalariesDataGrid: React.FC<{
           <LoadingButton
             onClick={handleConfirm}
             color="primary"
-            autoFocus
             loading={loading}
           >
             Confirm
