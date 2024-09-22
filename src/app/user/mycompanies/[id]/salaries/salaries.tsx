@@ -20,11 +20,11 @@ import { Add, Check, Edit } from "@mui/icons-material";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { companyId } from "../clientComponents/companySideBar";
-import EditSalaryForm from "./editSalaryForm";
 
 // Lazily load SalariesDataGrid and AddSalaryForm
 const SalariesDataGrid = lazy(() => import("./salariesDataGrid"));
 const AddSalaryForm = lazy(() => import("./generateSalaryForm"));
+const EditSalaryForm = lazy(() => import("./editSalaryForm"));
 
 export let salaryId: string | null;
 
