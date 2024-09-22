@@ -13,12 +13,15 @@ import {
   Snackbar,
   Slide,
   Button,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import { companyId } from "../clientComponents/companySideBar";
+import { LoadingButton } from "@mui/lab";
 import Link from "next/link";
-
-// Cache to store employee names
-const employeeCache: { [key: string]: string } = {};
 
 export interface Salary {
   id: string;
@@ -155,6 +158,26 @@ const SalariesDataGrid: React.FC<{
         );
       },
     },
+    {
+      field: "delete",
+      headerName: "Delete",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Button
+            variant="text"
+            color="error"
+            size="small"
+            disabled={!isEditing}
+            onClick={() => {
+              handleDeleteClick(params.id.toString());
+            }}
+          >
+            Delete
+          </Button>
+        );
+      },
+    },
   ];
 
   useEffect(() => {
@@ -206,7 +229,243 @@ const SalariesDataGrid: React.FC<{
       otReason: false,
       noPayReason: false,
       nic: false,
+      delete: false,
     });
+
+  const handleRowUpdate = async (newSalary: any) => {
+    try {
+      // Validate the new employee data
+      const errors: { [key: string]: string } = {};
+      if (!newSalary.basic) {
+        errors.basic = "Basic Salary is required";
+      }
+      if (!newSalary.finalSalary) {
+        errors.finalSalary = "Final Salary is required";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        throw new Error(
+          `Validation error in ${newSalary.period}: ${Object.values(
+            errors
+          ).join(", ")}`
+        );
+      }
+      console.log(newSalary);
+
+      // Format data
+      newSalary.basic = parseFloat(newSalary.basic);
+      newSalary.ot = {
+        amount: parseFloat(newSalary.ot),
+        reason: newSalary.otReason,
+      };
+      newSalary.noPay = {
+        amount: parseFloat(newSalary.noPay),
+        reason: newSalary.noPayReason,
+      };
+      newSalary.advanceAmount = parseFloat(newSalary.advanceAmount);
+      console.log(newSalary);
+      // Calculate total additions
+      const totalAdditions = newSalary.paymentStructure.additions.reduce(
+        (total: number, addition: { amount: number }) =>
+          total + addition.amount,
+        0
+      );
+
+      // Calculate total deductions
+      const totalDeductions = newSalary.paymentStructure.deductions.reduce(
+        (total: number, deduction: { amount: number }) =>
+          total + deduction.amount,
+        0
+      );
+
+      // Calculate final salary with payment structures
+      newSalary.finalSalary =
+        newSalary.basic +
+        newSalary.ot.amount -
+        newSalary.noPay.amount -
+        newSalary.advanceAmount +
+        totalAdditions -
+        totalDeductions;
+
+      const body = {
+        ...newSalary,
+        ot: newSalary.ot,
+        noPay: newSalary.noPay,
+      };
+
+      try {
+        // Perform POST request to update the employee
+        const response = await fetch("/api/salaries", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          setSnackbarMessage(
+            result.message || "Error saving salary. Please try again."
+          );
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+        }
+        //reset newsalary
+
+        newSalary.ot = newSalary.ot.amount;
+        newSalary.noPay = newSalary.noPay.amount;
+      } catch (error) {
+        console.error("Error saving salary:", error);
+        setSnackbarMessage("Error saving salary. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      } finally {
+        setLoading(false);
+      }
+      // }
+      //console.log(newEmployee);
+
+      // Success feedback
+      setSnackbarMessage(
+        `Employee ${newSalary.memberNo} - updated successfully!`
+      );
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+
+      return newSalary;
+    } catch (error: any) {
+      // Add type 'any' to the 'error' object
+      // Pass the error details along
+      throw {
+        message:
+          error?.message || "An error occurred while updating the employee.",
+        error: error,
+      };
+    }
+  };
+
+  const handleRowUpdateError = (params: any) => {
+    // Revert changes if necessary
+    const updatedSalaries = salaries.map((salary) => {
+      if (salary.id === params.id) {
+        return params.oldRow; // Revert to old row data
+      }
+      return salary;
+    });
+
+    // Log error and revert row updates
+    console.error("Row update error:", params.error?.error || params.error);
+
+    setSalaries(updatedSalaries); // Update state with reverted data
+
+    // Display the error details in Snackbar
+    setSnackbarMessage(
+      params.error?.message || "An unexpected error occurred." // Show detailed error message
+    );
+    setSnackbarSeverity("error"); // Set snackbar severity to error
+    setSnackbarOpen(true); // Open Snackbar
+  };
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [salaryId, setSalaryId] = useState("");
+
+  const handleDeleteClick = (salayId: string) => {
+    setSalaryId(salayId);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = async (confirmed: boolean) => {
+    if (confirmed) {
+      // Perform the delete action here
+      console.log(`Deleting salary record`);
+      await onDeleteClick(salaryId);
+    }
+    setDialogOpen(false);
+  };
+
+  interface ConfirmationDialogProps {
+    open: boolean;
+    onClose: (confirmed: boolean) => void;
+    title: string;
+    message: string;
+  }
+
+  const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+    open,
+    onClose,
+    title,
+    message,
+  }) => {
+    const handleConfirm = () => {
+      onClose(true);
+    };
+
+    const handleCancel = () => {
+      onClose(false);
+    };
+
+    return (
+      <Dialog open={open} onClose={() => onClose(false)}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <LoadingButton
+            onClick={handleConfirm}
+            color="primary"
+            autoFocus
+            loading={loading}
+          >
+            Confirm
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+  const onDeleteClick = async (salaryId: string) => {
+    setLoading(true);
+    try {
+      // Perform DELETE request to delete the salary record
+      const response = await fetch(`/api/salaries/?salaryId=${salaryId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSnackbarMessage("Salary record deleted successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        // Wait before clearing the form
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        //remove row
+        setSalaries(salaries.filter((salary) => salary.id !== salaryId));
+      } else {
+        // Handle validation or other errors returned by the API
+        setSnackbarMessage(
+          result.message || "Error deleting salary. Please try again."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error deleting salary:", error);
+
+      setSnackbarMessage("Error deleting salary. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -227,6 +486,7 @@ const SalariesDataGrid: React.FC<{
         <DataGrid
           rows={salaries}
           columns={columns}
+          editMode="row"
           initialState={{
             pagination: {
               paginationModel: {
@@ -244,6 +504,8 @@ const SalariesDataGrid: React.FC<{
           disableRowSelectionOnClick
           disableColumnFilter
           disableDensitySelector
+          processRowUpdate={handleRowUpdate}
+          onProcessRowUpdateError={handleRowUpdateError}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={(newModel) =>
             setColumnVisibilityModel(newModel)
@@ -267,6 +529,12 @@ const SalariesDataGrid: React.FC<{
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <ConfirmationDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete the salary record?`}
+      />
     </Box>
   );
 };

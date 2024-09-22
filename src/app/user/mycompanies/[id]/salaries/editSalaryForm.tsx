@@ -253,12 +253,13 @@ const EditSalaryForm: React.FC<{
     setDialogOpen(true);
   };
 
-  const handleDialogClose = (confirmed: boolean) => {
-    setDialogOpen(false);
+  const handleDialogClose = async (confirmed: boolean) => {
     if (confirmed) {
       // Perform the delete action here
       console.log(`Deleting salary record for ${employeeName}`);
+      await onDeleteClick();
     }
+    setDialogOpen(false);
   };
 
   interface ConfirmationDialogProps {
@@ -293,7 +294,7 @@ const EditSalaryForm: React.FC<{
             Cancel
           </Button>
           <LoadingButton
-            onClick={onDeleteClick}
+            onClick={handleConfirm}
             color="primary"
             autoFocus
             loading={loading}
