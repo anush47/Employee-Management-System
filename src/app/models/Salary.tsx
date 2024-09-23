@@ -23,6 +23,7 @@ interface ISalary extends Document {
       amount: number;
     }[];
   };
+  inOut: string;
   advanceAmount: number;
   finalSalary: number;
 }
@@ -86,6 +87,9 @@ const salarySchema = new Schema<ISalary>(
           },
         },
       ],
+    },
+    inOut: {
+      type: String,
     },
     advanceAmount: {
       type: Number,

@@ -43,6 +43,7 @@ const salarySchema = z.object({
   noPay: noPaySchema,
   ot: otSchema,
   paymentStructure: paymentStructureSchema,
+  inOut: z.string().optional(),
   advanceAmount: z.number().optional(), // Optional field
   finalSalary: z.number().min(0, "Final salary must be a positive number"),
 });
@@ -149,10 +150,12 @@ export async function GET(req: NextRequest) {
     // Extract the list of IDs (just the _id values)
     const employeeIdList = employees.map((emp) => emp._id);
 
-    // Step 2: Fetch salaries of employees with those IDs
-    const salaries = await Salary.find({
-      employee: { $in: employeeIdList }, // Match employees with the fetched IDs
-    });
+    // Step 2: Fetch salaries of employees with those IDs and remove inout
+
+    const salaries = await Salary.find(
+      { employee: { $in: employeeIdList } }, // Match employees with the fetched IDs
+      { inOut: 0 } // Exclude the inOut field
+    );
 
     // Step 3: Enrich the salary records with employee details
     const enrichedSalaries = salaries.map((salary) => {

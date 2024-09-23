@@ -28,6 +28,7 @@ export interface Salary {
   employee: string; // Will hold employee ID initially
   period: string;
   basic: number;
+  inOut: string;
   noPay: {
     amount: number;
     reason: string;

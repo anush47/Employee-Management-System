@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
         )
       )
     );
+    console.log(salaries);
 
     return NextResponse.json({ salaries });
   } catch (error) {

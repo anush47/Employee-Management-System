@@ -32,13 +32,13 @@ import { ArrowBack, Edit, Save } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { salaryId } from "./salaries";
 import { LoadingButton } from "@mui/lab";
+import { SimpleDialog } from "./generateSalaryOne";
 
 const EditSalaryForm: React.FC<{
   user: { id: string; name: string; email: string };
   handleBackClick: () => void;
 }> = ({ user, handleBackClick }) => {
   const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
-  const [salary, setSalary] = useState<Salary>();
   const [employee, setEmployee] = useState<{
     memberNo: string;
     name: string;
@@ -48,6 +48,7 @@ const EditSalaryForm: React.FC<{
   }>();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [openDialogInOut, setOpenDialogInOut] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
@@ -61,6 +62,7 @@ const EditSalaryForm: React.FC<{
     employee: "",
     period: "",
     basic: 0,
+    inOut: "",
     noPay: {
       amount: 0,
       reason: "",
@@ -93,6 +95,7 @@ const EditSalaryForm: React.FC<{
           id: data.salary._id,
           employee: data.salary.employee,
           period: data.salary.period,
+          inOut: data.salary.inOut,
           basic: data.salary.basic,
           noPay: data.salary.noPay,
           ot: data.salary.ot,
@@ -246,11 +249,11 @@ const EditSalaryForm: React.FC<{
     }
   };
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpenDelete, setDialogOpenDelete] = useState(false);
   const [employeeName, setEmployeeName] = useState<string | null>(null);
   const handleDeleteClick = (employeeName: string) => {
     setEmployeeName(employeeName);
-    setDialogOpen(true);
+    setDialogOpenDelete(true);
   };
 
   const handleDialogClose = async (confirmed: boolean) => {
@@ -259,7 +262,7 @@ const EditSalaryForm: React.FC<{
       console.log(`Deleting salary record for ${employeeName}`);
       await onDeleteClick();
     }
-    setDialogOpen(false);
+    setDialogOpenDelete(false);
   };
 
   interface ConfirmationDialogProps {
@@ -373,7 +376,7 @@ const EditSalaryForm: React.FC<{
                 </Tooltip>
                 Salary Details
                 {isEditing ? (
-                  <Tooltip title="Save new company" arrow>
+                  <Tooltip title="Save new Salary" arrow>
                     <span>
                       <Button
                         variant="outlined"
@@ -430,6 +433,25 @@ const EditSalaryForm: React.FC<{
 
         <CardContent>
           <Grid container spacing={3}>
+            <Grid item xs={12}>
+              {formFields.inOut && formFields.inOut !== "" && (
+                <FormControl fullWidth>
+                  {/* show fetched inout in a dialog */}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setOpenDialogInOut(true)}
+                  >
+                    View Fetched In-Out
+                  </Button>
+                  <SimpleDialog
+                    inOutFetched={formFields.inOut}
+                    openDialog={openDialogInOut}
+                    setOpenDialog={setOpenDialogInOut}
+                  />
+                </FormControl>
+              )}
+            </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>
                 <TextField
@@ -589,7 +611,7 @@ const EditSalaryForm: React.FC<{
         </CardContent>
       </Card>
       <ConfirmationDialog
-        open={dialogOpen}
+        open={dialogOpenDelete}
         onClose={handleDialogClose}
         title="Confirm Deletion"
         message={`Are you sure you want to delete the salary record for ${employeeName}?`}

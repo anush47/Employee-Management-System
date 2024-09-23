@@ -1,11 +1,16 @@
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Card,
   CardContent,
   CardHeader,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   FormHelperText,
   Grid,
@@ -15,13 +20,17 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Employee } from "../employees/clientComponents/employeesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
-import { Save } from "@mui/icons-material";
+import { Save, Upload } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
+import { handleCsvUpload } from "./csvUpload";
+import { blue } from "@mui/material/colors";
 
 const GenerateSalaryOne = ({
   period,
@@ -33,6 +42,8 @@ const GenerateSalaryOne = ({
   const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
   const [employee, setEmployee] = useState<Employee>();
   const [loading, setLoading] = useState(false);
+  const [inOut, setInOut] = useState("");
+  const [inOutFetched, setInOutFetched] = useState<string>("");
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
@@ -44,6 +55,7 @@ const GenerateSalaryOne = ({
     employee: "",
     period: "",
     basic: 0,
+    inOut: "",
     noPay: {
       amount: 0,
       reason: "",
@@ -60,6 +72,7 @@ const GenerateSalaryOne = ({
     finalSalary: 0,
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const theme = useTheme();
 
   // Fetch employee
   useEffect(() => {
@@ -118,6 +131,7 @@ const GenerateSalaryOne = ({
             companyId,
             employees: [employeeId],
             period,
+            inOut,
           }),
         });
         if (!response.ok) {
@@ -144,7 +158,10 @@ const GenerateSalaryOne = ({
         ) {
           throw new Error("Invalid Salary Data");
         }
+        console.log(data.salaries[0]);
+
         setFormFields(data.salaries[0]);
+        data.sa;
       } catch (error) {
         setSnackbarMessage(
           error instanceof Error ? error.message : "Error fetching Salary."
@@ -163,7 +180,7 @@ const GenerateSalaryOne = ({
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
-  }, [employeeId, period]);
+  }, [employeeId, period, inOut]);
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -284,6 +301,8 @@ const GenerateSalaryOne = ({
     }
   };
 
+  const [openDialog, setOpenDialog] = useState(false);
+
   return (
     <>
       <Card>
@@ -314,12 +333,50 @@ const GenerateSalaryOne = ({
 
         <CardContent>
           <Grid container spacing={3}>
-            {employee?.otMethod === "calc" && (
-              <Grid item xs={12}>
-                upload
-              </Grid>
-            )}
-
+            <Grid item xs={12} sm={6}>
+              <FormControl>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component="label"
+                  startIcon={<Upload />}
+                >
+                  Upload In-Out CSV
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={async (event) => {
+                      if (event.target.files && event.target.files[0]) {
+                        const _inOut = await handleCsvUpload(
+                          event.target.files[0]
+                        );
+                        setInOut(_inOut);
+                      }
+                    }}
+                  />
+                </Button>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {formFields.inOut && formFields.inOut !== "" && (
+                <FormControl fullWidth>
+                  {/* show fetched inout in a dialog */}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setOpenDialog(true)}
+                  >
+                    View Fetched In-Out
+                  </Button>
+                  <SimpleDialog
+                    inOutFetched={formFields.inOut}
+                    openDialog={openDialog}
+                    setOpenDialog={setOpenDialog}
+                  />
+                </FormControl>
+              )}
+            </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>
                 <TextField
@@ -494,3 +551,37 @@ const GenerateSalaryOne = ({
 };
 
 export default GenerateSalaryOne;
+
+export const SimpleDialog = (props: {
+  inOutFetched: string;
+  openDialog: boolean;
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const { inOutFetched, openDialog, setOpenDialog } = props;
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+  return (
+    <Dialog
+      open={openDialog}
+      onClose={() => setOpenDialog(false)}
+      fullScreen={fullScreen}
+    >
+      <DialogTitle>Fetched In-Out</DialogTitle>
+      <DialogContent>
+        {inOutFetched.split("\n").map((line, index) => (
+          <Typography key={index}>{line}</Typography>
+        ))}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={() => {
+            setOpenDialog(false);
+          }}
+        >
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
