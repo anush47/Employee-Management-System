@@ -27,8 +27,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  InputAdornment,
 } from "@mui/material";
-import { Save, Cancel, Edit, Delete } from "@mui/icons-material";
+import { Save, Cancel, Edit, Delete, Search } from "@mui/icons-material";
 import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { CompanyValidation } from "../../clientComponents/companyValidation";
@@ -41,6 +42,7 @@ import dayjs from "dayjs";
 import { Shifts } from "./shifts";
 import { start } from "repl";
 import { WorkingDays } from "./workingDays";
+import { LoadingButton } from "@mui/lab";
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const CompanyDetails = ({
@@ -71,6 +73,7 @@ const CompanyDetails = ({
     shifts: [], // Add the shifts property here
   });
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [companyUser, setCompanyUser] = useState<{
@@ -330,6 +333,49 @@ const CompanyDetails = ({
     );
   };
 
+  const onFetchNameClick = async () => {
+    setNameLoading(true);
+    try {
+      const response = await fetch("/api/companies/getReferenceNoName", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employerNo: formFields.employerNo,
+        }),
+      });
+      const result = await response.json();
+
+      // Simulate fetching company name
+      //const name = await fetchCompanyName(formFields.employerNo);
+      const name = result.name;
+      if (!name) {
+        setSnackbarMessage("Employer number not found. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        name: name.toUpperCase(),
+      }));
+
+      // Show success snackbar with the fetched name
+      setSnackbarMessage(`Name found: ${name}`);
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Error fetching company name:", error);
+
+      setSnackbarMessage("Error fetching company name. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setNameLoading(false);
+    }
+  };
+
   return (
     <Card
       //set height to viewport height and make scrollable only on larger screens
@@ -419,6 +465,20 @@ const CompanyDetails = ({
                     variant="filled"
                     InputProps={{
                       readOnly: !isEditing,
+                      endAdornment: isEditing && (
+                        <InputAdornment position="end">
+                          <LoadingButton
+                            variant="text"
+                            color="inherit"
+                            endIcon={<Search />}
+                            loading={nameLoading}
+                            loadingPosition="end"
+                            onClick={onFetchNameClick}
+                            disabled={nameLoading} // Disable button while loading
+                            sx={{ marginTop: 1 }}
+                          />
+                        </InputAdornment>
+                      ),
                     }}
                   />
                   {errors.employerNo && (

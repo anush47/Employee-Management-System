@@ -162,7 +162,7 @@ const AddCompanyForm: React.FC<{
   const onFetchNameClick = async () => {
     setNameLoading(true);
     try {
-      const response = await fetch("/api/companies/getReferenceNo", {
+      const response = await fetch("/api/companies/getReferenceNoName", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
