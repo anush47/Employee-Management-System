@@ -27,7 +27,7 @@ import React, { useEffect, useState } from "react";
 import { Employee } from "../employees/clientComponents/employeesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
-import { Save, Upload } from "@mui/icons-material";
+import { Autorenew, Save, Upload } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { handleCsvUpload } from "./csvUpload";
 import { blue } from "@mui/material/colors";
@@ -349,8 +349,8 @@ const GenerateSalaryOne = ({
 
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <FormControl>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth>
                 <Button
                   variant="contained"
                   color="primary"
@@ -374,24 +374,37 @@ const GenerateSalaryOne = ({
                 </Button>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {formFields.inOut && formFields.inOut !== "" && (
-                <FormControl fullWidth>
-                  {/* show fetched inout in a dialog */}
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => setOpenDialog(true)}
-                  >
-                    View Fetched In-Out
-                  </Button>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth>
+                {/* show fetched inout in a dialog */}
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setOpenDialog(true)}
+                  disabled={!formFields.inOut || formFields.inOut === ""}
+                >
+                  View In-Out
+                </Button>
+                {formFields.inOut && (
                   <SimpleDialog
                     inOutFetched={formFields.inOut}
                     openDialog={openDialog}
                     setOpenDialog={setOpenDialog}
                   />
-                </FormControl>
-              )}
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth>
+                <Button
+                  variant="contained"
+                  color="success"
+                  component="label"
+                  startIcon={<Autorenew />}
+                >
+                  Regenerate
+                </Button>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>
