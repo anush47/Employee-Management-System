@@ -111,9 +111,15 @@ const GenerateSalaryOne = ({
     const fetchSalary = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/salaries/generate?employeeId=${employeeId}&period=${period}`
-        );
+        //use post method
+        const response = await fetch(`/api/salaries/generate`, {
+          method: "POST",
+          body: JSON.stringify({
+            companyId,
+            employees: [employeeId],
+            period,
+          }),
+        });
         if (!response.ok) {
           setFormFields((prevFields) => ({
             ...prevFields,
@@ -130,10 +136,18 @@ const GenerateSalaryOne = ({
           }
         }
         const data = await response.json();
-        setFormFields(data.salary);
+        //check if data.salaries[0] is in correct form
+        if (
+          !data.salaries[0] ||
+          !data.salaries[0].employee ||
+          !data.salaries[0].period
+        ) {
+          throw new Error("Invalid Salary Data");
+        }
+        setFormFields(data.salaries[0]);
       } catch (error) {
         setSnackbarMessage(
-          error instanceof Error ? error.message : "Error fetching company."
+          error instanceof Error ? error.message : "Error fetching Salary."
         );
         setSnackbarSeverity("error");
         setSnackbarOpen(true);

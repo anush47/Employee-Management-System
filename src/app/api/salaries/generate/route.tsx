@@ -14,9 +14,7 @@ const periodSchema = z
   .regex(/^\d{4}-\d{2}$/, "Period must be in the format YYYY-MM");
 
 // GET request handler
-export async function GET(req: NextRequest) {
-  await dbConnect(); // Ensure database connection before any operations
-
+export async function POST(req: NextRequest) {
   try {
     // Get user session
     const session = await getServerSession(options);
@@ -24,128 +22,91 @@ export async function GET(req: NextRequest) {
     const userId = user?.id;
 
     // Validate userId
-    //IdSchema.parse(userId);
+    IdSchema.parse(userId);
 
-    const employeeId = req.nextUrl.searchParams.get("employeeId");
-    const companyId = req.nextUrl.searchParams.get("companyId");
-    const period = req.nextUrl.searchParams.get("period");
-    const inOut = req.nextUrl.searchParams.get("inOut");
+    const body = await req.json();
+    let { employees, companyId, period, inOut } = body;
 
     // Validate period
     periodSchema.parse(period);
+    IdSchema.parse(companyId);
 
-    if (user?.role !== "admin" && !companyId && !employeeId) {
+    if (!companyId) {
       return NextResponse.json(
-        { message: "Employee ID or Company ID must be provided" },
+        { message: "Company ID must be provided" },
         { status: 400 }
       );
     }
 
     let filter: { user?: string; _id?: string } = {
-      //user: userId,
+      user: userId,
     };
 
-    //remove user if admin
     if (user?.role === "admin") {
       delete filter.user;
     }
 
-    if (companyId) {
-      // Validate companyId
-      IdSchema.parse(companyId);
-      filter._id = companyId;
+    await dbConnect(); // Ensure database connection before any operations
 
-      // Find the company
-      const company = await Company.findOne(filter);
-      if (!company) {
-        return NextResponse.json(
-          { message: "Company not found" },
-          { status: 404 }
-        );
-      }
+    const company = await Company.findOne(filter);
 
-      // Find all active employees of the company
-      const employees = await Employee.find({
-        company: companyId,
-        active: true,
-      });
-
-      // Generate salaries for all employees
-      const salaries = await Promise.all(
-        employees.map(async (employee) => {
-          return generateSalaryForOneEmployee(
-            employee,
-            period!,
-            inOut ? inOut : undefined
-          );
-        })
+    if (!company) {
+      return NextResponse.json(
+        { message: "Company not found" },
+        { status: 400 }
       );
+    }
 
-      return NextResponse.json({ salaries });
-    } else if (employeeId) {
-      // Validate employeeId
-      IdSchema.parse(employeeId);
-
-      // Find the employee
-      const employee = await Employee.findOne({
-        _id: employeeId,
-        active: true,
-      });
-
-      if (!employee) {
+    if (
+      !(
+        user?.role === "admin" &&
+        (company.mode === "visit" || company.mode === "aided")
+      )
+    ) {
+      const purchasedStatus = await checkPurchased(companyId, period);
+      if (purchasedStatus !== "approved") {
         return NextResponse.json(
-          { message: "Employee not found" },
-          { status: 404 }
-        );
-      }
-
-      // Find the company of the employee
-      filter._id = employee.company;
-      const company = await Company.findOne(filter);
-      if (!company) {
-        return NextResponse.json(
-          { message: "Company not found" },
-          { status: 404 }
-        );
-      }
-
-      // check if purchsed
-      if (!employee.company || !period) {
-        return NextResponse.json(
-          { message: "Employee company or period is missing" },
+          { message: "Month not Purchased. Purchase is " + purchasedStatus },
           { status: 400 }
         );
       }
-      if (
-        !(
-          user?.role === "admin" &&
-          (company.mode === "visit" || company.mode === "aided")
-        )
-      ) {
-        const purchasedStatus = await checkPurchased(employee.company, period);
-        if (purchasedStatus !== "approved") {
-          return NextResponse.json(
-            { message: "Month not Purchased. Purchase is " + purchasedStatus },
-            { status: 400 }
-          );
-        }
-      }
-
-      // Generate salary for the employee
-      const salary = await generateSalaryForOneEmployee(
-        employee,
-        period!,
-        inOut ? inOut : undefined
-      );
-
-      return NextResponse.json({ salary });
     }
 
-    // If neither employeeId nor companyId is provided
-    return NextResponse.json(
-      { message: "Employee ID or Company ID must be provided" },
-      { status: 400 }
+    // Find all active employees of the company if employees are not given
+    if (!employees) {
+      employees = await Employee.find({
+        company: companyId,
+        active: true,
+      });
+    } else {
+      //get employees from employees
+      employees = await Employee.find({
+        _id: { $in: employees },
+        company: companyId,
+        active: true,
+      });
+    }
+
+    //if no employees
+    if (!employees || employees?.length === 0) {
+      return NextResponse.json(
+        { message: "No active employees found for the company" },
+        { status: 400 }
+      );
+    }
+
+    // Generate salary for all employees
+    const salaries = await Promise.all(
+      employees.map((employee: any) =>
+        generateSalaryForOneEmployee(
+          employee,
+          period,
+          inOut ? inOut : undefined
+        )
+      )
     );
+
+    return NextResponse.json({ salaries });
   } catch (error) {
     //console.error(error);
     // Handle Zod validation errors
