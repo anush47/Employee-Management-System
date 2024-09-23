@@ -116,7 +116,12 @@ export async function GET(req: NextRequest) {
           { status: 400 }
         );
       }
-      if (!(user?.role === "admin" && company.mode === "visit")) {
+      if (
+        !(
+          user?.role === "admin" &&
+          (company.mode === "visit" || company.mode === "aided")
+        )
+      ) {
         const purchasedStatus = await checkPurchased(employee.company, period);
         if (purchasedStatus !== "approved") {
           return NextResponse.json(

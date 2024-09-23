@@ -248,7 +248,12 @@ export async function POST(req: NextRequest) {
     }
 
     //check if purchased
-    if (!(user?.role === "admin" && company.mode === "visit")) {
+    if (
+      !(
+        user?.role === "admin" &&
+        (company.mode === "visit" || company.mode === "aided")
+      )
+    ) {
       const purchasedStatus = await checkPurchased(
         employee.company,
         parsedBody.period
