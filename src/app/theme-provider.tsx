@@ -16,9 +16,13 @@ const darkTheme = createTheme({
 
 const lightTheme = createTheme({
   palette: {
+    primary: {
+      main: "#1976d2",
+    },
     mode: "light",
     background: {
-      default: "#f0f0f0",
+      default: "#f5f5f5",
+      paper: "#ffffff",
     },
   },
 });
@@ -40,7 +44,11 @@ export const ThemeSwitch = () => {
   return (
     <Tooltip title="Toggle Theme" arrow>
       <IconButton onClick={toggleTheme}>
-        {theme.palette.mode === "dark" ? <LightMode /> : <DarkMode />}
+        {theme.palette.mode === "dark" ? (
+          <LightMode color="inherit" />
+        ) : (
+          <DarkMode color="inherit" />
+        )}
       </IconButton>
     </Tooltip>
   );
