@@ -310,6 +310,22 @@ const GenerateSalaryOne = ({
           title={
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
               Generate Salary
+              <Tooltip title="Save new salary record" arrow>
+                <>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      ml: 3,
+                    }}
+                    color="success"
+                    startIcon={<Save />}
+                    onClick={onSaveClick}
+                    disabled={loading} // Disable button while loading
+                  >
+                    {loading ? <CircularProgress size={24} /> : "Save"}
+                  </Button>
+                </>
+              </Tooltip>
             </Typography>
           }
           subheader={
@@ -511,21 +527,6 @@ const GenerateSalaryOne = ({
                   <FormHelperText>{errors.advanceAmount}</FormHelperText>
                 )}
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Tooltip title="Save new salary record" arrow>
-                <>
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    startIcon={<Save />}
-                    onClick={onSaveClick}
-                    disabled={loading} // Disable button while loading
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Save"}
-                  </Button>
-                </>
-              </Tooltip>
             </Grid>
           </Grid>
         </CardContent>
