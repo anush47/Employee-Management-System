@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
     const employeeId = req.nextUrl.searchParams.get("employeeId");
     const companyId = req.nextUrl.searchParams.get("companyId");
     const period = req.nextUrl.searchParams.get("period");
+    const inOut = req.nextUrl.searchParams.get("inOut");
 
-    console.log(period);
     // Validate period
     periodSchema.parse(period);
 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     }
 
     let filter: { user?: string; _id?: string } = {
-      user: userId,
+      //user: userId,
     };
 
     //remove user if admin
@@ -73,11 +73,11 @@ export async function GET(req: NextRequest) {
       // Generate salaries for all employees
       const salaries = await Promise.all(
         employees.map(async (employee) => {
-          let data;
-          if (employee.otMethod !== "random") {
-            data = await req.json();
-          }
-          return generateSalaryForOneEmployee(employee, period!, data);
+          return generateSalaryForOneEmployee(
+            employee,
+            period!,
+            inOut ? inOut : undefined
+          );
         })
       );
 
@@ -131,20 +131,11 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      let data;
-      if (employee.otMethod === "calc") {
-        try {
-          data = await req.json();
-        } catch (error) {
-          data = "";
-        }
-      }
-
       // Generate salary for the employee
       const salary = await generateSalaryForOneEmployee(
         employee,
         period!,
-        data
+        inOut ? inOut : undefined
       );
 
       return NextResponse.json({ salary });

@@ -23,7 +23,7 @@ function parseValue(value: string, basic: number): number {
 export async function generateSalaryForOneEmployee(
   employee: any,
   period: string,
-  data: string | undefined
+  inOut: string | undefined
 ) {
   try {
     // Calculate additions with actual computed values
@@ -54,21 +54,48 @@ export async function generateSalaryForOneEmployee(
       0
     );
 
-    const ot = 5000;
-    const noPay = 1000;
+    let ot = 0;
+    let noPay = 0;
+    let otReason = "";
+    let noPayReason = "";
+
+    switch (employee.otMethod) {
+      case "noOt":
+        ({ ot, otReason, noPay, noPayReason } = noOtCalc(
+          employee,
+          period,
+          inOut
+        ));
+        break;
+      case "calc":
+        ({ ot, otReason, noPay, noPayReason } = OtCalc(
+          employee,
+          period,
+          inOut
+        ));
+        break;
+      default:
+        ({ ot, otReason, noPay, noPayReason } = randomCalc(
+          employee,
+          period,
+          inOut
+        ));
+        break;
+    }
 
     // Generate the salary data
     const salaryData = {
+      inOut,
       employee: employee._id,
       period,
       basic: employee.basic, // Employee's basic salary
       noPay: {
         amount: 1000, // Example: No Pay deduction amount
-        reason: "Unapproved leaves", // Example reason for no pay
+        reason: noPayReason, // Example reason for no pay
       },
       ot: {
         amount: ot, // Example: Overtime payment
-        reason: "Extra work hours", // Example reason for overtime
+        reason: otReason, // Example reason for overtime
       },
       paymentStructure: {
         additions: parsedAdditions, // Return the parsed additions with computed values
@@ -87,3 +114,49 @@ export async function generateSalaryForOneEmployee(
     };
   }
 }
+
+const randomCalc = (
+  employee: any,
+  period: string,
+  inOut: string | undefined
+) => {
+  let ot = 5000;
+  let noPay = 1000;
+  let otReason = "Random";
+  let noPayReason = "Unapproved leaves";
+
+  return {
+    ot,
+    otReason,
+    noPay,
+    noPayReason,
+  };
+};
+
+const noOtCalc = (employee: any, period: string, inOut: string | undefined) => {
+  let ot = 0;
+  let noPay = 1000;
+  let otReason = "no OT";
+  let noPayReason = "Unapproved leaves";
+
+  return {
+    ot,
+    otReason,
+    noPay,
+    noPayReason,
+  };
+};
+
+const OtCalc = (employee: any, period: string, inOut: string | undefined) => {
+  let ot = 7000;
+  let noPay = 1000;
+  let otReason = "Calculated OT";
+  let noPayReason = "Unapproved leaves";
+
+  return {
+    ot,
+    otReason,
+    noPay,
+    noPayReason,
+  };
+};

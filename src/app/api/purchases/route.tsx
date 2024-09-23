@@ -18,7 +18,7 @@ const purchaseSchema = z.object({
     .refine((id) => /^[0-9a-fA-F]{24}$/.test(id), "Invalid company ID"),
   price: z.number().min(0, "Price must be a positive number"),
   totalPrice: z.number().min(0, "Total price must be a positive number"),
-  request: z.string().min(1, "Request is required"),
+  request: z.union([z.string().optional(), z.null()]),
   requestDay: z.string().min(1, "Request day is required"),
   remark: z.string().optional(),
   approvedStatus: z.enum(["approved", "pending", "rejected"]).optional(),
