@@ -7,6 +7,7 @@ import { z } from "zod";
 import { generateSalaryForOneEmployee } from "./salaryGeneration";
 import Employee from "@/app/models/Employee";
 import { checkPurchased } from "../../purchases/check/route";
+import Salary from "@/app/models/Salary";
 
 const IdSchema = z.string().min(1, "ID is required");
 const periodSchema = z
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
     const userId = user?.id;
 
     // Validate userId
-    IdSchema.parse(userId);
+    //IdSchema.parse(userId);
 
     const body = await req.json();
     let { employees, companyId, period, inOut } = body;
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     let filter: { user?: string; _id?: string } = {
-      user: userId,
+      //user: userId,
     };
 
     if (user?.role === "admin") {
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
       employees = await Employee.find({
         _id: { $in: employees },
         company: companyId,
-        active: true,
+        //active: true, //allow inactive employees
       });
     }
 
@@ -96,21 +97,35 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate salary for all employees
-    const salaries = await Promise.all(
-      employees.map((employee: any) =>
-        generateSalaryForOneEmployee(
-          employee,
-          period,
-          inOut ? inOut : undefined
-        )
-      )
-    );
-    console.log(salaries);
+    const salaries = [];
 
-    return NextResponse.json({ salaries });
+    const exists = [];
+    for (const employee of employees) {
+      const existingSalary = await Salary.findOne({
+        employee: employee._id,
+        period: period,
+      });
+      if (existingSalary) {
+        console.log(
+          `Salary already exists for employee ${employee._id} for period ${period}`
+        );
+        exists.push(employee._id);
+        continue; // Skip this employee and continue with the next one
+      }
+
+      const salary = await generateSalaryForOneEmployee(
+        employee,
+        period,
+        inOut ? inOut : undefined
+      );
+      salaries.push(salary);
+    }
+
+    return NextResponse.json({ salaries, exists });
   } catch (error) {
     //console.error(error);
     // Handle Zod validation errors
+    console.log(error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: error.errors[0].message },

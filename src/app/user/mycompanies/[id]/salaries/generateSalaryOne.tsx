@@ -264,7 +264,11 @@ const GenerateSalaryOne = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formFields,
+          salaries: [
+            {
+              ...formFields, // The form data becomes the first element of the array
+            },
+          ],
         }),
       });
 
@@ -313,7 +317,7 @@ const GenerateSalaryOne = ({
               <Tooltip title="Save new salary record" arrow>
                 <>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     sx={{
                       ml: 3,
                     }}
@@ -352,7 +356,7 @@ const GenerateSalaryOne = ({
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="primary"
                   component="label"
                   startIcon={<Upload />}
@@ -397,7 +401,7 @@ const GenerateSalaryOne = ({
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="success"
                   component="label"
                   startIcon={<Autorenew />}

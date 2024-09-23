@@ -185,7 +185,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Create a new Salary
+// POST: Create new Salaries
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(options);
@@ -199,108 +199,132 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Parse the request body
     const body = await req.json();
-    //convert all to numbers
-    body.basic = Number(body.basic);
-    body.advanceAmount = Number(body.advanceAmount);
-    body.finalSalary = Number(body.finalSalary);
-    body.noPay.amount = Number(body.noPay.amount);
-    body.ot.amount = Number(body.ot.amount);
-    body.paymentStructure.additions.forEach((addition: any) => {
-      addition.amount = Number(addition.amount);
-    });
-    body.paymentStructure.deductions.forEach((deduction: any) => {
-      deduction.amount = Number(deduction.amount);
-    });
 
-    let parsedBody = salarySchema.parse(body);
-
-    await dbConnect();
-
-    const employee = await Employee.findById(parsedBody.employee);
-    if (!employee) {
+    if (!Array.isArray(body.salaries)) {
       return NextResponse.json(
-        { message: "Employee not found" },
-        { status: 404 }
-      );
-    }
-
-    // Create filter
-    const filter: { user?: string; _id: string } = {
-      user: userId,
-      _id: employee.company,
-    };
-    if (user?.role === "admin") {
-      // Remove user from filter
-      delete filter.user;
-    }
-    const company = await Company.findOne(filter);
-    if (!company) {
-      return NextResponse.json({ message: "Access denied." }, { status: 403 });
-    }
-
-    const existingSalary = await Salary.findOne({
-      employee: parsedBody.employee,
-      period: parsedBody.period,
-    });
-    if (existingSalary) {
-      return NextResponse.json(
-        { message: "Salary already exists" },
+        { message: "Salaries must be an array" },
         { status: 400 }
       );
     }
 
-    //check if purchased
-    if (
-      !(
-        user?.role === "admin" &&
-        (company.mode === "visit" || company.mode === "aided")
-      )
-    ) {
-      const purchasedStatus = await checkPurchased(
-        employee.company,
-        parsedBody.period
-      );
-      if (purchasedStatus !== "approved") {
+    await dbConnect();
+
+    // Initialize an array to hold valid salary objects
+    const salaryDocs = [];
+    console.log(body.salaries);
+
+    for (const salary of body.salaries) {
+      // Convert all values in each salary object in the array
+      salary.basic = Number(salary.basic);
+      salary.advanceAmount = Number(salary.advanceAmount);
+      salary.finalSalary = Number(salary.finalSalary);
+      salary.noPay.amount = Number(salary.noPay.amount);
+      salary.ot.amount = Number(salary.ot.amount);
+
+      // Convert amounts in payment structure
+      salary.paymentStructure.additions.forEach((addition: any) => {
+        addition.amount = Number(addition.amount);
+      });
+      salary.paymentStructure.deductions.forEach((deduction: any) => {
+        deduction.amount = Number(deduction.amount);
+      });
+
+      // Parse and validate each salary object against the schema
+      const parsedSalary = salarySchema.parse(salary);
+
+      // Fetch employee for validation
+      const employee = await Employee.findById(parsedSalary.employee);
+      if (!employee) {
         return NextResponse.json(
-          { message: "Month not Purchased. Purchase is " + purchasedStatus },
+          { message: `Employee not found for salary ${parsedSalary.employee}` },
+          { status: 404 }
+        );
+      }
+
+      // Check if salary already exists for this period and employee
+      const existingSalary = await Salary.findOne({
+        employee: parsedSalary.employee,
+        period: parsedSalary.period,
+      });
+      if (existingSalary) {
+        return NextResponse.json(
+          {
+            message: `Salary already exists for employee ${parsedSalary.employee} in period ${parsedSalary.period}`,
+          },
           { status: 400 }
         );
       }
+
+      // Check for company access and purchased status
+      const filter: { user?: string; _id: string } = {
+        user: userId,
+        _id: employee.company,
+      };
+      if (user?.role === "admin") {
+        delete filter.user;
+      }
+      const company = await Company.findOne(filter);
+      if (!company) {
+        return NextResponse.json(
+          { message: "Access denied." },
+          { status: 403 }
+        );
+      }
+
+      if (
+        !(
+          user?.role === "admin" &&
+          (company.mode === "visit" || company.mode === "aided")
+        )
+      ) {
+        const purchasedStatus = await checkPurchased(
+          employee.company,
+          parsedSalary.period
+        );
+        if (purchasedStatus !== "approved") {
+          return NextResponse.json(
+            {
+              message: `Month not Purchased for employee ${parsedSalary.employee}. Purchase is ${purchasedStatus}`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      // Calculate total additions and deductions
+      const totalAdditions = parsedSalary.paymentStructure.additions.reduce(
+        (total: number, addition: { amount: number }) =>
+          total + addition.amount,
+        0
+      );
+      const totalDeductions = parsedSalary.paymentStructure.deductions.reduce(
+        (total: number, deduction: { amount: number }) =>
+          total + deduction.amount,
+        0
+      );
+
+      // Calculate final salary
+      const finalSalary =
+        parsedSalary.basic +
+        totalAdditions +
+        (parsedSalary.ot.amount || 0) -
+        totalDeductions -
+        (parsedSalary.noPay.amount || 0);
+      parsedSalary.finalSalary = finalSalary;
+
+      // Add the parsed salary to the array
+      salaryDocs.push(parsedSalary);
     }
 
-    // Calculate total additions
-    const totalAdditions = parsedBody.paymentStructure.additions.reduce(
-      (total: number, addition: { amount: number }) => total + addition.amount,
-      0
-    );
-
-    // Calculate total deductions
-    const totalDeductions = parsedBody.paymentStructure.deductions.reduce(
-      (total: number, deduction: { amount: number }) =>
-        total + deduction.amount,
-      0
-    );
-
-    // Calculate final salary
-    const finalSalary =
-      parsedBody.basic +
-      totalAdditions +
-      (parsedBody.ot.amount || 0) -
-      totalDeductions -
-      (parsedBody.noPay.amount || 0);
-    // Update the parsedBody with the calculated final salary
-    parsedBody.finalSalary = finalSalary;
-
-    //create and save new salary
-    const newSalary = new Salary({
-      ...parsedBody,
-    });
-    await newSalary.save();
+    // Use insertMany to save all salary documents efficiently
+    if (salaryDocs.length > 0) {
+      await Salary.insertMany(salaryDocs);
+    }
 
     return NextResponse.json({
-      message: "Purchase created successfully",
-      purchase: "",
+      message: `${salaryDocs.length} Salary records created successfully`,
     });
   } catch (error: any) {
     console.log(error);

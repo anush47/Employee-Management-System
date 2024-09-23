@@ -20,6 +20,16 @@ function parseValue(value: string, basic: number): number {
   }
 }
 
+function generateObjectId(): string {
+  const timestamp = Math.floor(Date.now() / 1000).toString(16); // 4-byte timestamp in hex
+  const randomPart = Math.random().toString(16).substr(2, 10); // 5-byte random hex string
+  const counter = Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .padStart(6, "0"); // 3-byte counter
+
+  return timestamp + randomPart + counter;
+}
+
 export async function generateSalaryForOneEmployee(
   employee: any,
   period: string,
@@ -85,6 +95,7 @@ export async function generateSalaryForOneEmployee(
 
     // Generate the salary data
     const salaryData = {
+      _id: generateObjectId(),
       inOut,
       employee: employee._id,
       period,
