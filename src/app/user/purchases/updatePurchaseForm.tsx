@@ -22,9 +22,15 @@ import {
   Slide,
   TextField,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, HideImage } from "@mui/icons-material";
 import Link from "next/link";
+import { LoadingButton } from "@mui/lab";
 
 interface ChipData {
   key: number;
@@ -69,6 +75,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [employerNo, setEmployerNo] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
 
   const theme = useTheme();
 
@@ -164,6 +171,66 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
       }
 
       setSnackbarMessage("Purchase updated successfully");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      handleBackClick();
+    } catch (error: any) {
+      setError(error.message);
+      setSnackbarMessage(error.message);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const DeleteDialog = () => {
+    return (
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Delete Purchase</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this purchase?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <LoadingButton
+            loading={loading}
+            loadingPosition={"center"}
+            onClick={handleDeleteEntry}
+            color="error"
+            disabled={loading}
+          >
+            <span>Delete</span>
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+  const handleDeleteEntry = async () => {
+    setLoading(true);
+    //confirm using mui dialog
+
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/purchases/?purchaseId=${purchaseId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete purchase");
+      }
+
+      setSnackbarMessage("Purchase deleted successfully");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -308,11 +375,19 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
           {image && (
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                {imagePreview && (
+                {typeof imagePreview === "string" &&
+                imagePreview.startsWith("data:application/pdf") ? (
+                  <iframe
+                    src={imagePreview}
+                    title="Uploaded PDF Preview"
+                    height={400 * (29.7 / 21)}
+                    width="400"
+                  />
+                ) : (
                   <img
                     src={imagePreview as string}
-                    alt="Preview"
-                    style={{ width: "100%", borderRadius: "8px" }}
+                    alt="Uploaded Preview"
+                    style={{ maxWidth: "400px", height: "auto" }}
                   />
                 )}
               </FormControl>
@@ -321,7 +396,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
           <Grid item xs={12} sm={6}>
             {image && (
               <>
-                <Tooltip title="Delete Image" arrow>
+                <Tooltip title="Delete Media" arrow>
                   <span className="mb-2">
                     <Button
                       variant="outlined"
@@ -329,10 +404,10 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
                       onClick={handleImageDelete}
                       disabled={loading}
                       startIcon={
-                        loading ? <CircularProgress size={24} /> : null
+                        loading ? <CircularProgress size={24} /> : <HideImage />
                       }
                     >
-                      {loading ? "Updating..." : "Delete Image"}
+                      {loading ? "Loading..." : "Delete Media"}
                     </Button>
                   </span>
                 </Tooltip>
@@ -421,6 +496,20 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
                 </Button>
               </span>
             </Tooltip>
+            <hr className="my-3" />
+            <Tooltip title="Delete Entry" arrow>
+              <span className="mb-2">
+                <Button
+                  variant="outlined"
+                  color={"error"}
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={loading}
+                  startIcon={loading ? <CircularProgress size={24} /> : null}
+                >
+                  {loading ? "Loading..." : "Delete Entry"}
+                </Button>
+              </span>
+            </Tooltip>
           </Grid>
         </Grid>
       </Box>
@@ -444,6 +533,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <DeleteDialog />
     </Box>
   );
 };

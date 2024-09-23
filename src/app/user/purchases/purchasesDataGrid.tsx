@@ -351,7 +351,7 @@ const PurchasesDataGrid: React.FC<{
       _id: false,
       //company: false,
       employerNo: false,
-      periods: false,
+      //periods: false,
       //price: false,
       request: false,
       remark: false,

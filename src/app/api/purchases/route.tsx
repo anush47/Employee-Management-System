@@ -11,7 +11,9 @@ import { calculateTotalPrice } from "./price/route";
 
 // Define schema for purchase validation
 const purchaseSchema = z.object({
-  periods: z.array(z.string().min(1, "Period is required")),
+  periods: z
+    .array(z.string().min(1, "Period is required"))
+    .min(1, "At least one period is required"),
   company: z
     .string()
     .min(1, "Company ID is required")
@@ -271,6 +273,67 @@ export async function PUT(req: NextRequest) {
     });
   } catch (error: any) {
     //console.log(error);
+    return NextResponse.json(
+      {
+        message:
+          error instanceof z.ZodError
+            ? error.errors[0].message
+            : "An unexpected error occurred",
+      },
+      { status: error instanceof z.ZodError ? 400 : 500 }
+    );
+  }
+}
+
+// DELETE: Delete an existing purchase
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(options);
+    const user = session?.user || null;
+    const userId = user?.id;
+
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (user.role !== "admin") {
+      return NextResponse.json({ message: "Access denied" }, { status: 403 });
+    }
+
+    const purchaseId = req.nextUrl.searchParams.get("purchaseId");
+
+    await dbConnect();
+
+    const existingPurchase = await Purchase.findById(purchaseId);
+    if (!existingPurchase) {
+      return NextResponse.json(
+        { message: "Purchase not found" },
+        { status: 404 }
+      );
+    }
+
+    const company = await Company.findById(existingPurchase.company);
+    if (!company) {
+      return NextResponse.json({ message: "Access denied." }, { status: 403 });
+    }
+
+    const deletedPurchase = await Purchase.findByIdAndDelete(purchaseId);
+
+    if (!deletedPurchase) {
+      return NextResponse.json(
+        { message: "Failed to delete purchase" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Purchase deleted successfully",
+      purchase: deletedPurchase,
+    });
+  } catch (error: any) {
     return NextResponse.json(
       {
         message:

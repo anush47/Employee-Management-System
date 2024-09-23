@@ -140,25 +140,20 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
 
   React.useEffect(() => {
     setBreadcrumbs([
-      <LinkM
-        underline="hover"
-        key="1"
-        color={theme.palette.background.paper}
-        href="/"
-      >
+      <LinkM underline="hover" key="1" color="text.main" href="/">
         Home
       </LinkM>,
       <LinkM
         underline="hover"
         key="2"
-        color={theme.palette.background.paper}
+        color="text.main"
         href="
       /user?userPageSelect=mycompanies
     "
       >
         My Companies
       </LinkM>,
-      <LinkM underline="none" key="3" color={theme.palette.background.paper}>
+      <LinkM underline="none" key="3" color="text.main">
         {(() => {
           switch (selected) {
             case "dashboard":

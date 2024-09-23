@@ -16,8 +16,9 @@ import {
   CardContent,
   CardActions,
   TextField,
+  FormControl,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
+import { ArrowBack, ShoppingBag } from "@mui/icons-material";
 import dayjs from "dayjs";
 import Slide from "@mui/material/Slide";
 import { companyId } from "../clientComponents/companySideBar";
@@ -443,7 +444,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <Typography variant="body1" sx={{ mt: 2 }}>
               Please make the payment and upload the payment slip to request.
             </Typography>
@@ -461,24 +462,16 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
                 onChange={handleImageChange}
               />
             </Button>
-            {imagePreview && (
-              <Box sx={{ mt: 2, justifyContent: "left" }}>
-                <img
-                  src={imagePreview as string}
-                  alt="Uploaded Preview"
-                  style={{ maxWidth: "100px", height: "auto" }}
-                />
-              </Box>
-            )}
-          </Grid>
-          <Grid item xs={12}>
+
+            <hr className="my-2" />
             <Tooltip title="Create purchase" arrow>
               <span>
                 <Button
                   variant="contained"
                   color="success"
+                  endIcon={<ShoppingBag />}
                   onClick={handleSubmit}
-                  disabled={loading || totalPrice === 0}
+                  disabled={loading || (totalPrice ?? 0) <= 0}
                   startIcon={loading ? <CircularProgress size={24} /> : null}
                 >
                   {loading ? "Purchasing..." : "Purchase"}
@@ -486,6 +479,28 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
               </span>
             </Tooltip>
           </Grid>
+          <Grid item xs={12} sm={6}>
+            {imagePreview && (
+              <FormControl fullWidth>
+                {typeof imagePreview === "string" &&
+                imagePreview.startsWith("data:application/pdf") ? (
+                  <iframe
+                    src={imagePreview}
+                    title="Uploaded PDF Preview"
+                    height={400 * (29.7 / 21)}
+                    width="400"
+                  />
+                ) : (
+                  <img
+                    src={imagePreview as string}
+                    alt="Uploaded Preview"
+                    style={{ maxWidth: "400px", height: "auto" }}
+                  />
+                )}
+              </FormControl>
+            )}
+          </Grid>
+          <Grid item xs={12}></Grid>
         </Grid>
       </Box>
       <Snackbar

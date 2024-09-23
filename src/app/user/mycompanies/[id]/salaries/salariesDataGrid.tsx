@@ -121,7 +121,7 @@ const SalariesDataGrid: React.FC<{
 
     {
       field: "advanceAmount",
-      headerName: "Advance Amount",
+      headerName: "Advance",
       type: "number",
       flex: 1,
       align: "left",

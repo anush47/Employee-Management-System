@@ -22,7 +22,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { Cancel, Save, Search } from "@mui/icons-material";
+import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -223,15 +223,15 @@ const AddCompanyForm: React.FC<{
               mb: 2,
             }}
           >
-            <Typography variant={isSmallScreen ? "h5" : "h4"}>
-              Add Company
-            </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Tooltip title="Discard and go back to my companies" arrow>
-                <IconButton color="error" onClick={handleBackClick}>
-                  <Cancel />
+                <IconButton onClick={handleBackClick}>
+                  <ArrowBack />
                 </IconButton>
               </Tooltip>
+              <Typography variant={isSmallScreen ? "h5" : "h4"}>
+                Add Company
+              </Typography>
               <Tooltip title="Save new company" arrow>
                 <Button
                   variant="outlined"

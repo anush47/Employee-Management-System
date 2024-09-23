@@ -124,15 +124,10 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   const [breadcrumbs, setBreadcrumbs] = React.useState<React.ReactNode[]>([]);
   React.useEffect(() => {
     setBreadcrumbs([
-      <LinkM
-        underline="hover"
-        key="1"
-        color={theme.palette.background.paper}
-        href="/"
-      >
+      <LinkM underline="hover" key="1" color="text.main" href="/">
         Home
       </LinkM>,
-      <LinkM underline="none" key="2" color={theme.palette.background.paper}>
+      <LinkM underline="none" key="2" color="text.main">
         {(() => {
           switch (selected) {
             case "dashboard":

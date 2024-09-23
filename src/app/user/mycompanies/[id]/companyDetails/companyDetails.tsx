@@ -29,14 +29,7 @@ import {
   MenuItem,
   InputAdornment,
 } from "@mui/material";
-import {
-  Save,
-  Cancel,
-  Edit,
-  Delete,
-  Search,
-  ArrowBack,
-} from "@mui/icons-material";
+import { Save, Cancel, Edit, Delete, Search } from "@mui/icons-material";
 import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { CompanyValidation } from "../../clientComponents/companyValidation";
@@ -403,17 +396,17 @@ const CompanyDetails = ({
               gap: 1,
             }}
           >
+            <Typography variant="h4">Company Details</Typography>
             {isEditing && (
               <Box sx={{ display: "flex", gap: 1 }}>
                 <Tooltip title="Cancel" arrow>
-                  <IconButton onClick={handleCancelClick}>
-                    <ArrowBack />
+                  <IconButton color="error" onClick={handleCancelClick}>
+                    <Cancel />
                   </IconButton>
                 </Tooltip>
-                <Typography variant="h4">Company Details</Typography>
                 <Tooltip title="Save changes" arrow>
                   <Button
-                    variant="outlined"
+                    variant="text"
                     color="success"
                     startIcon={<Save />}
                     onClick={handleSaveClick}
@@ -425,14 +418,11 @@ const CompanyDetails = ({
               </Box>
             )}
             {!isEditing && (
-              <>
-                <Typography variant="h4">Company Details</Typography>
-                <Tooltip title="Edit" arrow>
-                  <IconButton color="primary" onClick={handleEditClick}>
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
-              </>
+              <Tooltip title="Edit" arrow>
+                <IconButton color="primary" onClick={handleEditClick}>
+                  <Edit />
+                </IconButton>
+              </Tooltip>
             )}
           </Box>
         }
