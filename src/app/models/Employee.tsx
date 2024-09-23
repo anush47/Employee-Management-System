@@ -173,6 +173,7 @@ const employeeSchema = new Schema<IEmployee>(
             },
           },
         ],
+        default: [{ name: "EPF 8%", amount: null }],
       },
     },
   },

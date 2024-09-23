@@ -168,7 +168,7 @@ const companySchema = new Schema<ICompany>(
             },
           },
         ],
-        default: [],
+        default: [{ name: "EPF 8%", amount: null }],
       },
     },
   },

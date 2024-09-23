@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const userId = user?.id;
 
     // Validate userId
-    //IdSchema.parse(userId);
+    IdSchema.parse(userId);
 
     const body = await req.json();
     let { employees, companyId, period, inOut } = body;
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     let filter: { user?: string; _id?: string } = {
-      //user: userId,
+      user: userId,
     };
 
     if (user?.role === "admin") {

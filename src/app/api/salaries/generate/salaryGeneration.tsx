@@ -2,8 +2,10 @@ import Employee from "@/app/models/Employee";
 import Salary from "@/app/models/Salary";
 
 // Helper function to parse the value for additions/deductions
-function parseValue(value: string, basic: number): number {
-  if (value.includes("-")) {
+function parseValue(name: string, value: string, basic: number): number {
+  if (name === "EPF 8%") {
+    return basic * 0.08;
+  } else if (value && value.includes("-")) {
     // If the value is a range like "2000-5000", pick a random multiple of 100 within the range
     const [min, max] = value.split("-").map(Number);
     const randomValue =
@@ -40,7 +42,7 @@ export async function generateSalaryForOneEmployee(
     const parsedAdditions = employee.paymentStructure.additions.map(
       (addition: { name: string; amount: string }) => ({
         name: addition.name,
-        amount: parseValue(addition.amount, employee.basic), // Store the computed value
+        amount: parseValue(addition.name, addition.amount, employee.basic), // Store the computed value
       })
     );
 
@@ -48,7 +50,7 @@ export async function generateSalaryForOneEmployee(
     const parsedDeductions = employee.paymentStructure.deductions.map(
       (deduction: { name: string; amount: string }) => ({
         name: deduction.name,
-        amount: parseValue(deduction.amount, employee.basic), // Store the computed value
+        amount: parseValue(deduction.name, deduction.amount, employee.basic), // Store the computed value
       })
     );
 
@@ -116,7 +118,6 @@ export async function generateSalaryForOneEmployee(
       finalSalary:
         employee.basic + totalAdditions + ot - totalDeductions - noPay, // Calculating final salary
     };
-
     return salaryData;
   } catch (error) {
     return {

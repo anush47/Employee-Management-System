@@ -151,6 +151,7 @@ const GenerateSalaryOne = ({
         }
         const data = await response.json();
         //check if data.salaries[0] is in correct form
+        console.log(data.salaries[0]);
         if (
           !data.salaries[0] ||
           !data.salaries[0].employee ||
@@ -158,7 +159,6 @@ const GenerateSalaryOne = ({
         ) {
           throw new Error("Invalid Salary Data");
         }
-        console.log(data.salaries[0]);
 
         setFormFields(data.salaries[0]);
         data.sa;
