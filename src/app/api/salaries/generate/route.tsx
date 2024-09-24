@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         console.log("huttak");
         return NextResponse.json(
           {
-            message: `Month not Purchased for ${period} . Purchase is ${purchasedStatus}`,
+            message: `Month not Purchased for ${period} .Purchase is ${purchasedStatus}`,
           },
           { status: 400 }
         );
