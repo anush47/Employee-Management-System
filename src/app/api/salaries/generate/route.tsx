@@ -14,7 +14,7 @@ const periodSchema = z
   .string()
   .regex(/^\d{4}-\d{2}$/, "Period must be in the format YYYY-MM");
 
-// GET request handler
+// POST request handler
 export async function POST(req: NextRequest) {
   try {
     // Get user session
@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
 
     let filter: { user?: string; _id?: string } = {
       user: userId,
+      _id: companyId,
     };
 
     if (user?.role === "admin") {
@@ -66,8 +67,11 @@ export async function POST(req: NextRequest) {
     ) {
       const purchasedStatus = await checkPurchased(companyId, period);
       if (purchasedStatus !== "approved") {
+        console.log("huttak");
         return NextResponse.json(
-          { message: "Month not Purchased. Purchase is " + purchasedStatus },
+          {
+            message: `Month not Purchased for ${period} . Purchase is ${purchasedStatus}`,
+          },
           { status: 400 }
         );
       }
@@ -107,7 +111,7 @@ export async function POST(req: NextRequest) {
       });
       if (existingSalary) {
         console.log(
-          `Salary already exists for employee ${employee._id} for period ${period}`
+          `Salary already exists for employee ${employee.name} for period ${period}`
         );
         exists.push(employee._id);
         continue; // Skip this employee and continue with the next one

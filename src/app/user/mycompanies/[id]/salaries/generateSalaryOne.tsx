@@ -31,6 +31,7 @@ import { Autorenew, Save, Upload } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { handleCsvUpload } from "./csvUpload";
 import { blue } from "@mui/material/colors";
+import { LoadingButton } from "@mui/lab";
 
 const GenerateSalaryOne = ({
   period,
@@ -119,60 +120,59 @@ const GenerateSalaryOne = ({
     }
   }, [employeeId]);
 
+  const fetchSalary = async () => {
+    try {
+      setLoading(true);
+      //use post method
+      const response = await fetch(`/api/salaries/generate`, {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          employees: [employeeId],
+          period,
+          inOut,
+        }),
+      });
+      if (!response.ok) {
+        setFormFields((prevFields) => ({
+          ...prevFields,
+          period,
+        }));
+        const data = await response.json();
+        if (
+          typeof data?.message === "string" &&
+          data.message.startsWith("Month not Purchased")
+        ) {
+          throw new Error(data.message);
+        } else {
+          throw new Error("Failed to fetch Salary");
+        }
+      }
+      const data = await response.json();
+      //check if data.salaries[0] is in correct form
+      console.log(data.salaries[0]);
+      if (
+        !data.salaries[0] ||
+        !data.salaries[0].employee ||
+        !data.salaries[0].period
+      ) {
+        throw new Error("Invalid Salary Data");
+      }
+
+      setFormFields(data.salaries[0]);
+      data.sa;
+    } catch (error) {
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error fetching Salary."
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
   // Fetch salary
   useEffect(() => {
-    const fetchSalary = async () => {
-      try {
-        setLoading(true);
-        //use post method
-        const response = await fetch(`/api/salaries/generate`, {
-          method: "POST",
-          body: JSON.stringify({
-            companyId,
-            employees: [employeeId],
-            period,
-            inOut,
-          }),
-        });
-        if (!response.ok) {
-          setFormFields((prevFields) => ({
-            ...prevFields,
-            period,
-          }));
-          const data = await response.json();
-          if (
-            typeof data?.message === "string" &&
-            data.message.startsWith("Month not Purchased")
-          ) {
-            throw new Error(data.message);
-          } else {
-            throw new Error("Failed to fetch Salary");
-          }
-        }
-        const data = await response.json();
-        //check if data.salaries[0] is in correct form
-        console.log(data.salaries[0]);
-        if (
-          !data.salaries[0] ||
-          !data.salaries[0].employee ||
-          !data.salaries[0].period
-        ) {
-          throw new Error("Invalid Salary Data");
-        }
-
-        setFormFields(data.salaries[0]);
-        data.sa;
-      } catch (error) {
-        setSnackbarMessage(
-          error instanceof Error ? error.message : "Error fetching Salary."
-        );
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (employeeId?.length === 24) {
       fetchSalary();
     } else {
@@ -400,14 +400,19 @@ const GenerateSalaryOne = ({
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
-                <Button
+                <LoadingButton
                   variant="outlined"
                   color="success"
                   component="label"
+                  loading={loading}
+                  loadingPosition="center"
                   startIcon={<Autorenew />}
+                  onClick={() => {
+                    fetchSalary();
+                  }}
                 >
-                  Regenerate
-                </Button>
+                  <span>Regenerate</span>
+                </LoadingButton>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>

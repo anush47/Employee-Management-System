@@ -286,7 +286,7 @@ export async function POST(req: NextRequest) {
         if (purchasedStatus !== "approved") {
           return NextResponse.json(
             {
-              message: `Month not Purchased for employee ${parsedSalary.employee}. Purchase is ${purchasedStatus}`,
+              message: `${parsedSalary.period} not Purchased for ${company.name}. Purchase is ${purchasedStatus}`,
             },
             { status: 400 }
           );
