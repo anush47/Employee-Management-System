@@ -172,6 +172,33 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
   const onGenerateClick = async () => {
     try {
       setLoading(true);
+      // Check for each employeeId if there is a salary with the same period and employeeId in generatedSalaries
+      const alreadyGenerated = employeeIds.some((employeeId) =>
+        generatedSalaries.some(
+          (salary) => salary.employee === employeeId && salary.period === period
+        )
+      );
+
+      if (alreadyGenerated) {
+        const alreadyGeneratedEmployeeNames = employeeIds
+          .filter((employeeId) =>
+            generatedSalaries.some(
+              (salary) =>
+                salary.employee === employeeId && salary.period === period
+            )
+          )
+          .map((employeeId) => employees.find((e) => e.id === employeeId)?.name)
+          .filter(Boolean) // Remove undefined names
+          .join(", ");
+
+        setSnackbarMessage(
+          `Salaries for employees (${alreadyGeneratedEmployeeNames}) have already been generated for this period.`
+        );
+        setSnackbarSeverity("warning");
+        setSnackbarOpen(true);
+        return;
+      }
+
       //use post method
       const response = await fetch(`/api/salaries/generate`, {
         method: "POST",
@@ -196,10 +223,12 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
       }
       const data = await response.json();
       //check if data.salaries[0] is in correct form
+      console.log(data);
       if (
-        !data.salaries[0] ||
-        !data.salaries[0].employee ||
-        !data.salaries[0].period
+        (!data.salaries[0] ||
+          !data.salaries[0].employee ||
+          !data.salaries[0].period) &&
+        !(data.exists && data.exists.length > 0)
       ) {
         throw new Error("Invalid Salary Data");
       }

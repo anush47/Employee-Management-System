@@ -164,7 +164,7 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       otReason: false,
       noPayReason: false,
       nic: false,
-      delete: false,
+      //delete: false,
       paymentStructure: false,
     });
 
@@ -337,21 +337,11 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
 
   const onDeleteClick = async (salaryId: string) => {
     setLoading(true);
-    // Perform DELETE request to delete the salary record
-    const response = await fetch(`/api/salaries/?salaryId=${salaryId}`, {
-      method: "DELETE",
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      // Wait before clearing the form
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      //remove row
-      setGeneratedSalaries(
-        generatedSalaries.filter((salary) => salary.id !== salaryId)
-      );
-    }
+    //remove the salary from generated salaries
+    const newSalaries = generatedSalaries.filter(
+      (salary) => salary.id !== salaryId
+    );
+    setGeneratedSalaries(newSalaries);
     setLoading(false);
   };
 

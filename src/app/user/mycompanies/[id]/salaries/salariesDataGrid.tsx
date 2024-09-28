@@ -3,6 +3,7 @@ import {
   DataGrid,
   GridColDef,
   GridColumnVisibilityModel,
+  GridRowSelectionModel,
   GridToolbar,
 } from "@mui/x-data-grid";
 import {
@@ -226,12 +227,15 @@ const SalariesDataGrid: React.FC<{
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
-      basic: false,
+      //basic: false,
       otReason: false,
       noPayReason: false,
       nic: false,
       delete: false,
     });
+
+  const [rowSelectionModel, setRowSelectionModel] =
+    React.useState<GridRowSelectionModel>([]);
 
   const handleRowUpdate = async (newSalary: any) => {
     try {
@@ -370,10 +374,10 @@ const SalariesDataGrid: React.FC<{
   };
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [salaryId, setSalaryId] = useState("");
+  const [salaryIds, setSalaryIds] = useState<string[]>([]);
 
   const handleDeleteClick = (salayId: string) => {
-    setSalaryId(salayId);
+    setSalaryIds([salayId]);
     setDialogOpen(true);
   };
 
@@ -381,7 +385,7 @@ const SalariesDataGrid: React.FC<{
     if (confirmed) {
       // Perform the delete action here
       console.log(`Deleting salary record`);
-      await onDeleteClick(salaryId);
+      await onDeleteClick(salaryIds);
     }
     setDialogOpen(false);
   };
@@ -429,12 +433,18 @@ const SalariesDataGrid: React.FC<{
     );
   };
 
-  const onDeleteClick = async (salaryId: string) => {
+  const onDeleteClick = async (salaryIds: string[]) => {
     setLoading(true);
     try {
       // Perform DELETE request to delete the salary record
-      const response = await fetch(`/api/salaries/?salaryId=${salaryId}`, {
+      const response = await fetch(`/api/salaries/`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          salaryIds: salaryIds,
+        }),
       });
 
       const result = await response.json();
@@ -447,7 +457,9 @@ const SalariesDataGrid: React.FC<{
         // Wait before clearing the form
         await new Promise((resolve) => setTimeout(resolve, 200));
         //remove row
-        setSalaries(salaries.filter((salary) => salary.id !== salaryId));
+        setSalaries(
+          salaries.filter((salary) => !salaryIds.includes(salary.id))
+        );
       } else {
         // Handle validation or other errors returned by the API
         setSnackbarMessage(
@@ -467,11 +479,15 @@ const SalariesDataGrid: React.FC<{
     }
   };
 
+  const deleteSelected = async () => {
+    setSalaryIds(rowSelectionModel as string[]);
+    setDialogOpen(true);
+  };
+
   return (
     <Box
       sx={{
         width: "100%",
-        height: 400,
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -483,34 +499,63 @@ const SalariesDataGrid: React.FC<{
         </Alert>
       )}
       {!loading && !error && (
-        <DataGrid
-          rows={salaries}
-          columns={columns}
-          editMode="row"
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
+        <div>
+          {isEditing && rowSelectionModel.length > 0 && (
+            <Button
+              sx={{
+                mb: 1,
+              }}
+              variant="outlined"
+              color="error"
+              onClick={deleteSelected}
+            >
+              Delete Selected
+            </Button>
+          )}
+
+          <DataGrid
+            rows={salaries}
+            columns={columns}
+            sx={{
+              height: 400,
+            }}
+            //autoPageSize
+            editMode="row"
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
               },
-            },
-          }}
-          pageSizeOptions={[5]}
-          slots={{ toolbar: GridToolbar }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-            },
-          }}
-          disableRowSelectionOnClick
-          disableColumnFilter
-          disableDensitySelector
-          processRowUpdate={handleRowUpdate}
-          onProcessRowUpdateError={handleRowUpdateError}
-          columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={(newModel) =>
-            setColumnVisibilityModel(newModel)
-          }
-        />
+              filter: {
+                filterModel: {
+                  items: [],
+                  quickFilterExcludeHiddenColumns: false,
+                },
+              },
+            }}
+            pageSizeOptions={[5, 10]}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+              },
+            }}
+            disableRowSelectionOnClick
+            checkboxSelection={isEditing}
+            //disableColumnFilter
+            disableDensitySelector
+            processRowUpdate={handleRowUpdate}
+            onProcessRowUpdateError={handleRowUpdateError}
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={(newModel) =>
+              setColumnVisibilityModel(newModel)
+            }
+            onRowSelectionModelChange={(newModel) =>
+              setRowSelectionModel(newModel)
+            }
+          />
+        </div>
       )}
 
       <Snackbar
@@ -533,7 +578,7 @@ const SalariesDataGrid: React.FC<{
         open={dialogOpen}
         onClose={handleDialogClose}
         title="Confirm Deletion"
-        message={`Are you sure you want to delete the salary record?`}
+        message={`Are you sure you want to delete the salary record(s) ?`}
       />
     </Box>
   );

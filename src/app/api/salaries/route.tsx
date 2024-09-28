@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
       if (existingSalary) {
         return NextResponse.json(
           {
-            message: `Salary already exists for employee ${parsedSalary.employee} in period ${parsedSalary.period}`,
+            message: `Salary already exists for employee ${employee.name} in period ${parsedSalary.period}`,
           },
           { status: 400 }
         );
@@ -458,7 +458,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// DELETE: Delete an existing salary
+// DELETE: Delete existing salaries
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(options);
@@ -471,105 +471,83 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const salaryId = req.nextUrl.searchParams.get("salaryId");
-    const companyId = req.nextUrl.searchParams.get("companyId");
-    const period = req.nextUrl.searchParams.get("period");
-    if (!salaryId && !companyId && !period) {
-      return NextResponse.json({ message: "ID is required" }, { status: 400 });
-    }
-
-    //if salaryId
-    if (salaryId) {
-      await dbConnect();
-      const salary = await Salary.findById(salaryId);
-      if (!salary) {
-        return NextResponse.json(
-          { message: "Salary not found" },
-          { status: 404 }
-        );
-      }
-
-      //get employee.company from employee
-      const employee = await Employee.findById(salary.employee).select(
-        "company"
-      );
-      if (!employee) {
-        return NextResponse.json(
-          { message: "Employee not found" },
-          { status: 404 }
-        );
-      }
-      //check if user is the owner of the company
-      let filter: { user?: string; _id: string } = {
-        user: userId,
-        _id: employee.company,
-      };
-      if (user.role === "admin") {
-        delete filter.user;
-      }
-      const company = await Company.findOne(filter);
-      if (!company) {
-        return NextResponse.json(
-          { message: "Access denied." },
-          { status: 403 }
-        );
-      }
-      await Salary.findByIdAndDelete(salaryId);
+    const { salaryIds } = await req.json();
+    if (!Array.isArray(salaryIds) || salaryIds.length === 0) {
       return NextResponse.json(
-        { message: "Salary deleted successfully" },
-        { status: 200 }
-      );
-    } else if (companyId && period) {
-      await dbConnect();
-      // Create filter
-      const filter: { user?: string; _id: string } = {
-        user: userId,
-        _id: companyId,
-      };
-      if (user?.role === "admin") {
-        // Remove user from filter
-        delete filter.user;
-      }
-      const company = await Company.findOne(filter);
-      if (!company) {
-        return NextResponse.json(
-          { message: "Access denied." },
-          { status: 403 }
-        );
-      }
-
-      //find employee ids of that company
-      const employees = await Employee.find({ company: companyId }).select(
-        "_id"
-      );
-      const employeeIds = employees.map((employee) => employee._id);
-      //delete all salaries of that company of that period
-      await Salary.deleteMany({
-        employee: { $in: employeeIds },
-        period: period,
-      });
-      return NextResponse.json(
-        { message: "Salaries deleted successfully" },
-        { status: 200 }
+        { message: "Array of salary IDs is required" },
+        { status: 400 }
       );
     }
 
-    const salary = await Salary.findById(salaryId);
-    if (!salary) {
+    await dbConnect();
+
+    // Local cache for companies and employees
+    const companyCache = new Map();
+    const employeeCache = new Map();
+
+    // Fetch all employees related to the salaries
+    const salaries = await Salary.find({ _id: { $in: salaryIds } }).select(
+      "employee"
+    );
+    if (salaries.length === 0) {
       return NextResponse.json(
-        { message: "Salary not found" },
+        { message: "No salaries found for the provided IDs" },
         { status: 404 }
       );
     }
 
-    await Salary.findByIdAndDelete(salaryId);
+    const employeeIds = salaries.map((salary) => salary.employee);
+    const employees = await Employee.find({ _id: { $in: employeeIds } }).select(
+      "company"
+    );
+
+    // Check if user is authorized to delete these salaries
+    const companyIds = employees.map((employee) => employee.company);
+    const uniqueCompanyIds = companyIds.filter(
+      (value, index, self) => self.indexOf(value) === index
+    );
+
+    // Fetch companies and cache them
+    const companies = await Promise.all(
+      uniqueCompanyIds.map(async (companyId) => {
+        if (companyCache.has(companyId)) {
+          return companyCache.get(companyId);
+        }
+        const filter: { user?: string; _id: string } = {
+          user: userId,
+          _id: companyId,
+        };
+        if (user.role === "admin") {
+          delete filter.user;
+        }
+        const company = await Company.findOne(filter);
+        if (company) {
+          companyCache.set(companyId, company);
+        }
+        return company;
+      })
+    );
+
+    if (companies.some((company) => !company)) {
+      return NextResponse.json({ message: "Access denied." }, { status: 403 });
+    }
+
+    // Delete all salaries in one operation
+    const deleteResult = await Salary.deleteMany({ _id: { $in: salaryIds } });
+
+    if (deleteResult.deletedCount === 0) {
+      return NextResponse.json(
+        { message: "No salaries were deleted" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(
-      { message: "Salary deleted successfully" },
+      { message: "Salaries deleted successfully" },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Error deleting salary:", error);
+    console.error("Error deleting salaries:", error);
     return NextResponse.json(
       { message: "An unexpected error occurred" },
       { status: 500 }
