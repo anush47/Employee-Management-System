@@ -321,13 +321,6 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
           subheader={`Period - ${period}`}
         />
         <CardContent>
-          <EmployeesInclude
-            employees={employees}
-            employeeIds={employeeIds}
-            handleIncludeChange={handleIncludeChange}
-          />
-
-          <hr className="my-2" />
           <Grid container spacing={3}>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
@@ -389,6 +382,12 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
               </FormControl>
             </Grid>
           </Grid>
+          <hr className="my-2" />
+          <EmployeesInclude
+            employees={employees}
+            employeeIds={employeeIds}
+            handleIncludeChange={handleIncludeChange}
+          />
           <hr className="my-2" />
           {generatedSalaries && generatedSalaries.length > 0 && (
             <GeneratedSalaries
