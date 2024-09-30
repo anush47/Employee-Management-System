@@ -23,6 +23,7 @@ import Link from "next/link";
 dayjs.locale("en-gb");
 
 export interface Employee {
+  _id: string;
   id: string;
   designation: string;
   name: string;
@@ -73,13 +74,10 @@ const EmployeesDataGrid: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
-  const [companyCache, setCompanyCache] = useState<{
-    [key: string]: { companyName: string; employerNo: string };
-  }>({});
 
   const columns: GridColDef[] = [
     {
-      field: "employerNo",
+      field: "companyEmployerNo",
       headerName: "Employer No",
       flex: 1,
     },
@@ -90,10 +88,8 @@ const EmployeesDataGrid: React.FC<{
       renderCell: (params) => (
         <Link
           href={`user/mycompanies/${
-            //find key from companycache
-            Object.keys(companyCache).find(
-              (key) => companyCache[key].companyName == params.value
-            ) || ""
+            //companyId of the given params
+            employees.find((employee) => employee.id === params.id)?.company
           }?companyPageSelect=details`}
         >
           <Button variant="text">{params.value}</Button>
@@ -331,59 +327,14 @@ const EmployeesDataGrid: React.FC<{
           throw new Error("Failed to fetch employees");
         }
         const data = await response.json();
+        console.log(data);
 
-        // Fetch company names and map them to employees
-        const employeesWithCompany = await Promise.all(
-          data.employees.map(async (employee: any) => {
-            const companyId = employee.company;
-
-            // Check if the company data is already in the local cache
-            if (companyCache[companyId]) {
-              const { companyName, employerNo } = companyCache[companyId];
-
-              return {
-                ...employee,
-                id: employee._id,
-                companyName: name,
-                employerNo: employerNo,
-              };
-            }
-
-            try {
-              // Fetch the company name using the company ID
-              const companyResponse = await fetch(
-                `/api/companies/one?companyId=${companyId}`
-              );
-              if (!companyResponse.ok) {
-                throw new Error("Failed to fetch company name");
-              }
-              const companyData = await companyResponse.json();
-
-              // Store the fetched company data in the local cache
-              companyCache[companyId] = {
-                companyName: companyData.company?.name || "Unknown",
-                employerNo: companyData.company?.employerNo || "Unknown",
-              };
-
-              // Add the company name to the employee object
-              return {
-                ...employee,
-                id: employee._id,
-                companyName: companyCache[companyId].companyName,
-                employerNo: companyCache[companyId].employerNo,
-              };
-            } catch {
-              return {
-                ...employee,
-                id: employee._id,
-                companyName: "Unknown", // Set "Unknown" if there's an error
-                employerNo: "Unknown",
-              };
-            }
-          })
+        setEmployees(
+          data.employees.map((employee: Employee) => ({
+            ...employee,
+            id: employee._id,
+          }))
         );
-
-        setEmployees(employeesWithCompany);
       } catch (error) {
         setError(
           error instanceof Error
@@ -546,7 +497,7 @@ const EmployeesDataGrid: React.FC<{
       resignedAt: false,
       nic: false,
       //company: false,
-      employerNo: false,
+      companyEmployerNo: false,
       _id: false,
       designation: false,
       divideBy: false,
@@ -581,11 +532,17 @@ const EmployeesDataGrid: React.FC<{
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 5,
+                pageSize: 10,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
               },
             },
           }}
-          pageSizeOptions={[5]}
+          pageSizeOptions={[5, 10]}
           slots={{ toolbar: GridToolbar }}
           slotProps={{
             toolbar: {
@@ -594,7 +551,7 @@ const EmployeesDataGrid: React.FC<{
           }}
           //checkboxSelection
           disableRowSelectionOnClick
-          disableColumnFilter
+          //disableColumnFilter
           disableDensitySelector
           processRowUpdate={handleRowUpdate}
           onProcessRowUpdateError={handleRowUpdateError}

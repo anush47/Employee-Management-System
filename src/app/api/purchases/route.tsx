@@ -72,7 +72,13 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      return NextResponse.json({ purchase });
+      const enrichedPurchase = {
+        ...purchase._doc,
+        companyName: company.name,
+        companyEmployerNo: company.employerNo,
+      };
+
+      return NextResponse.json({ purchase: enrichedPurchase });
     } else if (companyId) {
       // Create filter
       const companyFilter = { user: userId, _id: companyId };
@@ -100,19 +106,33 @@ export async function GET(req: NextRequest) {
         }
 
         const purchases = await Purchase.find(filter).select("-request");
-        return NextResponse.json({ purchases });
-      } else {
-        // const purchases = await Purchase.find().select("-request");
-        // return NextResponse.json({ purchases });
-        const purchases = await Purchase.find().lean();
-
-        // Map through purchases and add request flag without fetching the actual image
-        const purchasesWithRequestFlag = purchases.map((purchase) => ({
-          ...purchase,
-          request: purchase.request ? true : false, // Add request flag
+        const enrichedPurchases = purchases.map((purchase) => ({
+          ...purchase._doc,
+          companyName: company.name,
+          companyEmployerNo: company.employerNo,
         }));
 
-        return NextResponse.json({ purchases: purchasesWithRequestFlag });
+        return NextResponse.json({ purchases: enrichedPurchases });
+      } else {
+        const purchases = await Purchase.find().lean();
+        const companies = await Company.find()
+          .select("_id name employerNo")
+          .lean();
+
+        // Map through purchases and add company details
+        const purchasesWithCompanyDetails = purchases.map((purchase) => {
+          const company = companies.find(
+            (comp) => String(comp._id) === String(purchase.company)
+          );
+          return {
+            ...purchase,
+            request: purchase.request ? true : false, // Add request flag
+            companyName: company?.name,
+            companyEmployerNo: company?.employerNo,
+          };
+        });
+
+        return NextResponse.json({ purchases: purchasesWithCompanyDetails });
       }
     } else {
       return NextResponse.json(

@@ -77,16 +77,6 @@ const EmployeesDataGrid: React.FC<{
 
   const columns: GridColDef[] = [
     {
-      field: "_id",
-      headerName: "ID",
-      flex: 1,
-    },
-    {
-      field: "company",
-      headerName: "Company ID",
-      flex: 1,
-    },
-    {
       field: "memberNo",
       headerName: "Member No",
       editable: isEditingEmployeeInHome,
@@ -512,11 +502,17 @@ const EmployeesDataGrid: React.FC<{
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 5,
+                pageSize: 10,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
               },
             },
           }}
-          pageSizeOptions={[5]}
+          pageSizeOptions={[5, 10]}
           slots={{ toolbar: GridToolbar }}
           slotProps={{
             toolbar: {
@@ -525,7 +521,7 @@ const EmployeesDataGrid: React.FC<{
           }}
           //checkboxSelection
           disableRowSelectionOnClick
-          disableColumnFilter
+          //disableColumnFilter
           disableDensitySelector
           processRowUpdate={handleRowUpdate}
           onProcessRowUpdateError={handleRowUpdateError}

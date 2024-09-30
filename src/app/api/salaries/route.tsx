@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 
     const salaryId = req.nextUrl.searchParams.get("salaryId");
     let companyId = req.nextUrl.searchParams.get("companyId");
-    //create filter
+
     if (!companyId && !salaryId) {
       return NextResponse.json(
         { message: "Company ID or salary ID is required" },
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (salaryId) {
-      //fetch one
+      // Fetch one salary by ID
       const salary = await Salary.findById(salaryId);
       if (!salary) {
         return NextResponse.json(
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
           { status: 404 }
         );
       }
-      //get company from employeeId and add company id
+      // Get company from employeeId and add company id
       const employee = await Employee.findById(salary.employee);
       companyId = employee?.company;
       const filter: {
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
           { status: 403 }
         );
       }
-      //enriched salary
+      // Enriched salary
       const enrichedSalary = {
         ...salary._doc,
         name: employee?.name,
@@ -111,66 +111,99 @@ export async function GET(req: NextRequest) {
         companyName: company.name,
         companyEmployerNo: company.employerNo,
       };
-      console.log(enrichedSalary);
       return NextResponse.json({ salary: enrichedSalary });
     }
 
-    if (!companyId) {
-      return NextResponse.json(
-        { message: "Company ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const filter: { user?: string; _id: string } = {
-      user: userId,
-      _id: companyId,
-    };
-
-    if (user?.role === "admin") {
-      // Remove user from filter
-      delete filter.user;
-    }
-
-    const company = await Company.findOne(filter);
-    if (!company) {
-      return NextResponse.json({ message: "Access denied." }, { status: 403 });
-    }
-
-    // Step 1: Fetch employee IDs along with name, memberNo, and nic for the specified company
-    const employees: {
+    let employees: {
       _id: string;
       name: string;
       memberNo: number;
       nic: string;
-    }[] = await Employee.find({ company: companyId })
-      .select("_id name memberNo nic") // Fetch _id, name, memberNo, and nic fields
-      .lean();
+      companyName?: string;
+      companyEmployerNo?: string;
+      company?: string;
+    }[] = [];
+
+    if (companyId === "all") {
+      let companies = [];
+      if (user?.role === "admin") {
+        // Fetch all employees for admin
+        employees = await Employee.find({})
+          .select("_id name memberNo nic company")
+          .lean();
+        companies = await Company.find({}).select("_id name employerNo").lean();
+      } else {
+        // Fetch all employees of companies associated with the user
+        companies = await Company.find({ user: userId })
+          .select("_id name employerNo")
+          .lean();
+        const companyIds = companies.map((company) => company._id);
+        employees = await Employee.find({ company: { $in: companyIds } })
+          .select("_id name memberNo nic company")
+          .lean();
+      }
+
+      // Enrich employees with company details
+      employees = employees.map((employee) => {
+        const company = companies.find(
+          (comp) => String(comp._id) === String(employee.company)
+        );
+        return {
+          ...employee,
+          companyName: company?.name,
+          companyEmployerNo: company?.employerNo,
+        };
+      });
+    } else {
+      // Fetch employees of the specified company
+      const filter: { user?: string; _id: string } = {
+        user: userId,
+        _id: companyId as string,
+      };
+
+      if (user?.role === "admin") {
+        delete filter.user;
+      }
+
+      const company = await Company.findOne(filter);
+      if (!company) {
+        return NextResponse.json(
+          { message: "Access denied." },
+          { status: 403 }
+        );
+      }
+
+      employees = await Employee.find({ company: companyId })
+        .select("_id name memberNo nic")
+        .lean();
+    }
 
     // Extract the list of IDs (just the _id values)
     const employeeIdList = employees.map((emp) => emp._id);
 
-    // Step 2: Fetch salaries of employees with those IDs and remove inout
-
+    // Fetch salaries of employees with those IDs and remove inOut
     const salaries = await Salary.find(
-      { employee: { $in: employeeIdList } }, // Match employees with the fetched IDs
-      { inOut: 0 } // Exclude the inOut field
+      { employee: { $in: employeeIdList } },
+      { inOut: 0 }
     );
 
-    // Step 3: Enrich the salary records with employee details
+    // Enrich the salary records with employee details
     const enrichedSalaries = salaries.map((salary) => {
       const employee = employees.find(
         (emp) => String(emp._id) === String(salary.employee)
       );
       return {
-        ...salary._doc, // Spread the salary document data
+        ...salary._doc,
         name: employee?.name,
         memberNo: employee?.memberNo,
         nic: employee?.nic,
+        companyName: employee?.companyName,
+        companyEmployerNo: employee?.companyEmployerNo,
+        companyId: employee?.company,
       };
     });
 
-    //send salaries
+    // Send salaries
     return NextResponse.json({ salaries: enrichedSalaries });
   } catch (error: any) {
     return NextResponse.json(

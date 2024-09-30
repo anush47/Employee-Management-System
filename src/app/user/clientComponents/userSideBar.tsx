@@ -30,6 +30,7 @@ import {
   NavigateNext,
   ShoppingBag,
   Groups,
+  LocalAtm,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -44,7 +45,8 @@ export type Selected =
   | "mycompanies"
   | "settings"
   | "purchases"
-  | "employees";
+  | "employees"
+  | "salaries";
 
 interface Props {
   window?: Window | undefined;
@@ -72,6 +74,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       "settings",
       "purchases",
       "employees",
+      "salaries",
     ].includes(selected)
   ) {
     selected = "dashboard";
@@ -104,6 +107,11 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       name: "Employees",
       key: "employees",
       icon: <Groups />,
+    },
+    {
+      name: "Salaries",
+      key: "salaries",
+      icon: <LocalAtm />,
     },
   ];
 
@@ -140,6 +148,8 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
               return "Purchases";
             case "settings":
               return "Settings";
+            case "salaries":
+              return "Salaries";
             default:
               return "";
           }

@@ -47,34 +47,23 @@ const PurchasesDataGrid: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
-  const [companyCache, setCompanyCache] = useState<{
-    [key: string]: { name: string; employerNo: string };
-  }>({});
 
   const columns: GridColDef[] = [
     {
-      //id
-      field: "_id",
-      headerName: "ID",
-      flex: 1,
-    },
-    {
-      field: "employerNo",
+      field: "companyEmployerNo",
       headerName: "Employer No",
       flex: 1,
     },
     {
-      field: "company",
+      field: "companyName",
       headerName: "Company",
       flex: 1,
       //link to company details
       renderCell: (params) => (
         <Link
           href={`user/mycompanies/${
-            //find key from companycache
-            Object.keys(companyCache).find(
-              (key) => companyCache[key].name == params.value
-            ) || ""
+            //get companyId from purchases
+            purchases.find((purchase) => purchase.id === params.id)?.company
           }?companyPageSelect=details`}
         >
           <Button variant="text">{params.value}</Button>
@@ -263,63 +252,13 @@ const PurchasesDataGrid: React.FC<{
         }
         const data = await response.json();
 
-        // Fetch company names and map them to purchases
-        const purchasesWithId = await Promise.all(
-          data.purchases.map(async (purchase: any) => {
-            const companyId = purchase.company;
-
-            // Check if the company data is already in the cache
-            if (companyCache[companyId]) {
-              const { name, employerNo } = companyCache[companyId];
-
-              return {
-                ...purchase,
-                id: purchase._id,
-                company: name,
-                employerNo: employerNo,
-                price: `${purchase.periods.length} x ${
-                  purchase.price?.toLocaleString() || "0"
-                } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
-              };
-            }
-
-            try {
-              // Fetch the company name using the company ID
-              const companyResponse = await fetch(
-                `/api/companies/one?companyId=${companyId}`
-              );
-              if (!companyResponse.ok) {
-                throw new Error("Failed to fetch company name");
-              }
-              const companyData = await companyResponse.json();
-
-              // Store the fetched company data in the cache
-              companyCache[companyId] = {
-                name: companyData.company?.name || "Unknown",
-                employerNo: companyData.company?.employerNo || "Unknown",
-              };
-
-              // Add the company name to the purchase object
-              return {
-                ...purchase,
-                id: purchase._id,
-                company: companyCache[companyId].name,
-                employerNo: companyCache[companyId].employerNo,
-                price: `${purchase.periods.length} x ${
-                  purchase.price?.toLocaleString() || "0"
-                } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
-              };
-            } catch {
-              return {
-                ...purchase,
-                id: purchase._id,
-                company: "Unknown", // Set "Unknown" if there's an error
-                employerNo: "Unknown",
-              };
-            }
-          })
-        );
-
+        const purchasesWithId = data.purchases.map((purchase: any) => ({
+          ...purchase,
+          id: purchase._id,
+          price: `${purchase.periods.length} x ${
+            purchase.price?.toLocaleString() || "0"
+          } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
+        }));
         setPurchases(purchasesWithId);
       } catch (error) {
         setError(
@@ -350,7 +289,7 @@ const PurchasesDataGrid: React.FC<{
       id: false,
       _id: false,
       //company: false,
-      employerNo: false,
+      companyEmployerNo: false,
       //periods: false,
       //price: false,
       request: false,
@@ -380,11 +319,17 @@ const PurchasesDataGrid: React.FC<{
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 5,
+                pageSize: 10,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
               },
             },
           }}
-          pageSizeOptions={[5]}
+          pageSizeOptions={[5, 10]}
           slots={{ toolbar: GridToolbar }}
           slotProps={{
             toolbar: {
@@ -392,7 +337,7 @@ const PurchasesDataGrid: React.FC<{
             },
           }}
           disableRowSelectionOnClick
-          disableColumnFilter
+          //disableColumnFilter
           disableDensitySelector
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={(newModel) =>

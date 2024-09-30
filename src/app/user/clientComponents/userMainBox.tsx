@@ -5,6 +5,7 @@ import "@fontsource/roboto/400.css";
 import { selected } from "./userSideBar";
 import Purchases from "../purchases/purchases";
 import Employees from "../employees/employees";
+import Salaries from "../salaries/salaries";
 
 // Lazy load the components
 const Dashboard = lazy(() => import("../dashboard/dashboard"));
@@ -45,6 +46,8 @@ const UserMainBox = ({
               return <Employees user={user} />;
             case "purchases":
               return <Purchases user={user} />;
+            case "salaries":
+              return <Salaries user={user} />;
             default:
               return <div>Component not found</div>;
           }

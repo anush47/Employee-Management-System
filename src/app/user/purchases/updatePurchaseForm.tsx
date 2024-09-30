@@ -80,21 +80,6 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchCompany = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/companies/one?companyId=${companyId}`);
-        const data = await res.json();
-        setPrice(data.company.monthlyPrice);
-        setCompanyName(data.company.name);
-        setEmployerNo(data.company.employerNo);
-      } catch (err) {
-        setError("Failed to fetch company details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const fetchPurchase = async () => {
       setLoading(true);
       try {
@@ -111,6 +96,8 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
         setStatus(data.purchase.approvedStatus);
         setRemark(data.purchase.remark);
         setCompanyId(data.purchase.company);
+        setCompanyName(data.purchase.companyName);
+        setEmployerNo(data.purchase.companyEmployerNo);
         setTotalPrice(data.purchase.totalPrice);
         if (data.purchase.request) {
           const imageResponse = await fetch(data.purchase.request);
@@ -127,7 +114,6 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
     };
 
     if (!price) fetchPurchase();
-    if (companyId) fetchCompany();
   }, [purchaseId, companyId]);
 
   useEffect(() => {
