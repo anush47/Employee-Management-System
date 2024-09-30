@@ -296,7 +296,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
         <CardHeader
           title={
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              Generate Salaries
+              Generated Salary Information
               <Tooltip title="Save new salary record" arrow>
                 <>
                   <Button

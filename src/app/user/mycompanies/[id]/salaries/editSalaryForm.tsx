@@ -313,8 +313,14 @@ const EditSalaryForm: React.FC<{
     setLoading(true);
     try {
       // Perform DELETE request to delete the salary record
-      const response = await fetch(`/api/salaries/?salaryId=${salaryId}`, {
+      const response = await fetch(`/api/salaries/`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          salaryIds: [formFields.id],
+        }),
       });
 
       const result = await response.json();
@@ -596,16 +602,14 @@ const EditSalaryForm: React.FC<{
                 mt: 2,
               }}
             >
-              {isEditing && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => handleDeleteClick(employee?.name || "")}
-                  disabled={loading}
-                >
-                  Delete
-                </Button>
-              )}
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => handleDeleteClick(employee?.name || "")}
+                disabled={loading || !isEditing}
+              >
+                Delete
+              </Button>
             </Box>
           </Grid>
         </CardContent>
@@ -614,7 +618,7 @@ const EditSalaryForm: React.FC<{
         open={dialogOpenDelete}
         onClose={handleDialogClose}
         title="Confirm Deletion"
-        message={`Are you sure you want to delete the salary record for ${employeeName}?`}
+        message={`Are you sure you want to delete the salary of ${employeeName} for ${formFields.period}?`}
       />
       <Snackbar
         open={snackbarOpen}

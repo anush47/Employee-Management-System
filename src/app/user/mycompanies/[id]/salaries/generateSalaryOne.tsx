@@ -149,6 +149,14 @@ const GenerateSalaryOne = ({
         }
       }
       const data = await response.json();
+      //if data.exists then show salary for this month already exists
+      if (data.exists && data.exists.length > 0) {
+        setSnackbarMessage(`Salary for ${period} already exists.`);
+        setSnackbarSeverity("warning");
+        setSnackbarOpen(true);
+        return;
+      }
+
       //check if data.salaries[0] is in correct form
       console.log(data.salaries[0]);
       if (
@@ -313,7 +321,7 @@ const GenerateSalaryOne = ({
         <CardHeader
           title={
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              Generate Salary
+              Generated Salary Information
               <Tooltip title="Save new salary record" arrow>
                 <>
                   <Button
@@ -324,7 +332,7 @@ const GenerateSalaryOne = ({
                     color="success"
                     startIcon={<Save />}
                     onClick={onSaveClick}
-                    disabled={loading} // Disable button while loading
+                    disabled={loading || !formFields.employee} // Disable button while loading
                   >
                     {loading ? <CircularProgress size={24} /> : "Save"}
                   </Button>
