@@ -160,7 +160,7 @@ const SignInPage: React.FC = () => {
         </CardContent>
         <Box mt={2} display="flex" justifyContent="center">
           <Typography variant="body2">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/auth/signUp" color="primary.main" underline="hover">
               Register
             </Link>

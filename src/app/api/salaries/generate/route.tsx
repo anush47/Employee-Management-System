@@ -6,7 +6,7 @@ import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
 import { generateSalaryForOneEmployee } from "./salaryGeneration";
 import Employee from "@/app/models/Employee";
-import { checkPurchased } from "../../purchases/check/route";
+import { checkPurchased } from "../../purchases/check/checkPurchased";
 import Salary from "@/app/models/Salary";
 
 const IdSchema = z.string().min(1, "ID is required");

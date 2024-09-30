@@ -8,7 +8,7 @@ import { options } from "../auth/[...nextauth]/options";
 import { request } from "http";
 import Employee from "@/app/models/Employee";
 import Salary from "@/app/models/Salary";
-import { checkPurchased } from "../purchases/check/route";
+import { checkPurchased } from "../purchases/check/checkPurchased";
 
 const noPaySchema = z.object({
   amount: z.number().min(0, "No Pay amount must be a positive number"),

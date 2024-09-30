@@ -367,7 +367,8 @@ const AddCompanyForm: React.FC<{
               />
             </FormControl>
             <FormHelperText>
-              Bank name, branch EPF/ETF is paid. you may use "Cash" as well
+              Bank name, branch EPF/ETF is paid. you may use &quot;Cash&quot; as
+              well
             </FormHelperText>
           </Grid>
         </Grid>

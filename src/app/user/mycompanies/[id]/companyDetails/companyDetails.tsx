@@ -518,7 +518,8 @@ const CompanyDetails = ({
                   />
                 </FormControl>
                 <FormHelperText>
-                  Bank name, branch EPF/ETF is paid. you may use "Cash" as well
+                  Bank name, branch EPF/ETF is paid. you may use
+                  &quot;Cash&quot; as well
                 </FormHelperText>
               </Grid>
               <Grid item xs={12} sm={6}>

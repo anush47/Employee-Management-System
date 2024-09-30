@@ -7,7 +7,7 @@ import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
 import { request } from "http";
 import Employee from "@/app/models/Employee";
-import { calculateTotalPrice } from "./price/route";
+import { calculateTotalPrice } from "./price/calculateTotalPrice";
 
 // Define schema for purchase validation
 const purchaseSchema = z.object({

@@ -7,7 +7,7 @@ import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
 
 // Define the schema for employee validation
-export const employeeSchema = z.object({
+const employeeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   memberNo: z.number().min(1, "Member number is required"),
   nic: z.string().min(1, "NIC is required"),

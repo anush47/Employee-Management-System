@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { options } from "../../auth/[...nextauth]/options";
 import Company from "@/app/models/Company";
 import { z } from "zod";
+import { calculateTotalPrice } from "./calculateTotalPrice";
 
 // GET: Fetch price based on months and company ID
 export async function GET(req: NextRequest) {
@@ -77,12 +78,4 @@ export async function GET(req: NextRequest) {
       { status: error instanceof z.ZodError ? 400 : 500 }
     );
   }
-}
-
-//define function for calculation
-export function calculateTotalPrice(pricePerMonth: number, months: string[]) {
-  const noOfMonths = months.length;
-  const totalPrice = pricePerMonth * noOfMonths;
-  const finalTotalPrice = noOfMonths >= 3 ? totalPrice * 0.9 : totalPrice;
-  return { totalPrice, finalTotalPrice };
 }
