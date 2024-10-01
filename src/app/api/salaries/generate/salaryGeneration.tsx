@@ -1,5 +1,6 @@
 import Employee from "@/app/models/Employee";
 import Salary from "@/app/models/Salary";
+import { inOutGen, inOutProcess } from "../inOutProcessing";
 
 // Helper function to parse the value for additions/deductions
 function parseValue(name: string, value: string, basic: number): number {
@@ -70,24 +71,25 @@ export async function generateSalaryForOneEmployee(
     let noPay = 0;
     let otReason = "";
     let noPayReason = "";
+    let inOutProcessed = "";
 
     switch (employee.otMethod) {
       case "noOt":
-        ({ ot, otReason, noPay, noPayReason } = noOtCalc(
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = noOtCalc(
           employee,
           period,
           inOut
         ));
         break;
       case "calc":
-        ({ ot, otReason, noPay, noPayReason } = OtCalc(
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = OtCalc(
           employee,
           period,
           inOut
         ));
         break;
       default:
-        ({ ot, otReason, noPay, noPayReason } = randomCalc(
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = randomCalc(
           employee,
           period,
           inOut
@@ -132,43 +134,48 @@ const randomCalc = (
   period: string,
   inOut: string | undefined
 ) => {
-  let ot = 5000;
-  let noPay = 1000;
-  let otReason = "Random";
-  let noPayReason = "Unapproved leaves";
+  let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutGen(
+    employee,
+    period,
+    inOut
+  );
 
   return {
     ot,
     otReason,
     noPay,
     noPayReason,
+    inOutProcessed,
   };
 };
 
 const noOtCalc = (employee: any, period: string, inOut: string | undefined) => {
-  let ot = 0;
-  let noPay = 1000;
-  let otReason = "no OT";
-  let noPayReason = "Unapproved leaves";
+  let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
+    employee,
+    period,
+    inOut
+  );
 
   return {
     ot,
     otReason,
     noPay,
     noPayReason,
+    inOutProcessed,
   };
 };
 
 const OtCalc = (employee: any, period: string, inOut: string | undefined) => {
-  let ot = 7000;
-  let noPay = 1000;
-  let otReason = "Calculated OT";
-  let noPayReason = "Unapproved leaves";
-
+  let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
+    employee,
+    period,
+    inOut
+  );
   return {
     ot,
     otReason,
     noPay,
     noPayReason,
+    inOutProcessed,
   };
 };

@@ -1,9 +1,8 @@
 export const handleCsvUpload = async (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+  const reader = new FileReader();
 
+  const result = await new Promise<string>((resolve, reject) => {
     reader.onload = (event) => {
-      // Resolving the file content as a string
       if (event.target?.result) {
         resolve(event.target.result.toString());
       } else {
@@ -15,7 +14,10 @@ export const handleCsvUpload = async (file: File): Promise<string> => {
       reject(error);
     };
 
-    // Read the file as text
     reader.readAsText(file);
   });
+
+  //send to api to process and get the result
+
+  return result;
 };

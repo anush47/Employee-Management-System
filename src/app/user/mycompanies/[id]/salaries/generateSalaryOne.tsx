@@ -30,7 +30,6 @@ import { Salary } from "./salariesDataGrid";
 import { Autorenew, Save, Upload } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { handleCsvUpload } from "./csvUpload";
-import { blue } from "@mui/material/colors";
 import { LoadingButton } from "@mui/lab";
 
 const GenerateSalaryOne = ({
