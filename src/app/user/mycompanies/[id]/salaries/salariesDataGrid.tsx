@@ -146,14 +146,7 @@ const SalariesDataGrid: React.FC<{
           <Link
             href={`/user/mycompanies/${companyId}?companyPageSelect=salaries&salaryId=${params.id}`}
           >
-            <Button
-              variant="text"
-              color="primary"
-              size="small"
-              onClick={() => {
-                console.log(params);
-              }}
-            >
+            <Button variant="text" color="primary" size="small">
               View
             </Button>
           </Link>
@@ -255,7 +248,7 @@ const SalariesDataGrid: React.FC<{
           ).join(", ")}`
         );
       }
-      console.log(newSalary);
+      //console.log(newSalary);
 
       // Format data
       newSalary.basic = parseFloat(newSalary.basic);
@@ -268,7 +261,7 @@ const SalariesDataGrid: React.FC<{
         reason: newSalary.noPayReason,
       };
       newSalary.advanceAmount = parseFloat(newSalary.advanceAmount);
-      console.log(newSalary);
+      //console.log(newSalary);
       // Calculate total additions
       const totalAdditions = newSalary.paymentStructure.additions.reduce(
         (total: number, addition: { amount: number }) =>

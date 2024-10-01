@@ -43,7 +43,6 @@ const GenerateSalaryOne = ({
   const [employee, setEmployee] = useState<Employee>();
   const [loading, setLoading] = useState(false);
   const [inOut, setInOut] = useState("");
-  const [inOutFetched, setInOutFetched] = useState<string>("");
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<

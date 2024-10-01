@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { inOut } = body;
-    const inOut_Initial = initialInOutProcess(inOut);
+    const inOutInitial = initialInOutProcess(inOut);
 
-    return NextResponse.json({ inOut_Initial });
+    return NextResponse.json({ inOutInitial });
   } catch (error) {
     //console.error(error);
     // Handle Zod validation errors
