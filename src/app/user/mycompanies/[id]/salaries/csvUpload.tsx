@@ -19,25 +19,9 @@ export const handleCsvUpload = async (file: File): Promise<string> => {
     });
 
     // Send to API to process inOut
-    const response = await fetch("/api/salaries/initialInOut", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ inOut: result }),
-    });
+    console.log(result);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `API error: ${response.status} - ${
-          errorData.message || "Unknown error"
-        }`
-      );
-    }
-
-    const data = await response.json();
-    return data.inOutInitial;
+    return result;
   } catch (error) {
     console.error("Error during file upload or processing:", error);
     throw new Error(

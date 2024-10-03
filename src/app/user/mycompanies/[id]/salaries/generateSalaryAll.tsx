@@ -32,7 +32,8 @@ import EmployeesInclude from "./employeesInclude";
 import GeneratedSalaries from "./generatedSalaries";
 import { LoadingButton } from "@mui/lab";
 import { handleCsvUpload } from "./csvUpload";
-import { SimpleDialog } from "./generateSalaryOne";
+import { SimpleDialog } from "./inOutTable";
+import { InOutTable } from "./inOutTable";
 
 const GenerateSalaryAll = ({ period }: { period: string }) => {
   const [loading, setLoading] = useState(false);
@@ -360,9 +361,33 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
                 </Button>
                 {inOut && inOut !== "" && (
                   <SimpleDialog
-                    inOutFetched={inOut}
                     openDialog={openDialog}
                     setOpenDialog={setOpenDialog}
+                    inOutFetched={
+                      false &&
+                      generatedSalaries &&
+                      generatedSalaries.length > 0 ? (
+                        <InOutTable
+                          salaryRecords={generatedSalaries
+                            .map((salary) => {
+                              const employee = employees.find(
+                                (e) => e.id === salary.employee
+                              );
+                              return employee
+                                ? {
+                                    employeeName: employee.name,
+                                    employeeNIC: employee.nic,
+                                    inOut: salary.inOut,
+                                    _id: employee.id,
+                                  }
+                                : null;
+                            })
+                            .filter((record) => record !== null)}
+                        />
+                      ) : (
+                        inOut
+                      )
+                    }
                   />
                 )}
               </FormControl>

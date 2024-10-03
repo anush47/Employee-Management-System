@@ -31,6 +31,7 @@ import { Autorenew, Save, Upload } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { handleCsvUpload } from "./csvUpload";
 import { LoadingButton } from "@mui/lab";
+import { InOutTable, SimpleDialog } from "./inOutTable";
 
 const GenerateSalaryOne = ({
   period,
@@ -54,7 +55,19 @@ const GenerateSalaryOne = ({
     employee: "",
     period: "",
     basic: 0,
-    inOut: "",
+    inOut: [
+      {
+        _id: "",
+        in: new Date(),
+        out: new Date(),
+        workingHours: 0,
+        otHours: 0,
+        ot: 0,
+        noPay: 0,
+        holiday: "",
+        description: "",
+      },
+    ],
     noPay: {
       amount: 0,
       reason: "",
@@ -178,15 +191,15 @@ const GenerateSalaryOne = ({
     }
   };
   // Fetch salary
-  useEffect(() => {
-    if (employeeId?.length === 24) {
-      fetchSalary();
-    } else {
-      setSnackbarMessage("Invalid Employee ID");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  }, [employeeId, period, inOut]);
+  // useEffect(() => {
+  //   if (employeeId?.length === 24) {
+  //     fetchSalary();
+  //   } else {
+  //     setSnackbarMessage("Invalid Employee ID");
+  //     setSnackbarSeverity("error");
+  //     setSnackbarOpen(true);
+  //   }
+  // }, [employeeId, period, inOut]);
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -391,13 +404,28 @@ const GenerateSalaryOne = ({
                   variant="outlined"
                   color="primary"
                   onClick={() => setOpenDialog(true)}
-                  disabled={!formFields.inOut || formFields.inOut === ""}
+                  disabled={!formFields.inOut}
                 >
                   View In-Out
                 </Button>
                 {formFields.inOut && (
                   <SimpleDialog
-                    inOutFetched={formFields.inOut}
+                    inOutFetched={
+                      formFields.inOut ? (
+                        <InOutTable
+                          salaryRecords={[
+                            {
+                              employeeName: employee?.name || "",
+                              employeeNIC: employee?.nic || "",
+                              inOut: formFields.inOut,
+                              _id: employee?.id || "",
+                            },
+                          ]}
+                        />
+                      ) : (
+                        "No In-Out data fetched"
+                      )
+                    }
                     openDialog={openDialog}
                     setOpenDialog={setOpenDialog}
                   />
@@ -407,8 +435,8 @@ const GenerateSalaryOne = ({
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <LoadingButton
-                  variant="outlined"
-                  color="success"
+                  variant="contained"
+                  color="primary"
                   component="label"
                   loading={loading}
                   loadingPosition="center"
@@ -417,7 +445,7 @@ const GenerateSalaryOne = ({
                     fetchSalary();
                   }}
                 >
-                  <span>Regenerate</span>
+                  <span>Generate</span>
                 </LoadingButton>
               </FormControl>
             </Grid>
@@ -580,37 +608,3 @@ const GenerateSalaryOne = ({
 };
 
 export default GenerateSalaryOne;
-
-export const SimpleDialog = (props: {
-  inOutFetched: string;
-  openDialog: boolean;
-  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
-  const { inOutFetched, openDialog, setOpenDialog } = props;
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
-
-  return (
-    <Dialog
-      open={openDialog}
-      onClose={() => setOpenDialog(false)}
-      fullScreen={fullScreen}
-    >
-      <DialogTitle>Fetched In-Out</DialogTitle>
-      <DialogContent>
-        {inOutFetched.split("\n").map((line, index) => (
-          <Typography key={index}>{line}</Typography>
-        ))}
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={() => {
-            setOpenDialog(false);
-          }}
-        >
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};

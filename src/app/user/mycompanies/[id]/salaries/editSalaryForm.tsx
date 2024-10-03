@@ -32,7 +32,7 @@ import { ArrowBack, Edit, Save } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { salaryId } from "./salaries";
 import { LoadingButton } from "@mui/lab";
-import { SimpleDialog } from "./generateSalaryOne";
+import { InOutTable, SimpleDialog } from "./inOutTable";
 
 const EditSalaryForm: React.FC<{
   user: { id: string; name: string; email: string };
@@ -62,7 +62,19 @@ const EditSalaryForm: React.FC<{
     employee: "",
     period: "",
     basic: 0,
-    inOut: "",
+    inOut: [
+      {
+        _id: "",
+        in: new Date(),
+        out: new Date(),
+        workingHours: 0,
+        otHours: 0,
+        ot: 0,
+        noPay: 0,
+        holiday: "",
+        description: "",
+      },
+    ],
     noPay: {
       amount: 0,
       reason: "",
@@ -440,7 +452,7 @@ const EditSalaryForm: React.FC<{
         <CardContent>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              {formFields.inOut && formFields.inOut !== "" && (
+              {formFields.inOut && (
                 <FormControl fullWidth>
                   {/* show fetched inout in a dialog */}
                   <Button
@@ -451,7 +463,22 @@ const EditSalaryForm: React.FC<{
                     View Fetched In-Out
                   </Button>
                   <SimpleDialog
-                    inOutFetched={formFields.inOut}
+                    inOutFetched={
+                      formFields.inOut ? (
+                        <InOutTable
+                          salaryRecords={[
+                            {
+                              employeeName: employee?.name || "",
+                              employeeNIC: employee?.nic || "",
+                              inOut: formFields.inOut,
+                              _id: employee?.memberNo || "",
+                            },
+                          ]}
+                        />
+                      ) : (
+                        "No In-Out data fetched"
+                      )
+                    }
                     openDialog={openDialogInOut}
                     setOpenDialog={setOpenDialogInOut}
                   />

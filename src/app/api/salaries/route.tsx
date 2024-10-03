@@ -43,12 +43,34 @@ const salarySchema = z.object({
   noPay: noPaySchema,
   ot: otSchema,
   paymentStructure: paymentStructureSchema,
-  inOut: z.string().optional(),
+  inOut: z
+    .array(
+      z.object({
+        in: z.string().min(1, "In time is required").optional(),
+        out: z.string().min(1, "Out time is required").optional(),
+        workingHours: z
+          .number()
+          .min(0, "Working hours must be a positive number")
+          .optional(),
+        otHours: z
+          .number()
+          .min(0, "OT hours must be a positive number")
+          .optional(),
+        ot: z.number().min(0, "OT amount must be a positive number").optional(),
+        noPay: z
+          .number()
+          .min(0, "No Pay amount must be a positive number")
+          .optional(),
+        holiday: z.string().optional(),
+        description: z.string().optional(),
+      })
+    )
+    .optional(),
   advanceAmount: z.number().optional(), // Optional field
   finalSalary: z.number().min(0, "Final salary must be a positive number"),
 });
 
-// GET: Fetch a purchase by ID or all purchases of the company
+// GET: Fetch a Salary
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(options);

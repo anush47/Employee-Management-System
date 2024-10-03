@@ -23,7 +23,16 @@ interface ISalary extends Document {
       amount: number;
     }[];
   };
-  inOut: string;
+  inOut: {
+    in: Date;
+    out: Date;
+    workingHours: number;
+    otHours: number;
+    ot: number;
+    noPay: number;
+    holiday: string;
+    description: string;
+  }[];
   advanceAmount: number;
   finalSalary: number;
 }
@@ -88,9 +97,34 @@ const salarySchema = new Schema<ISalary>(
         },
       ],
     },
-    inOut: {
-      type: String,
-    },
+    inOut: [
+      {
+        in: {
+          type: Date,
+        },
+        out: {
+          type: Date,
+        },
+        workingHours: {
+          type: Number,
+        },
+        otHours: {
+          type: Number,
+        },
+        ot: {
+          type: Number,
+        },
+        noPay: {
+          type: Number,
+        },
+        holiday: {
+          type: String,
+        },
+        description: {
+          type: String,
+        },
+      },
+    ],
     advanceAmount: {
       type: Number,
     },

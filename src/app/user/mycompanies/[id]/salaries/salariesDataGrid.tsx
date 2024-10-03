@@ -29,7 +29,17 @@ export interface Salary {
   employee: string; // Will hold employee ID initially
   period: string;
   basic: number;
-  inOut: string;
+  inOut: {
+    _id: string;
+    in: Date;
+    out: Date;
+    workingHours: number;
+    otHours: number;
+    holiday: string;
+    ot: number;
+    noPay: number;
+    description: string;
+  }[];
   noPay: {
     amount: number;
     reason: string;

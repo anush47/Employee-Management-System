@@ -18,7 +18,7 @@ import { AutoAwesome, ShoppingBag, Upload } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { LoadingButton } from "@mui/lab";
 import { handleCsvUpload } from "../salaries/csvUpload";
-import { SimpleDialog } from "../salaries/generateSalaryOne";
+import { SimpleDialog } from "../salaries/inOutTable";
 
 const Employees = ({
   user,

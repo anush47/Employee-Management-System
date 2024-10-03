@@ -36,7 +36,7 @@ function generateObjectId(): string {
 export async function generateSalaryForOneEmployee(
   employee: any,
   period: string,
-  inOut: string | undefined
+  inOut: string[] | undefined
 ) {
   try {
     // Calculate additions with actual computed values
@@ -71,7 +71,19 @@ export async function generateSalaryForOneEmployee(
     let noPay = 0;
     let otReason = "";
     let noPayReason = "";
-    let inOutProcessed = "";
+    let inOutProcessed: {
+      in: Date;
+      out: Date;
+      workingHours: number;
+      otHours: number;
+      ot: number;
+      noPay: number;
+      holiday: string;
+      description: string;
+    }[] = [];
+
+    //sort inOut
+    inOut = inOut?.sort() || [];
 
     switch (employee.otMethod) {
       case "noOt":
@@ -100,7 +112,7 @@ export async function generateSalaryForOneEmployee(
     // Generate the salary data
     const salaryData = {
       _id: generateObjectId(),
-      inOut,
+      inOut: inOutProcessed,
       employee: employee._id,
       period,
       basic: employee.basic, // Employee's basic salary
@@ -129,11 +141,7 @@ export async function generateSalaryForOneEmployee(
   }
 }
 
-const randomCalc = (
-  employee: any,
-  period: string,
-  inOut: string | undefined
-) => {
+const randomCalc = (employee: any, period: string, inOut: string[] = []) => {
   let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutGen(
     employee,
     period,
@@ -149,7 +157,7 @@ const randomCalc = (
   };
 };
 
-const noOtCalc = (employee: any, period: string, inOut: string | undefined) => {
+const noOtCalc = (employee: any, period: string, inOut: string[] = []) => {
   let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
     employee,
     period,
@@ -165,7 +173,7 @@ const noOtCalc = (employee: any, period: string, inOut: string | undefined) => {
   };
 };
 
-const OtCalc = (employee: any, period: string, inOut: string | undefined) => {
+const OtCalc = (employee: any, period: string, inOut: string[] = []) => {
   let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
     employee,
     period,

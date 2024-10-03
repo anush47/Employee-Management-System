@@ -8,6 +8,7 @@ import { generateSalaryForOneEmployee } from "./salaryGeneration";
 import Employee from "@/app/models/Employee";
 import { checkPurchased } from "../../purchases/check/checkPurchased";
 import Salary from "@/app/models/Salary";
+import { initialInOutProcess } from "../initialInOutProcess";
 
 const IdSchema = z.string().min(1, "ID is required");
 const periodSchema = z
@@ -104,6 +105,8 @@ export async function POST(req: NextRequest) {
     const salaries = [];
 
     const exists = [];
+
+    const inOutInitial = initialInOutProcess(inOut);
     for (const employee of employees) {
       const existingSalary = await Salary.findOne({
         employee: employee._id,
@@ -120,7 +123,7 @@ export async function POST(req: NextRequest) {
       const salary = await generateSalaryForOneEmployee(
         employee,
         period,
-        inOut ? inOut : undefined
+        inOutInitial[employee._id] ? inOutInitial[employee._id] : undefined
       );
       salaries.push(salary);
     }
