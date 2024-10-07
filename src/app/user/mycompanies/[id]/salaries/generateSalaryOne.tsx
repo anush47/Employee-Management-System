@@ -29,7 +29,7 @@ import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
 import { Autorenew, Save, Upload } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
-import { handleCsvUpload } from "./csvUpload";
+import { handleCsvUpload, inOutCalc } from "./csvUpload";
 import { LoadingButton } from "@mui/lab";
 import { InOutTable, SimpleDialog } from "./inOutTable";
 
@@ -58,8 +58,8 @@ const GenerateSalaryOne = ({
     inOut: [
       {
         _id: "",
-        in: new Date(),
-        out: new Date(),
+        in: "",
+        out: "",
         workingHours: 0,
         otHours: 0,
         ot: 0,
@@ -160,6 +160,7 @@ const GenerateSalaryOne = ({
         }
       }
       const data = await response.json();
+
       //if data.exists then show salary for this month already exists
       if (data.exists && data.exists.length > 0) {
         setSnackbarMessage(`Salary for ${period} already exists.`);
@@ -169,7 +170,6 @@ const GenerateSalaryOne = ({
       }
 
       //check if data.salaries[0] is in correct form
-      console.log(data.salaries[0]);
       if (
         !data.salaries[0] ||
         !data.salaries[0].employee ||
@@ -179,7 +179,6 @@ const GenerateSalaryOne = ({
       }
 
       setFormFields(data.salaries[0]);
-      data.sa;
     } catch (error) {
       setSnackbarMessage(
         error instanceof Error ? error.message : "Error fetching Salary."
@@ -229,6 +228,27 @@ const GenerateSalaryOne = ({
     setFormFields((prevFields) => ({
       ...prevFields,
       finalSalary,
+    }));
+  };
+
+  //when inOut is changed change ot otreason and no pay
+  const handleInOutChange = () => {
+    //perform inOut calculations
+    const { ot, noPay, otReason, noPayReason } = inOutCalc(
+      formFields,
+      employee?.divideBy ?? 240
+    );
+    console.log(ot);
+    setFormFields((prevFields) => ({
+      ...prevFields,
+      ot: {
+        amount: ot,
+        reason: otReason,
+      },
+      noPay: {
+        amount: noPay,
+        reason: noPayReason,
+      },
     }));
   };
 
@@ -351,28 +371,38 @@ const GenerateSalaryOne = ({
               </Tooltip>
             </Typography>
           }
-          subheader={
-            loading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="subtitle1" color="textSecondary">
-                  Employee: {employee?.memberNo} - {employee?.name}
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  NIC: {employee?.nic}
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  Period: {period}
-                </Typography>
-              </Box>
-            )
-          }
         />
 
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12}>
+              {loading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", color: "primary.main" }}
+                  >
+                    Employee: {employee?.memberNo} - {employee?.name}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    NIC: {employee?.nic}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    Period: {formFields?.period}
+                  </Typography>
+                </Box>
+              )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <Button
                   variant="outlined"
@@ -397,42 +427,7 @@ const GenerateSalaryOne = ({
                 </Button>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth>
-                {/* show fetched inout in a dialog */}
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => setOpenDialog(true)}
-                  disabled={!formFields.inOut}
-                >
-                  View In-Out
-                </Button>
-                {formFields.inOut && (
-                  <SimpleDialog
-                    inOutFetched={
-                      formFields.inOut ? (
-                        <InOutTable
-                          salaryRecords={[
-                            {
-                              employeeName: employee?.name || "",
-                              employeeNIC: employee?.nic || "",
-                              inOut: formFields.inOut,
-                              _id: employee?.id || "",
-                            },
-                          ]}
-                        />
-                      ) : (
-                        "No In-Out data fetched"
-                      )
-                    }
-                    openDialog={openDialog}
-                    setOpenDialog={setOpenDialog}
-                  />
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <LoadingButton
                   variant="contained"
@@ -441,13 +436,44 @@ const GenerateSalaryOne = ({
                   loading={loading}
                   loadingPosition="center"
                   startIcon={<Autorenew />}
-                  onClick={() => {
-                    fetchSalary();
+                  onClick={async () => {
+                    await fetchSalary();
+                    handleInOutChange();
                   }}
                 >
                   <span>Generate</span>
                 </LoadingButton>
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <InOutTable
+                inOuts={formFields.inOut.map((inOut, index) => ({
+                  id: index + 1,
+                  employeeName: employee?.name,
+                  employeeNIC: employee?.nic,
+                  basic: employee?.basic ?? 0,
+                  divideBy: employee?.divideBy ?? 240,
+                  ...inOut,
+                }))}
+                setInOuts={(inOuts: any[]) => {
+                  setFormFields((prev) => ({
+                    ...prev,
+                    inOut: inOuts.map((inOut, index) => ({
+                      ...prev.inOut[index],
+                      in: inOut.in,
+                      out: inOut.out,
+                      workingHours: inOut.workingHours,
+                      otHours: inOut.otHours,
+                      ot: inOut.ot,
+                      noPay: inOut.noPay,
+                      holiday: inOut.holiday,
+                      description: inOut.description,
+                    })),
+                  }));
+                  handleInOutChange();
+                }}
+                editable={true}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>

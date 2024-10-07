@@ -46,8 +46,8 @@ const salarySchema = z.object({
   inOut: z
     .array(
       z.object({
-        in: z.string().min(1, "In time is required").optional(),
-        out: z.string().min(1, "Out time is required").optional(),
+        in: z.string().datetime().optional(),
+        out: z.string().datetime().optional(),
         workingHours: z
           .number()
           .min(0, "Working hours must be a positive number")
@@ -144,6 +144,8 @@ export async function GET(req: NextRequest) {
       companyName?: string;
       companyEmployerNo?: string;
       company?: string;
+      basic?: number;
+      divideBy?: number;
     }[] = [];
 
     if (companyId === "all") {
@@ -151,7 +153,7 @@ export async function GET(req: NextRequest) {
       if (user?.role === "admin") {
         // Fetch all employees for admin
         employees = await Employee.find({})
-          .select("_id name memberNo nic company")
+          .select("_id name memberNo nic company basic divideBy")
           .lean();
         companies = await Company.find({}).select("_id name employerNo").lean();
       } else {
@@ -222,6 +224,8 @@ export async function GET(req: NextRequest) {
         companyName: employee?.companyName,
         companyEmployerNo: employee?.companyEmployerNo,
         companyId: employee?.company,
+        basic: employee?.basic,
+        divideBy: employee?.divideBy,
       };
     });
 
@@ -264,14 +268,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log(body.salaries[0].inOut);
+
     await dbConnect();
 
     // Initialize an array to hold valid salary objects
     const salaryDocs = [];
-    console.log(body.salaries);
+    //console.log(body.salaries);
 
     for (const salary of body.salaries) {
-      // Convert all values in each salary object in the array
       salary.basic = Number(salary.basic);
       salary.advanceAmount = Number(salary.advanceAmount);
       salary.finalSalary = Number(salary.finalSalary);

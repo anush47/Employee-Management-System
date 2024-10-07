@@ -33,6 +33,7 @@ import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { salaryId } from "./salaries";
 import { LoadingButton } from "@mui/lab";
 import { InOutTable, SimpleDialog } from "./inOutTable";
+import { inOutCalc } from "./csvUpload";
 
 const EditSalaryForm: React.FC<{
   user: { id: string; name: string; email: string };
@@ -45,6 +46,7 @@ const EditSalaryForm: React.FC<{
     nic: string;
     companyName: string;
     companyEmployerNo: string;
+    divideBy: number;
   }>();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -65,8 +67,8 @@ const EditSalaryForm: React.FC<{
     inOut: [
       {
         _id: "",
-        in: new Date(),
-        out: new Date(),
+        in: "",
+        out: "",
         workingHours: 0,
         otHours: 0,
         ot: 0,
@@ -92,7 +94,7 @@ const EditSalaryForm: React.FC<{
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Fetch employee
+  // Fetch salary
   useEffect(() => {
     const fetchSalary = async () => {
       try {
@@ -121,6 +123,7 @@ const EditSalaryForm: React.FC<{
           nic: data.salary.nic,
           companyName: data.salary.companyName,
           companyEmployerNo: data.salary.companyEmployerNo,
+          divideBy: data.salary.divideBy,
         });
       } catch (error) {
         setSnackbarMessage(
@@ -183,6 +186,26 @@ const EditSalaryForm: React.FC<{
     formFields.noPay,
   ]);
 
+  //when inOut is changed change ot otreason and no pay
+  const handleInOutChange = () => {
+    //perform inOut calculations
+    const { ot, noPay, otReason, noPayReason } = inOutCalc(
+      formFields,
+      employee?.divideBy ?? 240
+    );
+    setFormFields((prevFields) => ({
+      ...prevFields,
+      ot: {
+        amount: ot,
+        reason: otReason,
+      },
+      noPay: {
+        amount: noPay,
+        reason: noPayReason,
+      },
+    }));
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -203,6 +226,13 @@ const EditSalaryForm: React.FC<{
       ...prevFields,
       [name]: value,
     }));
+
+    if (name === "basic") {
+      //wait 1s
+      setTimeout(() => {
+        handleInOutChange();
+      }, 1000);
+    }
   };
 
   const onSaveClick = async () => {
@@ -424,66 +454,64 @@ const EditSalaryForm: React.FC<{
               </Typography>
             </Box>
           }
-          subheader={
-            loading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="subtitle1" color="textSecondary">
-                  Employee: {employee?.memberNo} - {employee?.name}
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  NIC: {employee?.nic}
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  Period: {formFields?.period}
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  Company: {employee?.companyName}
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  Employer No: {employee?.companyEmployerNo}
-                </Typography>
-              </Box>
-            )
-          }
         />
 
         <CardContent>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              {formFields.inOut && (
-                <FormControl fullWidth>
-                  {/* show fetched inout in a dialog */}
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => setOpenDialogInOut(true)}
+              {loading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", color: "primary.main" }}
                   >
-                    View Fetched In-Out
-                  </Button>
-                  <SimpleDialog
-                    inOutFetched={
-                      formFields.inOut ? (
-                        <InOutTable
-                          salaryRecords={[
-                            {
-                              employeeName: employee?.name || "",
-                              employeeNIC: employee?.nic || "",
-                              inOut: formFields.inOut,
-                              _id: employee?.memberNo || "",
-                            },
-                          ]}
-                        />
-                      ) : (
-                        "No In-Out data fetched"
-                      )
-                    }
-                    openDialog={openDialogInOut}
-                    setOpenDialog={setOpenDialogInOut}
-                  />
-                </FormControl>
+                    Employee: {employee?.memberNo} - {employee?.name}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    NIC: {employee?.nic}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    Period: {formFields?.period}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    Company: {employee?.companyName}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    Employer No: {employee?.companyEmployerNo}
+                  </Typography>
+                </Box>
               )}
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InOutTable
+                  inOuts={formFields.inOut.map((inOut, index) => ({
+                    id: inOut._id,
+                    employeeName: employee?.name,
+                    employeeNIC: employee?.nic,
+                    basic: formFields.basic,
+                    divideBy: employee?.divideBy ?? 240,
+                    ...inOut,
+                  }))}
+                  setInOuts={(inOuts: any) => {
+                    setFormFields((prev) => ({
+                      ...prev,
+                      inOut: inOuts,
+                    }));
+                    handleInOutChange();
+                  }}
+                  editable={isEditing}
+                />
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>
@@ -529,7 +557,7 @@ const EditSalaryForm: React.FC<{
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading || !isEditing,
+                    readOnly: true,
                   }}
                 />
                 {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}
@@ -576,7 +604,7 @@ const EditSalaryForm: React.FC<{
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading || !isEditing,
+                    readOnly: true,
                   }}
                 />
                 {errors.noPay && (

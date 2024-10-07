@@ -1,7 +1,7 @@
 export const inOutProcess = (
   employee: any,
   period: string,
-  inOut: string[] // Array of date-time strings
+  inOut: Date[] // Array of Date objects
 ) => {
   const { shifts, workingDays, basic, divideBy } = employee;
 
@@ -23,12 +23,9 @@ export const inOutProcess = (
   // Iterate through each day in the period
   while (day <= endDate) {
     // Iterate through each inOut record
-    while (
-      inOutIndex < inOut.length &&
-      new Date(inOut[inOutIndex]) <= endDate
-    ) {
+    while (inOutIndex < inOut.length && inOut[inOutIndex] <= endDate) {
       // Get the in Time
-      let inDate = new Date(inOut[inOutIndex]);
+      let inDate = inOut[inOutIndex];
 
       // Check for shifts starting within 3 hours of inDate's time
       const shift = shifts.find((shift: { start: string; end: string }) => {
@@ -38,9 +35,7 @@ export const inOutProcess = (
       });
 
       if (!shift) {
-        console.log(
-          "No shift found for the given time: " + inDate.toISOString()
-        );
+        console.log("No shift found for the given time:", inDate);
         inOutIndex++;
         continue; // Move to the next inOut record
       }
@@ -53,20 +48,15 @@ export const inOutProcess = (
 
       // Check if out of bound
       if (inOutIndex >= inOut.length) {
-        console.log(
-          "No out time found for the given in time: " + inDate.toISOString()
-        );
+        console.log("No out time found for the given in time:", inDate);
         outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
       } else {
         // Check if the next date is in the variation of end time of 8 hrs
-        outDate = new Date(inOut[inOutIndex]);
-        if (
-          Math.abs(getTimeDifferenceInMinutes(shift.end, outDate)) >
-          3 * 60 // Allow 8 hours variation in minutes
-        ) {
+        outDate = inOut[inOutIndex];
+        if (Math.abs(getTimeDifferenceInMinutes(shift.end, outDate)) > 3 * 60) {
           console.log(
-            "Out time is not in the variation of end time of 8 hrs: " +
-              outDate.toISOString()
+            "Out time is not in the variation of end time of 8 hrs:",
+            outDate
           );
           outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
         } else {
@@ -75,16 +65,21 @@ export const inOutProcess = (
         }
       }
 
-      //calculations
+      // Calculations
       const workingHours =
         (outDate.getTime() - inDate.getTime()) / 1000 / 60 / 60;
+      // OT hours
+      let otHours = 0;
+      if (workingHours > 8) {
+        otHours = workingHours - 8;
+      }
 
       // Add processed record to records
       records.push({
         in: inDate, // Record the in time
         out: outDate, // Record the out time
         workingHours,
-        otHours: 0,
+        otHours,
         ot: 0,
         noPay: 0,
         holiday: "",
@@ -92,13 +87,8 @@ export const inOutProcess = (
       });
       day.setUTCDate(outDate.getUTCDate() + 1);
     }
-    // End of inOutIndex while loop
 
     // Move to the next day
-    // records.push({
-    //   in: new Date(day),
-    //   out: new Date(day),
-    // });
     day.setUTCDate(day.getUTCDate() + 1);
   }
 
@@ -188,7 +178,7 @@ const getShiftEnd = (shift: string, inDate: Date): Date => {
   return shiftEndTime;
 };
 
-// Helper function to get time Difference of shift and inOut
+// Helper function to get time difference of shift and inOut
 const getTimeDifferenceInMinutes = (shift: string, inOut: Date): number => {
   const [hours, minutes] = shift.split(":").map(Number);
   // Check time difference in minutes without converting to date
@@ -196,7 +186,3 @@ const getTimeDifferenceInMinutes = (shift: string, inOut: Date): number => {
     hours * 60 + minutes - (inOut.getUTCHours() * 60 + inOut.getUTCMinutes());
   return timeDiff;
 };
-
-// export const otCalc = (employee, period, inOutProcessed) => {
-//   //for each record add otHours,
-// };

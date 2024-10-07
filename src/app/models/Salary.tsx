@@ -24,8 +24,8 @@ interface ISalary extends Document {
     }[];
   };
   inOut: {
-    in: Date;
-    out: Date;
+    in: String;
+    out: String;
     workingHours: number;
     otHours: number;
     ot: number;
@@ -100,10 +100,10 @@ const salarySchema = new Schema<ISalary>(
     inOut: [
       {
         in: {
-          type: Date,
+          type: String,
         },
         out: {
-          type: Date,
+          type: String,
         },
         workingHours: {
           type: Number,

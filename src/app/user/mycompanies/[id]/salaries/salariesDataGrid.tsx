@@ -23,6 +23,7 @@ import {
 import { companyId } from "../clientComponents/companySideBar";
 import { LoadingButton } from "@mui/lab";
 import Link from "next/link";
+import { DeleteOutline } from "@mui/icons-material";
 
 export interface Salary {
   id: string;
@@ -31,8 +32,8 @@ export interface Salary {
   basic: number;
   inOut: {
     _id: string;
-    in: Date;
-    out: Date;
+    in: string;
+    out: string;
     workingHours: number;
     otHours: number;
     holiday: string;
@@ -511,6 +512,13 @@ const SalariesDataGrid: React.FC<{
               variant="outlined"
               color="error"
               onClick={deleteSelected}
+              startIcon={
+                <DeleteOutline
+                  style={{ marginRight: "8px" }}
+                  color="error"
+                  fontSize="small"
+                />
+              }
             >
               Delete Selected
             </Button>

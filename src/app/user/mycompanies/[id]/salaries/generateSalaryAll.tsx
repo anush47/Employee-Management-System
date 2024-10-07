@@ -233,7 +233,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
       ) {
         throw new Error("Invalid Salary Data");
       }
-      console.log(data);
+
       if (data.exists && data.exists.length > 0) {
         let msg = "Salary already exists:\n";
 
@@ -254,15 +254,27 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
       data.salaries.forEach(
         (salary: {
           ot: any;
-          otReason: any;
-          noPayReason: any;
+          otReason: string;
+          noPayReason: string;
           noPay: any;
-          id: any;
-          _id: any;
+          id: string;
+          _id: string;
           employee: any;
-          memberNo: any;
-          name: any;
-          nic: any;
+          memberNo: number | undefined;
+          name: string | undefined;
+          nic: string | undefined;
+          inOut:
+            | {
+                in: string | Date;
+                out: string | Date;
+                workingHours: number;
+                otHours: number;
+                ot: number;
+                noPay: number;
+                holiday: string;
+                description: string;
+              }[]
+            | undefined;
         }) => {
           const employee = employees.find((e) => e.id === salary.employee);
 
@@ -363,31 +375,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
                   <SimpleDialog
                     openDialog={openDialog}
                     setOpenDialog={setOpenDialog}
-                    inOutFetched={
-                      false &&
-                      generatedSalaries &&
-                      generatedSalaries.length > 0 ? (
-                        <InOutTable
-                          salaryRecords={generatedSalaries
-                            .map((salary) => {
-                              const employee = employees.find(
-                                (e) => e.id === salary.employee
-                              );
-                              return employee
-                                ? {
-                                    employeeName: employee.name,
-                                    employeeNIC: employee.nic,
-                                    inOut: salary.inOut,
-                                    _id: employee.id,
-                                  }
-                                : null;
-                            })
-                            .filter((record) => record !== null)}
-                        />
-                      ) : (
-                        inOut
-                      )
-                    }
+                    inOutFetched={inOut}
                   />
                 )}
               </FormControl>

@@ -36,7 +36,7 @@ function generateObjectId(): string {
 export async function generateSalaryForOneEmployee(
   employee: any,
   period: string,
-  inOut: string[] | undefined
+  inOut: Date[] | undefined
 ) {
   try {
     // Calculate additions with actual computed values
@@ -83,7 +83,7 @@ export async function generateSalaryForOneEmployee(
     }[] = [];
 
     //sort inOut
-    inOut = inOut?.sort() || [];
+    inOut = inOut?.sort((a: Date, b: Date) => a.getTime() - b.getTime()) || [];
 
     switch (employee.otMethod) {
       case "noOt":
@@ -141,7 +141,7 @@ export async function generateSalaryForOneEmployee(
   }
 }
 
-const randomCalc = (employee: any, period: string, inOut: string[] = []) => {
+const randomCalc = (employee: any, period: string, inOut: Date[] = []) => {
   let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutGen(
     employee,
     period,
@@ -157,7 +157,7 @@ const randomCalc = (employee: any, period: string, inOut: string[] = []) => {
   };
 };
 
-const noOtCalc = (employee: any, period: string, inOut: string[] = []) => {
+const noOtCalc = (employee: any, period: string, inOut: Date[] = []) => {
   let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
     employee,
     period,
@@ -173,7 +173,7 @@ const noOtCalc = (employee: any, period: string, inOut: string[] = []) => {
   };
 };
 
-const OtCalc = (employee: any, period: string, inOut: string[] = []) => {
+const OtCalc = (employee: any, period: string, inOut: Date[] = []) => {
   let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
     employee,
     period,
