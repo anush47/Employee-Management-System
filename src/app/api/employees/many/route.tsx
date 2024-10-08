@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Return enriched employees
-    return NextResponse.json({ employees: enrichedEmployees });
+    return NextResponse.json({ employees: enrichedEmployees || [] });
   } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
