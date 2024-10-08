@@ -52,7 +52,7 @@ const SignInPage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
     e.preventDefault();
-    await signIn("credentials", {
+    signIn("credentials", {
       redirect: true,
       email,
       password,
