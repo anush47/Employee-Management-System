@@ -53,7 +53,7 @@ const SignInPage: React.FC = () => {
     setLoading(true);
     e.preventDefault();
     signIn("credentials", {
-      redirect: true,
+      //redirect: true,
       email,
       password,
       callbackUrl,
