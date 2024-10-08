@@ -125,18 +125,14 @@ export async function POST(req: NextRequest) {
         ? (inOutInitial as ProcessedInOut)
         : (inOutInitial as { [employeeId: string]: RawInOut })[employee._id];
 
-      if (
-        !update &&
-        Array.isArray(employeeInOut) &&
-        employeeInOut.length > 0 &&
-        employeeInOut[0] instanceof Date
-      ) {
+      if (!update) {
         // If inOutInitial is RawInOut (array of Dates), generate salary using RawInOut
         const generatedSalary = await generateSalaryForOneEmployee(
           employee,
           period,
           employeeInOut as RawInOut
         );
+        console.log(generatedSalary);
         salaries.push(generatedSalary);
       } else if (update) {
         const existingSalary = existingSalaries?.find(
@@ -151,7 +147,6 @@ export async function POST(req: NextRequest) {
           employeeInOut as ProcessedInOut,
           existingSalary
         );
-        console.log(generatedSalary);
         salaries.push(generatedSalary);
       }
     }

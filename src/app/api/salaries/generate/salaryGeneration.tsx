@@ -139,7 +139,7 @@ export async function generateSalaryForOneEmployee(
       employee.basic + totalAdditions + ot - totalDeductions - noPay;
 
     const salaryData = {
-      _id: salary._id || generateObjectId(),
+      _id: salary ? salary._id : generateObjectId(),
       inOut: inOutProcessed,
       employee: employee._id,
       period,

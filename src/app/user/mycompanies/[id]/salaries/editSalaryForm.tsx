@@ -64,19 +64,7 @@ const EditSalaryForm: React.FC<{
     employee: "",
     period: "",
     basic: 0,
-    inOut: [
-      {
-        _id: "",
-        in: "",
-        out: "",
-        workingHours: 0,
-        otHours: 0,
-        ot: 0,
-        noPay: 0,
-        holiday: "",
-        description: "",
-      },
-    ],
+    inOut: [],
     noPay: {
       amount: 0,
       reason: "",

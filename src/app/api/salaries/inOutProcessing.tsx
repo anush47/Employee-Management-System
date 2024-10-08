@@ -11,7 +11,9 @@ export const inOutProcess = (
   const source = existingSalary || employee;
 
   // Determine if inOut contains already processed records (objects) or unprocessed Dates
-  const isProcessed = (inOut as ProcessedInOut)[0].in !== undefined;
+  const isProcessed =
+    (inOut as ProcessedInOut) !== undefined &&
+    (inOut as ProcessedInOut)[0].in !== undefined;
 
   const records: {
     in: string;
@@ -78,6 +80,7 @@ export const inOutProcess = (
     while (day <= endDate) {
       // Iterate through each inOut record
       while (
+        inOut &&
         inOutIndex < inOut.length &&
         (inOut[inOutIndex] as Date) <= endDate
       ) {
@@ -186,10 +189,11 @@ const startEndDates = (
   inOut: (string | number | Date)[]
 ) => {
   const periodStartDate = new Date(period);
-  const inOutStartDate = new Date(inOut[0]);
+  const inOutStartDate = inOut ? new Date(inOut[0]) : undefined;
   let startDate = new Date();
   const halfMonthInMillis = (30 * 24 * 60 * 60 * 1000) / 2; // Approximate half month in milliseconds
   if (
+    inOutStartDate &&
     inOutStartDate < periodStartDate &&
     periodStartDate.getTime() - inOutStartDate.getTime() <= halfMonthInMillis
   ) {

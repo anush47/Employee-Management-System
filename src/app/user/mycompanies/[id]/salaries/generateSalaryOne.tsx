@@ -62,19 +62,7 @@ const GenerateSalaryOne = ({
     employee: "",
     period: "",
     basic: 0,
-    inOut: [
-      {
-        _id: "",
-        in: "",
-        out: "",
-        workingHours: 0,
-        otHours: 0,
-        ot: 0,
-        noPay: 0,
-        holiday: "",
-        description: "",
-      },
-    ],
+    inOut: [],
     noPay: {
       amount: 0,
       reason: "",
@@ -118,6 +106,7 @@ const GenerateSalaryOne = ({
             sun: "off",
           };
         }
+        setGenerated(false);
       } catch (error) {
         setSnackbarMessage(
           error instanceof Error ? error.message : "Error fetching company."

@@ -33,10 +33,14 @@ import {
 } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import "dayjs/locale/en-gb";
 import { companyId } from "../clientComponents/companySideBar";
 import GenerateSalaryAll from "./generateSalaryAll";
 import GenerateSalaryOne from "./generateSalaryOne";
 import Link from "next/link";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 export interface Salary {
@@ -269,7 +273,7 @@ const AddSalaryForm: React.FC<{
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <TextField
+              {/* <TextField
                 label="Period"
                 name="period"
                 type="month"
@@ -297,7 +301,43 @@ const AddSalaryForm: React.FC<{
                     </InputAdornment>
                   ) : null,
                 }}
-              />
+              /> */}
+              <Box
+                display={purchased ? "grid" : "flex"}
+                alignItems="center"
+                gap={2}
+              >
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="en-gb"
+                >
+                  <DatePicker
+                    label={"Period"}
+                    views={["month", "year"]}
+                    value={period ? dayjs(period) : dayjs()}
+                    onChange={(newValue) => {
+                      setPeriod(dayjs(newValue).format("YYYY-MM"));
+                    }}
+                  />
+                  {!purchased && (
+                    <InputAdornment position="end">
+                      <Link
+                        href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true&periods=${
+                          period.split("-")[1]
+                        }-${period.split("-")[0]}`}
+                      >
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<ShoppingBag />}
+                        >
+                          Purchase
+                        </Button>
+                      </Link>
+                    </InputAdornment>
+                  )}
+                </LocalizationProvider>
+              </Box>
             </FormControl>
           </Grid>
           <Grid item xs={12}>

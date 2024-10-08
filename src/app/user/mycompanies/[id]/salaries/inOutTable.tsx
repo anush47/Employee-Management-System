@@ -1,4 +1,9 @@
-import { Autorenew, DeleteOutline, SaveOutlined } from "@mui/icons-material";
+import {
+  Add,
+  Autorenew,
+  DeleteOutline,
+  SaveOutlined,
+} from "@mui/icons-material";
 import {
   Button,
   Chip,
@@ -6,7 +11,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  Grid,
   IconButton,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -84,6 +92,40 @@ export const InOutTable = ({
 
   const [rowSelectionModel, setRowSelectionModel] =
     React.useState<GridRowSelectionModel>([]);
+
+  const [newInOut, setNewInOut] = useState<InOut>(
+    inOuts.length > 0
+      ? {
+          id: inOuts[inOuts.length - 1].id + 1,
+          employeeName: inOuts[inOuts.length - 1].employeeName,
+          employeeNIC: inOuts[inOuts.length - 1].employeeNIC,
+          basic: inOuts[inOuts.length - 1].basic,
+          divideBy: inOuts[inOuts.length - 1].divideBy,
+          in: dayjs().toISOString(),
+          out: dayjs().toISOString(),
+          workingHours: 0,
+          otHours: 0,
+          ot: 0,
+          noPay: 0,
+          holiday: "",
+          description: "",
+        }
+      : {
+          id: 0,
+          employeeName: "",
+          employeeNIC: "",
+          basic: 0,
+          divideBy: 0,
+          in: dayjs().toISOString(),
+          out: dayjs().toISOString(),
+          workingHours: 0,
+          otHours: 0,
+          ot: 0,
+          noPay: 0,
+          holiday: "",
+          description: "",
+        }
+  );
 
   const columns: GridColDef[] = [
     { field: "employeeName", headerName: "Employee", flex: 1 },
@@ -171,6 +213,7 @@ export const InOutTable = ({
     {
       field: "otHours",
       headerName: "OT Hours",
+      type: "number",
       flex: 1,
       renderCell(params) {
         return params.value.toFixed(2);
@@ -180,6 +223,7 @@ export const InOutTable = ({
       field: "ot",
       headerName: "OT",
       flex: 1,
+      type: "number",
       renderCell(params) {
         return params.value.toFixed(2);
       },
@@ -188,6 +232,8 @@ export const InOutTable = ({
       field: "noPay",
       headerName: "No Pay",
       flex: 1,
+      editable,
+      type: "number",
       renderCell(params) {
         return params.value.toFixed(2);
       },
@@ -272,6 +318,7 @@ export const InOutTable = ({
 
   // State for managing dialog visibility
   const [openDelete, setOpenDelete] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
 
   // State for storing the ids of the items to delete (support for multiple)
   const [deleteIds, setDeleteIds] = useState<(string | null)[]>([]);
@@ -294,12 +341,33 @@ export const InOutTable = ({
   const handleConfirmDelete = () => {
     const newInOuts = inOuts.filter((inOut) => !deleteIds.includes(inOut.id));
     setInOuts(newInOuts); // Update the state with filtered data
+    setEdited(true);
     setOpenDelete(false); // Close the dialog
   };
 
   // Close the dialog without deleting anything
-  const handleClose = () => {
+  const handleDeleteClose = () => {
     setOpenDelete(false); // Close the dialog
+  };
+
+  //close without adding
+  const handleAddClose = () => {
+    setOpenAdd(false);
+  };
+
+  //confirm add
+  const handleConfirmAdd = () => {
+    const newInOutRecord: InOut = {
+      ...newInOut,
+      id: inOuts.length > 0 ? inOuts[inOuts.length - 1].id + 1 : 0,
+      //add z to in and out if necessary
+      in: newInOut.in.endsWith("Z") ? newInOut.in : newInOut.in + "Z",
+      out: newInOut.out.endsWith("Z") ? newInOut.out : newInOut.out + "Z",
+    };
+
+    setInOuts([...inOuts, newInOutRecord]);
+    setEdited(true);
+    setOpenAdd(false);
   };
 
   //calculate function
@@ -318,7 +386,18 @@ export const InOutTable = ({
       className={edited || rowSelectionModel.length > 0 ? "mb-20" : "mb-10"}
     >
       <Typography variant="h6" gutterBottom>
-        In-Out Records
+        <div className="flex items-start">
+          <div className="mr-2">In-Out Records</div>
+          {editable && (
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={() => setOpenAdd(true)}
+            >
+              Add
+            </Button>
+          )}
+        </div>
       </Typography>
       {editable && rowSelectionModel.length > 0 && (
         <Button
@@ -398,17 +477,102 @@ export const InOutTable = ({
         onRowSelectionModelChange={(newModel) => setRowSelectionModel(newModel)}
       />
       {/* Confirmation Dialog */}
-      <Dialog open={openDelete} onClose={handleClose}>
+      <Dialog open={openDelete} onClose={handleDeleteClose}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           Are you sure you want to delete this record?
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleDeleteClose} color="primary">
             Cancel
           </Button>
           <Button onClick={handleConfirmDelete} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Dialog */}
+      <Dialog open={openAdd} onClose={handleAddClose} fullWidth>
+        <DialogTitle>Add Record</DialogTitle>
+        <DialogContent>
+          <Grid my={3} container spacing={3}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="en-gb"
+                >
+                  <DateTimePicker
+                    label="In time"
+                    value={dayjs(newInOut?.in)}
+                    onChange={
+                      (date) =>
+                        setNewInOut({
+                          ...newInOut,
+                          in: date
+                            ? date.format("YYYY-MM-DDTHH:mm:ss.SSS")
+                            : newInOut.in,
+                        }) // Store the value as a string
+                    }
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="en-gb"
+                >
+                  <DateTimePicker
+                    label="Out time"
+                    value={dayjs(newInOut?.out)}
+                    minDate={newInOut?.in ? dayjs(newInOut?.in) : undefined}
+                    onChange={
+                      (date) =>
+                        setNewInOut({
+                          ...newInOut,
+                          out: date
+                            ? date.format("YYYY-MM-DDTHH:mm:ss.SSS")
+                            : newInOut.out,
+                        }) // Store the value as a string
+                    }
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <TextField
+                  label="Details"
+                  name="designation"
+                  variant="filled"
+                  multiline
+                  rows={2}
+                  value={newInOut?.description}
+                  onChange={(e) =>
+                    setNewInOut({ ...newInOut, description: e.target.value })
+                  }
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddClose} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmAdd}
+            color="success"
+            variant="outlined"
+            disabled={
+              !newInOut?.in || !newInOut?.out || newInOut?.in === newInOut?.out
+            }
+            startIcon={<Add />}
+          >
+            Add
           </Button>
         </DialogActions>
       </Dialog>

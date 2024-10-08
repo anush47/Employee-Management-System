@@ -331,7 +331,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
               </Tooltip>
             </Typography>
           }
-          subheader={`Period - ${period}`}
+          subheader={`Period: ${period}`}
         />
         <CardContent>
           <Grid container spacing={3}>
