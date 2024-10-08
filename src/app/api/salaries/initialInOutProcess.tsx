@@ -1,3 +1,5 @@
+import { ProcessedInOut, RawInOut } from "./generate/salaryGeneration";
+
 // Helper function to parse and validate a date string
 const parseDate = (time: string): Date | null => {
   const utcTime = `${time}Z`;
@@ -12,10 +14,14 @@ const parseDate = (time: string): Date | null => {
 };
 
 // Main function to process inOut CSV data
-export const initialInOutProcess = (data: string) => {
+export const initialInOutProcess = (data: string | ProcessedInOut) => {
+  //if type is not string return as it is
+  if (typeof data !== "string") {
+    return data;
+  }
   // Split the CSV data into lines and ignore the header
   const rows = data.trim().split("\n").slice(1);
-  const result: { [employeeId: string]: Date[] } = {};
+  const result: { [employeeId: string]: RawInOut } = {};
 
   // Process each row
   rows.forEach((row) => {

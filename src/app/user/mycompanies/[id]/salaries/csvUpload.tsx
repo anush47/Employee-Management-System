@@ -21,9 +21,6 @@ export const handleCsvUpload = async (file: File): Promise<string> => {
       reader.readAsText(file);
     });
 
-    // Send to API to process inOut
-    console.log(result);
-
     return result;
   } catch (error) {
     console.error("Error during file upload or processing:", error);

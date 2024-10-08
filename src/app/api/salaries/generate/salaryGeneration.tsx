@@ -1,12 +1,35 @@
-import Employee from "@/app/models/Employee";
-import Salary from "@/app/models/Salary";
 import { inOutGen, inOutProcess } from "../inOutProcessing";
+
+// Types for InOut
+export type RawInOut = Date[]; // Unprocessed in/out records
+export type ProcessedInOut = {
+  in: String;
+  out: String;
+  workingHours: number;
+  otHours: number;
+  ot: number;
+  noPay: number;
+  holiday: string;
+  description: string;
+}[];
+
+// Helper function to check if inOut is already processed
+function isProcessed(
+  inOut: RawInOut | ProcessedInOut
+): inOut is ProcessedInOut {
+  return (
+    Array.isArray(inOut) &&
+    inOut.length > 0 &&
+    typeof inOut[0] === "object" &&
+    "workingHours" in inOut[0]
+  );
+}
 
 // Helper function to parse the value for additions/deductions
 function parseValue(name: string, value: string, basic: number): number {
   if (name === "EPF 8%") {
     return basic * 0.08;
-  } else if (value && value.includes("-")) {
+  } else if (typeof value === "string" && value.includes("-")) {
     // If the value is a range like "2000-5000", pick a random multiple of 100 within the range
     const [min, max] = value.split("-").map(Number);
     const randomValue =
@@ -23,6 +46,7 @@ function parseValue(name: string, value: string, basic: number): number {
   }
 }
 
+// Helper function to generate a random object ID
 function generateObjectId(): string {
   const timestamp = Math.floor(Date.now() / 1000).toString(16); // 4-byte timestamp in hex
   const randomPart = Math.random().toString(16).substr(2, 10); // 5-byte random hex string
@@ -33,29 +57,30 @@ function generateObjectId(): string {
   return timestamp + randomPart + counter;
 }
 
+// Function to generate salary for an employee
 export async function generateSalaryForOneEmployee(
   employee: any,
   period: string,
-  inOut: Date[] | undefined
+  inOut: RawInOut | ProcessedInOut | undefined,
+  salary?: any
 ) {
   try {
-    // Calculate additions with actual computed values
-    const parsedAdditions = employee.paymentStructure.additions.map(
+    const source = salary || employee;
+
+    const parsedAdditions = source.paymentStructure.additions.map(
       (addition: { name: string; amount: string }) => ({
         name: addition.name,
-        amount: parseValue(addition.name, addition.amount, employee.basic), // Store the computed value
+        amount: parseValue(addition.name, addition.amount, source.basic),
       })
     );
 
-    // Calculate deductions with actual computed values
-    const parsedDeductions = employee.paymentStructure.deductions.map(
+    const parsedDeductions = source.paymentStructure.deductions.map(
       (deduction: { name: string; amount: string }) => ({
         name: deduction.name,
-        amount: parseValue(deduction.name, deduction.amount, employee.basic), // Store the computed value
+        amount: parseValue(deduction.name, deduction.amount, source.basic),
       })
     );
 
-    // Calculate total additions and deductions
     const totalAdditions = parsedAdditions.reduce(
       (total: number, addition: { amount: number }) => total + addition.amount,
       0
@@ -71,67 +96,70 @@ export async function generateSalaryForOneEmployee(
     let noPay = 0;
     let otReason = "";
     let noPayReason = "";
-    let inOutProcessed: {
-      in: Date;
-      out: Date;
-      workingHours: number;
-      otHours: number;
-      ot: number;
-      noPay: number;
-      holiday: string;
-      description: string;
-    }[] = [];
+    let inOutProcessed: ProcessedInOut | RawInOut = [];
 
-    //sort inOut
-    inOut = inOut?.sort((a: Date, b: Date) => a.getTime() - b.getTime()) || [];
-
+    // Only sort if the data is unprocessed (RawInOut)
+    if (inOut && !isProcessed(inOut)) {
+      inOutProcessed =
+        (inOut as RawInOut)?.sort(
+          (a: Date, b: Date) => a.getTime() - b.getTime()
+        ) || [];
+    } else {
+      inOutProcessed = inOut as ProcessedInOut; // If already processed, use it as is
+    }
+    // Choose the appropriate overtime calculation method
     switch (employee.otMethod) {
       case "noOt":
         ({ ot, otReason, noPay, noPayReason, inOutProcessed } = noOtCalc(
           employee,
           period,
-          inOut
+          inOutProcessed,
+          salary
         ));
         break;
       case "calc":
         ({ ot, otReason, noPay, noPayReason, inOutProcessed } = OtCalc(
           employee,
           period,
-          inOut
+          inOutProcessed,
+          salary
         ));
         break;
       default:
         ({ ot, otReason, noPay, noPayReason, inOutProcessed } = randomCalc(
           employee,
           period,
-          inOut
+          inOutProcessed,
+          salary
         ));
         break;
     }
 
-    // Generate the salary data
+    const finalSalary =
+      employee.basic + totalAdditions + ot - totalDeductions - noPay;
+
     const salaryData = {
-      _id: generateObjectId(),
+      _id: salary._id || generateObjectId(),
       inOut: inOutProcessed,
       employee: employee._id,
       period,
-      basic: employee.basic, // Employee's basic salary
+      basic: source.basic, // Employee's basic salary
       noPay: {
-        amount: 1000, // Example: No Pay deduction amount
-        reason: noPayReason, // Example reason for no pay
+        amount: noPay, // No Pay deduction amount
+        reason: noPayReason, // Reason for no pay
       },
       ot: {
-        amount: ot, // Example: Overtime payment
-        reason: otReason, // Example reason for overtime
+        amount: ot, // Overtime payment
+        reason: otReason, // Reason for overtime
       },
       paymentStructure: {
-        additions: parsedAdditions, // Return the parsed additions with computed values
-        deductions: parsedDeductions, // Return the parsed deductions with computed values
+        additions: parsedAdditions, // Additions with computed values
+        deductions: parsedDeductions, // Deductions with computed values
       },
       advanceAmount: 0, // Example advance amount
-      finalSalary:
-        employee.basic + totalAdditions + ot - totalDeductions - noPay, // Calculating final salary
+      finalSalary,
     };
+
     return salaryData;
   } catch (error) {
     return {
@@ -141,49 +169,73 @@ export async function generateSalaryForOneEmployee(
   }
 }
 
-const randomCalc = (employee: any, period: string, inOut: Date[] = []) => {
-  let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutGen(
-    employee,
-    period,
-    inOut
-  );
+// Random overtime calculation
+const randomCalc = (
+  employee: any,
+  period: string,
+  inOutProcessed: ProcessedInOut | RawInOut,
+  salary: any
+) => {
+  let {
+    inOutProcessed: processedInOut,
+    ot,
+    noPay,
+    otReason,
+    noPayReason,
+  } = inOutGen(employee, period, inOutProcessed, salary);
 
   return {
     ot,
     otReason,
     noPay,
     noPayReason,
-    inOutProcessed,
+    inOutProcessed: processedInOut,
   };
 };
 
-const noOtCalc = (employee: any, period: string, inOut: Date[] = []) => {
-  let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
-    employee,
-    period,
-    inOut
-  );
+// No overtime calculation
+const noOtCalc = (
+  employee: any,
+  period: string,
+  inOutProcessed: ProcessedInOut | RawInOut,
+  salary: any
+) => {
+  let {
+    inOutProcessed: processedInOut,
+    ot,
+    noPay,
+    otReason,
+    noPayReason,
+  } = inOutProcess(employee, period, inOutProcessed, salary);
 
   return {
     ot,
     otReason,
     noPay,
     noPayReason,
-    inOutProcessed,
+    inOutProcessed: processedInOut,
   };
 };
 
-const OtCalc = (employee: any, period: string, inOut: Date[] = []) => {
-  let { inOutProcessed, ot, noPay, otReason, noPayReason } = inOutProcess(
-    employee,
-    period,
-    inOut
-  );
+// Overtime calculation
+const OtCalc = (
+  employee: any,
+  period: string,
+  inOutProcessed: ProcessedInOut | RawInOut,
+  salary: any
+) => {
+  let {
+    inOutProcessed: processedInOut,
+    ot,
+    noPay,
+    otReason,
+    noPayReason,
+  } = inOutProcess(employee, period, inOutProcessed, salary);
   return {
     ot,
     otReason,
     noPay,
     noPayReason,
-    inOutProcessed,
+    inOutProcessed: processedInOut,
   };
 };

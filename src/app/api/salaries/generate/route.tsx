@@ -4,7 +4,11 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
-import { generateSalaryForOneEmployee } from "./salaryGeneration";
+import {
+  generateSalaryForOneEmployee,
+  RawInOut,
+  ProcessedInOut,
+} from "./salaryGeneration";
 import Employee from "@/app/models/Employee";
 import { checkPurchased } from "../../purchases/check/checkPurchased";
 import Salary from "@/app/models/Salary";
@@ -27,8 +31,8 @@ export async function POST(req: NextRequest) {
     IdSchema.parse(userId);
 
     const body = await req.json();
-    let { employees, companyId, period, inOut } = body;
-
+    let { employees, companyId, period, inOut, update, existingSalaries } =
+      body;
     // Validate period
     periodSchema.parse(period);
     IdSchema.parse(companyId);
@@ -68,10 +72,9 @@ export async function POST(req: NextRequest) {
     ) {
       const purchasedStatus = await checkPurchased(companyId, period);
       if (purchasedStatus !== "approved") {
-        console.log("huttak");
         return NextResponse.json(
           {
-            message: `Month not Purchased for ${period} .Purchase is ${purchasedStatus}`,
+            message: `Month not Purchased for ${period}. Purchase is ${purchasedStatus}`,
           },
           { status: 400 }
         );
@@ -85,16 +88,15 @@ export async function POST(req: NextRequest) {
         active: true,
       });
     } else {
-      //get employees from employees
+      console.log(employees);
       employees = await Employee.find({
         _id: { $in: employees },
         company: companyId,
-        //active: true, //allow inactive employees
       });
     }
 
-    //if no employees
-    if (!employees || employees?.length === 0) {
+    // If no employees
+    if (!employees || employees.length === 0) {
       return NextResponse.json(
         { message: "No active employees found for the company" },
         { status: 400 }
@@ -103,42 +105,69 @@ export async function POST(req: NextRequest) {
 
     // Generate salary for all employees
     const salaries = [];
-
     const exists = [];
 
     const inOutInitial = initialInOutProcess(inOut);
+
     for (const employee of employees) {
       const existingSalary = await Salary.findOne({
         employee: employee._id,
         period: period,
       });
-      if (existingSalary) {
-        console.log(
-          `Salary already exists for employee ${employee.name} for period ${period}`
-        );
+
+      if (existingSalary && !update) {
         exists.push(employee._id);
-        continue; // Skip this employee and continue with the next one
+        continue; // Skip this employee if salary already exists and update is not requested
       }
 
-      const salary = await generateSalaryForOneEmployee(
-        employee,
-        period,
-        inOutInitial[employee._id] ? inOutInitial[employee._id] : undefined
-      );
-      salaries.push(salary);
+      // Check if the `inOutInitial` for the employee is RawInOut or ProcessedInOut
+      const employeeInOut = update
+        ? (inOutInitial as ProcessedInOut)
+        : (inOutInitial as { [employeeId: string]: RawInOut })[employee._id];
+
+      if (
+        !update &&
+        Array.isArray(employeeInOut) &&
+        employeeInOut.length > 0 &&
+        employeeInOut[0] instanceof Date
+      ) {
+        // If inOutInitial is RawInOut (array of Dates), generate salary using RawInOut
+        const generatedSalary = await generateSalaryForOneEmployee(
+          employee,
+          period,
+          employeeInOut as RawInOut
+        );
+        salaries.push(generatedSalary);
+      } else if (update) {
+        const existingSalary = existingSalaries?.find(
+          (s: { employee: any }) =>
+            s.employee.toString() === employee._id.toString()
+        );
+
+        // If update is true and inOutInitial is ProcessedInOut, generate salary using ProcessedInOut
+        const generatedSalary = await generateSalaryForOneEmployee(
+          employee,
+          period,
+          employeeInOut as ProcessedInOut,
+          existingSalary
+        );
+        console.log(generatedSalary);
+        salaries.push(generatedSalary);
+      }
     }
 
     return NextResponse.json({ salaries, exists });
   } catch (error) {
-    //console.error(error);
-    // Handle Zod validation errors
     console.log(error);
+
+    // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: error.errors[0].message },
         { status: 400 }
       );
     }
+
     // Handle general errors
     return NextResponse.json(
       {

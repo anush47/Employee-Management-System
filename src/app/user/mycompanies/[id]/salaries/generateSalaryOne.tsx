@@ -27,7 +27,13 @@ import React, { useEffect, useState } from "react";
 import { Employee } from "../employees/clientComponents/employeesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
-import { Autorenew, Save, Upload } from "@mui/icons-material";
+import {
+  Autorenew,
+  CheckCircle,
+  DoneAllRounded,
+  Save,
+  Upload,
+} from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { handleCsvUpload, inOutCalc } from "./csvUpload";
 import { LoadingButton } from "@mui/lab";
@@ -44,6 +50,7 @@ const GenerateSalaryOne = ({
   const [employee, setEmployee] = useState<Employee>();
   const [loading, setLoading] = useState(false);
   const [inOut, setInOut] = useState("");
+  const [generated, setGenerated] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
@@ -131,7 +138,7 @@ const GenerateSalaryOne = ({
     }
   }, [employeeId]);
 
-  const fetchSalary = async () => {
+  const fetchSalary = async (update = false) => {
     try {
       setLoading(true);
       //use post method
@@ -141,7 +148,9 @@ const GenerateSalaryOne = ({
           companyId,
           employees: [employeeId],
           period,
-          inOut,
+          inOut: update ? formFields.inOut : inOut,
+          existingSalaries: update ? [formFields] : undefined,
+          update,
         }),
       });
       if (!response.ok) {
@@ -179,6 +188,9 @@ const GenerateSalaryOne = ({
       }
 
       setFormFields(data.salaries[0]);
+      if (!update) {
+        setGenerated(true);
+      }
     } catch (error) {
       setSnackbarMessage(
         error instanceof Error ? error.message : "Error fetching Salary."
@@ -231,27 +243,6 @@ const GenerateSalaryOne = ({
     }));
   };
 
-  //when inOut is changed change ot otreason and no pay
-  const handleInOutChange = () => {
-    //perform inOut calculations
-    const { ot, noPay, otReason, noPayReason } = inOutCalc(
-      formFields,
-      employee?.divideBy ?? 240
-    );
-    console.log(ot);
-    setFormFields((prevFields) => ({
-      ...prevFields,
-      ot: {
-        amount: ot,
-        reason: otReason,
-      },
-      noPay: {
-        amount: noPay,
-        reason: noPayReason,
-      },
-    }));
-  };
-
   //calculate final salary when changed
   useEffect(() => {
     calculateFinalSalary();
@@ -282,6 +273,11 @@ const GenerateSalaryOne = ({
       ...prevFields,
       [name]: value,
     }));
+
+    if (name === "basic") {
+      formFields.basic = Number(value);
+      fetchSalary(true);
+    }
   };
 
   const onSaveClick = async () => {
@@ -291,8 +287,6 @@ const GenerateSalaryOne = ({
     if (!isValid) {
       return;
     }
-
-    console.log(formFields);
 
     setLoading(true);
     try {
@@ -397,54 +391,57 @@ const GenerateSalaryOne = ({
                     NIC: {employee?.nic}
                   </Typography>
                   <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                    Period: {formFields?.period}
+                    Period: {period}
                   </Typography>
                 </Box>
               )}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  component="label"
-                  startIcon={<Upload />}
-                >
-                  Upload In-Out CSV
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={async (event) => {
-                      if (event.target.files && event.target.files[0]) {
-                        const _inOut = await handleCsvUpload(
-                          event.target.files[0]
-                        );
-                        setInOut(_inOut);
-                      }
-                    }}
-                  />
-                </Button>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <LoadingButton
-                  variant="contained"
-                  color="primary"
-                  component="label"
-                  loading={loading}
-                  loadingPosition="center"
-                  startIcon={<Autorenew />}
-                  onClick={async () => {
-                    await fetchSalary();
-                    handleInOutChange();
-                  }}
-                >
-                  <span>Generate</span>
-                </LoadingButton>
-              </FormControl>
-            </Grid>
+            {!generated && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      component="label"
+                      startIcon={inOut ? <CheckCircle /> : <Upload />}
+                    >
+                      Upload In-Out CSV
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={async (event) => {
+                          if (event.target.files && event.target.files[0]) {
+                            const _inOut = await handleCsvUpload(
+                              event.target.files[0]
+                            );
+                            setInOut(_inOut);
+                          }
+                        }}
+                      />
+                    </Button>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <LoadingButton
+                      variant="contained"
+                      color="success"
+                      component="label"
+                      loading={loading}
+                      loadingPosition="center"
+                      startIcon={<Autorenew />}
+                      onClick={async () => {
+                        await fetchSalary();
+                      }}
+                    >
+                      <span>Generate</span>
+                    </LoadingButton>
+                  </FormControl>
+                </Grid>
+              </>
+            )}
             <Grid item xs={12}>
               <InOutTable
                 inOuts={formFields.inOut.map((inOut, index) => ({
@@ -470,8 +467,8 @@ const GenerateSalaryOne = ({
                       description: inOut.description,
                     })),
                   }));
-                  handleInOutChange();
                 }}
+                fetchSalary={fetchSalary}
                 editable={true}
               />
             </Grid>
@@ -519,7 +516,7 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: true,
                   }}
                 />
                 {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}
@@ -566,7 +563,7 @@ const GenerateSalaryOne = ({
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: loading,
+                    readOnly: true,
                   }}
                 />
                 {errors.noPay && (

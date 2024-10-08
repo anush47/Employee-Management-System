@@ -1,15 +1,21 @@
+// Determine if inOut contains already processed records (objects) or unprocessed Dates
+import { ProcessedInOut, RawInOut } from "./generate/salaryGeneration";
+
 export const inOutProcess = (
   employee: any,
   period: string,
-  inOut: Date[] // Array of Date objects
+  inOut: RawInOut | ProcessedInOut,
+  existingSalary: any = undefined
 ) => {
-  const { shifts, workingDays, basic, divideBy } = employee;
+  const { shifts } = employee;
+  const source = existingSalary || employee;
 
-  const { startDate, endDate } = startEndDates(period, inOut);
+  // Determine if inOut contains already processed records (objects) or unprocessed Dates
+  const isProcessed = (inOut as ProcessedInOut)[0].in !== undefined;
 
   const records: {
-    in: Date;
-    out: Date;
+    in: string;
+    out: string;
     workingHours: number;
     otHours: number;
     ot: number;
@@ -17,85 +23,109 @@ export const inOutProcess = (
     holiday: string;
     description: string;
   }[] = [];
-  let day = new Date(startDate);
-  let inOutIndex = 0;
 
-  // Iterate through each day in the period
-  while (day <= endDate) {
-    // Iterate through each inOut record
-    while (inOutIndex < inOut.length && inOut[inOutIndex] <= endDate) {
-      // Get the in Time
-      let inDate = inOut[inOutIndex];
+  // Reusable function to calculate working hours, OT, and other fields
+  const processRecord = (
+    inDate: Date,
+    outDate: Date,
+    noPay = 0,
+    holiday = "",
+    description = ""
+  ) => {
+    const workingHours =
+      (outDate.getTime() - inDate.getTime()) / 1000 / 60 / 60;
+    let otHours = 0;
+    if (workingHours > 8) {
+      otHours = workingHours - 8;
+    }
+    const ot = otHours > 0 ? (otHours * source.basic) / employee.divideBy : 0; // Example OT rate
 
-      // Check for shifts starting within 3 hours of inDate's time
-      const shift = shifts.find((shift: { start: string; end: string }) => {
-        return (
-          Math.abs(getTimeDifferenceInMinutes(shift.start, inDate)) <= 3 * 60
-        ); // Allow 3 hours variation in minutes
-      });
+    records.push({
+      in: inDate.toISOString(),
+      out: outDate.toISOString(),
+      workingHours,
+      otHours,
+      ot,
+      noPay,
+      holiday,
+      description,
+    });
+  };
 
-      if (!shift) {
-        console.log("No shift found for the given time:", inDate);
+  if (isProcessed) {
+    // Process the already processed records
+    (inOut as any[]).forEach((record: any) => {
+      const inDate = new Date(record.in);
+      const outDate = new Date(record.out);
+
+      // Recalculate using the reusable function
+      processRecord(
+        inDate,
+        outDate,
+        record.noPay,
+        record.holiday,
+        record.description
+      );
+    });
+  } else {
+    // Unprocessed, proceed to process Date[] input
+    const { startDate, endDate } = startEndDates(period, inOut as Date[]);
+
+    let day = new Date(startDate);
+    let inOutIndex = 0;
+
+    // Iterate through each day in the period
+    while (day <= endDate) {
+      // Iterate through each inOut record
+      while (
+        inOutIndex < inOut.length &&
+        (inOut[inOutIndex] as Date) <= endDate
+      ) {
+        let inDate = inOut[inOutIndex] as Date;
+
+        const shift = shifts.find((shift: { start: string; end: string }) => {
+          return (
+            Math.abs(getTimeDifferenceInMinutes(shift.start, inDate)) <= 3 * 60
+          ); // Allow 3 hours variation in minutes
+        });
+
+        if (!shift) {
+          console.log("No shift found for the given time:", inDate);
+          inOutIndex++;
+          continue; // Move to the next inOut record
+        }
+
+        // Move to the next inOut record for out time
         inOutIndex++;
-        continue; // Move to the next inOut record
-      }
 
-      // Move to the next inOut record for out time
-      inOutIndex++;
-
-      // Get the out Time
-      let outDate: Date | null = null;
-
-      // Check if out of bound
-      if (inOutIndex >= inOut.length) {
-        console.log("No out time found for the given in time:", inDate);
-        outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
-      } else {
-        // Check if the next date is in the variation of end time of 8 hrs
-        outDate = inOut[inOutIndex];
-        if (Math.abs(getTimeDifferenceInMinutes(shift.end, outDate)) > 3 * 60) {
-          console.log(
-            "Out time is not in the variation of end time of 8 hrs:",
-            outDate
-          );
+        let outDate: Date | null = null;
+        if (inOutIndex >= inOut.length) {
           outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
         } else {
-          // Move to next inOut index if valid out time
-          inOutIndex++;
+          outDate = inOut[inOutIndex] as Date;
+          if (
+            Math.abs(getTimeDifferenceInMinutes(shift.end, outDate)) >
+            3 * 60
+          ) {
+            outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
+          } else {
+            inOutIndex++;
+          }
         }
-      }
 
-      // Calculations
-      const workingHours =
-        (outDate.getTime() - inDate.getTime()) / 1000 / 60 / 60;
-      // OT hours
-      let otHours = 0;
-      if (workingHours > 8) {
-        otHours = workingHours - 8;
+        // Use the reusable function to process the record
+        processRecord(inDate, outDate);
+        day.setUTCDate(outDate.getUTCDate() + 1);
       }
-
-      // Add processed record to records
-      records.push({
-        in: inDate, // Record the in time
-        out: outDate, // Record the out time
-        workingHours,
-        otHours,
-        ot: 0,
-        noPay: 0,
-        holiday: "",
-        description: "",
-      });
-      day.setUTCDate(outDate.getUTCDate() + 1);
+      day.setUTCDate(day.getUTCDate() + 1);
     }
-
-    // Move to the next day
-    day.setUTCDate(day.getUTCDate() + 1);
   }
 
-  const ot = 0;
-  const otReason = "no OT";
-  const noPay = 1000;
-  const noPayReason = "Unapproved leaves";
+  const ot = records.reduce((acc, cur) => acc + cur.ot, 0);
+  const noPay = records.reduce((acc, cur) => acc + cur.noPay, 0);
+  const otReason = "OT recalculated";
+  const noPayReason = "Unapproved leaves recalculated";
+
   return {
     inOutProcessed: records,
     ot,
@@ -105,10 +135,15 @@ export const inOutProcess = (
   };
 };
 
-export const inOutGen = (employee: any, period: any, inOut: any) => {
+export const inOutGen = (
+  employee: any,
+  period: any,
+  inOut: any,
+  existingSalary: any = undefined
+) => {
   const inOutProcessed: {
-    in: Date;
-    out: Date;
+    in: string;
+    out: string;
     workingHours: number;
     otHours: number;
     ot: number;
@@ -118,8 +153,8 @@ export const inOutGen = (employee: any, period: any, inOut: any) => {
   }[] = [];
   inOutProcessed.push(
     {
-      in: new Date("2024-09-30T08:10:00"),
-      out: new Date("2024-09-30T17:05:00"),
+      in: new Date("2024-09-30T08:10:00").toISOString(),
+      out: new Date("2024-09-30T17:05:00").toISOString(),
       workingHours: 0,
       otHours: 0,
       ot: 0,
@@ -128,8 +163,8 @@ export const inOutGen = (employee: any, period: any, inOut: any) => {
       description: "",
     },
     {
-      in: new Date("2024-09-30T07:55:00"),
-      out: new Date("2024-09-30T17:10:00"),
+      in: new Date("2024-09-30T07:55:00").toISOString(),
+      out: new Date("2024-09-30T17:10:00").toISOString(),
       workingHours: 0,
       otHours: 0,
       ot: 0,
@@ -145,6 +180,7 @@ export const inOutGen = (employee: any, period: any, inOut: any) => {
   return { inOutProcessed, ot, otReason, noPay, noPayReason };
 };
 
+// Helper functions
 const startEndDates = (
   period: string | number | Date,
   inOut: (string | number | Date)[]
@@ -171,17 +207,15 @@ const getShiftEnd = (shift: string, inDate: Date): Date => {
   let shiftEndTime = new Date(inDate);
   shiftEndTime.setUTCHours(hours);
   shiftEndTime.setUTCMinutes(minutes);
-  // If shift endtime is before start move to next day
+  // If shift end time is before start, move to the next day
   if (shiftEndTime < inDate) {
     shiftEndTime.setUTCDate(shiftEndTime.getUTCDate() + 1);
   }
   return shiftEndTime;
 };
 
-// Helper function to get time difference of shift and inOut
 const getTimeDifferenceInMinutes = (shift: string, inOut: Date): number => {
   const [hours, minutes] = shift.split(":").map(Number);
-  // Check time difference in minutes without converting to date
   const timeDiff =
     hours * 60 + minutes - (inOut.getUTCHours() * 60 + inOut.getUTCMinutes());
   return timeDiff;

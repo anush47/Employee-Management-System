@@ -224,7 +224,6 @@ export async function GET(req: NextRequest) {
         companyName: employee?.companyName,
         companyEmployerNo: employee?.companyEmployerNo,
         companyId: employee?.company,
-        basic: employee?.basic,
         divideBy: employee?.divideBy,
       };
     });

@@ -145,6 +145,71 @@ const EditSalaryForm: React.FC<{
     }
   }, [salaryId]);
 
+  //gen salary
+  const fetchSalary = async () => {
+    try {
+      setLoading(true);
+      //use post method
+      const response = await fetch(`/api/salaries/generate`, {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          employees: [formFields.employee ?? ""],
+          period: formFields.period,
+          inOut: formFields.inOut,
+          existingSalaries: [formFields],
+          update: true,
+        }),
+      });
+      if (!response.ok) {
+        setFormFields((prevFields) => ({
+          ...prevFields,
+        }));
+        const data = await response.json();
+        if (
+          typeof data?.message === "string" &&
+          data.message.startsWith("Month not Purchased")
+        ) {
+          throw new Error(data.message);
+        } else {
+          throw new Error("Failed to fetch Salary");
+        }
+      }
+      const data = await response.json();
+
+      console.log(data.salaries[0]);
+      //check if data.salaries[0] is in correct form
+      if (
+        !data.salaries[0] ||
+        !data.salaries[0].employee ||
+        !data.salaries[0].period
+      ) {
+        throw new Error("Invalid Salary Data");
+      }
+
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        employee: data.salaries[0].employee,
+        period: data.salaries[0].period,
+        inOut: data.salaries[0].inOut,
+        basic: data.salaries[0].basic,
+        noPay: data.salaries[0].noPay,
+        ot: data.salaries[0].ot,
+        paymentStructure: data.salaries[0].paymentStructure,
+        advanceAmount: data.salaries[0].advanceAmount,
+        finalSalary: data.salaries[0].finalSalary,
+      }));
+    } catch (error) {
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error Updating Salary."
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
     reason?: string
@@ -186,26 +251,6 @@ const EditSalaryForm: React.FC<{
     formFields.noPay,
   ]);
 
-  //when inOut is changed change ot otreason and no pay
-  const handleInOutChange = () => {
-    //perform inOut calculations
-    const { ot, noPay, otReason, noPayReason } = inOutCalc(
-      formFields,
-      employee?.divideBy ?? 240
-    );
-    setFormFields((prevFields) => ({
-      ...prevFields,
-      ot: {
-        amount: ot,
-        reason: otReason,
-      },
-      noPay: {
-        amount: noPay,
-        reason: noPayReason,
-      },
-    }));
-  };
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -228,10 +273,8 @@ const EditSalaryForm: React.FC<{
     }));
 
     if (name === "basic") {
-      //wait 1s
-      setTimeout(() => {
-        handleInOutChange();
-      }, 1000);
+      formFields.basic = Number(value);
+      fetchSalary();
     }
   };
 
@@ -495,7 +538,7 @@ const EditSalaryForm: React.FC<{
               <FormControl fullWidth>
                 <InOutTable
                   inOuts={formFields.inOut.map((inOut, index) => ({
-                    id: inOut._id,
+                    id: inOut._id || index + 1,
                     employeeName: employee?.name,
                     employeeNIC: employee?.nic,
                     basic: formFields.basic,
@@ -507,9 +550,9 @@ const EditSalaryForm: React.FC<{
                       ...prev,
                       inOut: inOuts,
                     }));
-                    handleInOutChange();
                   }}
                   editable={isEditing}
+                  fetchSalary={fetchSalary}
                 />
               </FormControl>
             </Grid>

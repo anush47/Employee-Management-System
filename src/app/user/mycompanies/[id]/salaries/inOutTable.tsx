@@ -1,4 +1,4 @@
-import { DeleteOutline } from "@mui/icons-material";
+import { Autorenew, DeleteOutline, SaveOutlined } from "@mui/icons-material";
 import {
   Button,
   Chip,
@@ -63,10 +63,12 @@ export interface InOut {
 export const InOutTable = ({
   inOuts,
   setInOuts,
+  fetchSalary,
   editable,
 }: {
   inOuts: InOut[];
   setInOuts: any;
+  fetchSalary: any;
   editable: boolean;
 }) => {
   const [columnVisibilityModel, setColumnVisibilityModel] =
@@ -220,6 +222,8 @@ export const InOutTable = ({
     },
   ];
 
+  const [edited, setEdited] = useState(false);
+
   const handleRowUpdate = async (newInOut: any) => {
     try {
       // Ensure 'in' and 'out' fields have 'Z' at the end if not present
@@ -230,6 +234,8 @@ export const InOutTable = ({
         newInOut.out += "Z";
       }
 
+      setEdited(true);
+
       // Perform the update operation
       const newInOuts = inOuts.map((inOut) => {
         if (inOut.id === newInOut.id) {
@@ -237,11 +243,7 @@ export const InOutTable = ({
         }
         return inOut;
       });
-      //calculate ot
-      const newInOutsOt = newInOuts.map((inOut) =>
-        inOutCalcOne(inOut, inOut.basic, inOut.divideBy)
-      );
-      setInOuts(newInOutsOt);
+      setInOuts(newInOuts);
       return newInOut;
     } catch (error: any) {
       // Pass the error details along
@@ -300,8 +302,21 @@ export const InOutTable = ({
     setOpenDelete(false); // Close the dialog
   };
 
+  //calculate function
+  const handleCalculate = async () => {
+    try {
+      await fetchSalary(true);
+      setEdited(false);
+    } catch (error) {
+      console.error("Error during calculation:", error);
+    }
+  };
+
   return (
-    <div style={{ height: 400, width: "100%" }} className="mb-10">
+    <div
+      style={{ height: 400, width: "100%" }}
+      className={edited || rowSelectionModel.length > 0 ? "mb-20" : "mb-10"}
+    >
       <Typography variant="h6" gutterBottom>
         In-Out Records
       </Typography>
@@ -317,6 +332,7 @@ export const InOutTable = ({
           disabled={!editable}
           sx={{
             mb: 1,
+            mr: 1,
           }}
           startIcon={
             <DeleteOutline
@@ -327,6 +343,24 @@ export const InOutTable = ({
           }
         >
           Delete Selected
+        </Button>
+      )}
+      {edited && (
+        <Button
+          variant="contained"
+          color="success"
+          onClick={async () => {
+            await handleCalculate();
+          }}
+          disabled={!editable}
+          sx={{
+            mb: 1,
+          }}
+          startIcon={
+            <Autorenew style={{ marginRight: "8px" }} fontSize="small" />
+          }
+        >
+          Calculate
         </Button>
       )}
       <DataGrid

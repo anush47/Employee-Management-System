@@ -94,11 +94,10 @@ const SalariesDataGrid: React.FC<{
     {
       field: "basic",
       headerName: "Basic Salary",
-      type: "number",
       flex: 1,
       align: "left",
+      type: "number",
       headerAlign: "left",
-      editable: isEditing,
     },
     {
       field: "ot",
@@ -107,7 +106,6 @@ const SalariesDataGrid: React.FC<{
       flex: 1,
       align: "left",
       headerAlign: "left",
-      editable: isEditing,
     },
     {
       field: "otReason",
@@ -122,7 +120,6 @@ const SalariesDataGrid: React.FC<{
       flex: 1,
       align: "left",
       headerAlign: "left",
-      editable: isEditing,
     },
     {
       field: "noPayReason",
