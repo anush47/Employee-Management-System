@@ -91,7 +91,7 @@ const Purchases = ({
                 </Typography>
                 <Tooltip title="New Purchase" arrow>
                   <Link
-                    href={`http://localhost:3000/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true`}
+                    href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true`}
                   >
                     <Button
                       variant="outlined"

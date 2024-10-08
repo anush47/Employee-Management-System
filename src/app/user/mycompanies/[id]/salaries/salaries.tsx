@@ -123,7 +123,7 @@ const Salaries = ({
 
                   {/* Add Button to open the form */}
                   <Link
-                    href={`http://localhost:3000/user/mycompanies/${companyId}?companyPageSelect=salaries&gen=true`}
+                    href={`/user/mycompanies/${companyId}?companyPageSelect=salaries&gen=true`}
                   >
                     <Button
                       variant="outlined"
