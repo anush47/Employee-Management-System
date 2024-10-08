@@ -29,6 +29,7 @@ export const options: NextAuthOptions = {
         // You can also use the `req` object to obtain more information, including the IP
         //
         //console.log(email);
+        await dbConnect();
         const user = await User.findOne({ email });
         if (user && bcrypt.compareSync(password, user.password)) {
           // Any object returned will be saved in `user` property of the JWT
