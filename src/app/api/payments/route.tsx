@@ -167,7 +167,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export const paymentSaveSchema = z.object({
+const paymentSaveSchema = z.object({
   _id: z.string().optional(),
   company: z.string(),
   period: z.string(),
