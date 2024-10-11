@@ -75,6 +75,7 @@ const Payments = ({
                   //go back in browser
                   window.history.back();
                 }}
+                user={user}
               />
             </div>
           </Slide>
@@ -122,14 +123,14 @@ const Payments = ({
 
                   {/* Add Button to open the form */}
                   <Link
-                    href={`/user/mycompanies/${companyId}?companyPageSelect=salaries&gen=true`}
+                    href={`/user/mycompanies/${companyId}?companyPageSelect=payments&gen=true`}
                   >
                     <Button
                       variant="outlined"
                       color="primary"
                       startIcon={<Add />}
                     >
-                      Generate Payment
+                      New Payment
                     </Button>
                   </Link>
                 </Box>

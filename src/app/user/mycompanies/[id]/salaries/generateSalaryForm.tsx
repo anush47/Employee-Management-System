@@ -273,35 +273,6 @@ const AddSalaryForm: React.FC<{
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              {/* <TextField
-                label="Period"
-                name="period"
-                type="month"
-                variant="filled"
-                fullWidth
-                value={period}
-                onChange={(event) => setPeriod(event.target.value)}
-                //end adormnt button
-                InputProps={{
-                  endAdornment: !purchased ? (
-                    <InputAdornment position="end">
-                      <Link
-                        href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true&periods=${
-                          period.split("-")[1]
-                        }-${period.split("-")[0]}`}
-                      >
-                        <Button
-                          variant="contained"
-                          color="success"
-                          startIcon={<ShoppingBag />}
-                        >
-                          Purchase
-                        </Button>
-                      </Link>
-                    </InputAdornment>
-                  ) : null,
-                }}
-              /> */}
               <Box
                 display={purchased ? "grid" : "flex"}
                 alignItems="center"
@@ -320,21 +291,19 @@ const AddSalaryForm: React.FC<{
                     }}
                   />
                   {!purchased && (
-                    <InputAdornment position="end">
-                      <Link
-                        href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true&periods=${
-                          period.split("-")[1]
-                        }-${period.split("-")[0]}`}
+                    <Link
+                      href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true&periods=${
+                        period.split("-")[1]
+                      }-${period.split("-")[0]}`}
+                    >
+                      <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={<ShoppingBag />}
                       >
-                        <Button
-                          variant="contained"
-                          color="success"
-                          startIcon={<ShoppingBag />}
-                        >
-                          Purchase
-                        </Button>
-                      </Link>
-                    </InputAdornment>
+                        Purchase
+                      </Button>
+                    </Link>
                   )}
                 </LocalizationProvider>
               </Box>

@@ -1,261 +1,208 @@
-import React, { useState, useEffect } from "react";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Box,
   Button,
-  Typography,
-  CircularProgress,
-  Alert,
-  Snackbar,
-  Grid,
-  Paper,
-  Chip,
-  CardHeader,
-  IconButton,
-  Tooltip,
   Card,
   CardContent,
-  CardActions,
-  TextField,
+  CardHeader,
+  CircularProgress,
   FormControl,
+  FormHelperText,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Slide,
+  Snackbar,
+  TextField,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { ArrowBack, ShoppingBag } from "@mui/icons-material";
-import dayjs from "dayjs";
-import Slide from "@mui/material/Slide";
+import React, { useEffect, useState } from "react";
+import { Payment } from "./paymentsDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
-import { useSearchParams } from "next/navigation";
+import {
+  ArrowBack,
+  ExpandMore,
+  Refresh,
+  Save,
+  Search,
+  ShoppingBag,
+  Sync,
+} from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import "dayjs/locale/en-gb";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import Link from "next/link";
+import SalariesDataGrid from "../salaries/salariesDataGrid";
 
-interface ChipData {
-  key: number;
-  label: string;
-}
-
-const validatePeriod = (value: string) => {
-  const regex = /^(0?[1-9]|1[0-2])-(19|20)\d\d$/;
-  return regex.test(value);
-};
-
-const isValidMonthYear = (value: string) => {
-  if (!validatePeriod(value)) return false;
-
-  const [monthStr, yearStr] = value.split("-");
-  const month = parseInt(monthStr, 10);
-  const year = parseInt(yearStr, 10);
-
-  return year >= 1990 && year <= 2026 && month >= 1 && month <= 12;
-};
-
-const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
-
-const formatPeriod = (value: string) => {
-  const [monthStr, yearStr] = value.split("-");
-  const month = monthStr.padStart(2, "0"); // Add leading zero if necessary
-  const year = yearStr.padStart(4, "0"); // Ensure year is 4 digits
-  return `${month}-${year}`;
-};
-
-const formatPrice = (price: number) => {
-  return price.toLocaleString("en-LK", {
-    style: "currency",
-    currency: "LKR",
-  });
-};
-
-const NewPaymentForm: React.FC<{ handleBackClick: () => void }> = ({
+const NewPaymentForm = ({
   handleBackClick,
+  user,
+}: {
+  handleBackClick: () => void;
+  user: { id: string; name: string; email: string };
 }) => {
-  const [periods, setPeriods] = useState<ChipData[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-  const [price, setPrice] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
+  const [company, setCompany] = useState<any>();
+  const [purchased, setPurchased] = useState<boolean>(true);
+  const [period, setPeriod] = useState<string>(
+    dayjs().format("YYYY-MM") // Default to current month
+  );
+  const [loading, setLoading] = useState(false);
+  const [ReferenceLoading, setReferenceLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
-    null
-  );
-  const [purchasedPeriods, setPurchasedPeriods] = useState<string[]>([]); // New state for purchased periods
-  const [totalPrice, setTotalPrice] = useState<number | null>(null); // New state for total price
-  const [finalTotalPrice, setFinalTotalPrice] = useState<number | null>(null); // New state for final total price
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
 
-  const searchParams = useSearchParams();
-  const periodsInitial = searchParams.get("periods");
+  const [formFields, setFormFields] = useState<{
+    _id: string;
+    company: string;
+    period: string;
+    epfAmount: number;
+    epfPaymentMethod: string;
+    epfChequeNo: string;
+    epfPayDay: string;
+    epfReferenceNo: string;
+    etfAmount: number;
+    etfPaymentMethod: string;
+    etfChequeNo: string;
+    etfPayDay: string;
+  }>({
+    _id: "",
+    company: "",
+    period: "",
+    epfAmount: 0,
+    epfPaymentMethod: "",
+    epfChequeNo: "",
+    epfPayDay: "",
+    epfReferenceNo: "",
+    etfAmount: 0,
+    etfPaymentMethod: "",
+    etfChequeNo: "",
+    etfPayDay: "",
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Fetch company
   useEffect(() => {
-    if (periodsInitial) {
-      const periods = periodsInitial.split(" ");
-      //validate and add
-      const validPeriods = periods.filter((period) => isValidMonthYear(period));
-      setPeriods(
-        validPeriods.map((period, index) => ({
-          key: index,
-          label: formatPeriod(period),
-        }))
-      );
-    }
-  }, [periodsInitial]);
-
-  useEffect(() => {
-    // Set the default month to the current month in "MM-YYYY" format
-    const currentMonth = dayjs().format("MM");
-    const currentYear = dayjs().format("YYYY");
-    setSelectedPeriod(`${currentMonth}-${currentYear}`);
-
     const fetchCompany = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/companies/one?companyId=${companyId}`);
-        const data = await res.json();
-        setPrice(data.company.monthlyPrice);
-      } catch (err) {
-        setError("Failed to fetch company details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchPurchases = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/purchases/?companyId=${companyId}`);
+        const response = await fetch(
+          `/api/companies/one?companyId=${companyId}`
+        );
         if (!response.ok) {
-          throw new Error("Failed to fetch purchases");
+          throw new Error("Failed to fetch Company");
         }
         const data = await response.json();
-        const purchases = data.purchases
-          .filter((purchase: any) => purchase.approvedStatus !== "rejected")
-          .map((purchase: any) => purchase.periods)
-          .flat();
-        setPurchasedPeriods(purchases);
+        setCompany(data.company);
+        setFormFields({
+          ...formFields,
+          epfPaymentMethod: data.company.paymentMethod,
+          etfPaymentMethod: data.company.paymentMethod,
+        });
       } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred"
+        setSnackbarMessage(
+          error instanceof Error ? error.message : "Error fetching company."
         );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCompany();
-    fetchPurchases();
-  }, []);
+    if (companyId?.length === 24) {
+      fetchCompany();
+    } else {
+      setSnackbarMessage("Invalid Company ID");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  }, [companyId]);
 
   useEffect(() => {
-    if (image) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(image);
-    } else {
-      setImagePreview(null);
-    }
-  }, [image]);
-
-  const handleAddPeriod = () => {
-    if (
-      selectedPeriod &&
-      isValidMonthYear(selectedPeriod) &&
-      !periods.find((p) => p.label === formatPeriod(selectedPeriod))
-    ) {
-      if (purchasedPeriods.includes(formatPeriod(selectedPeriod))) {
-        setError("Period already purchased");
-        return;
+    const checkPurchased = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/purchases/check?companyId=${companyId}&month=${period}`,
+          {
+            method: "GET",
+          }
+        );
+        try {
+          const result = await response.json();
+          setPurchased(result?.purchased === "approved");
+        } catch (error) {
+          console.error("Error parsing JSON or updating state:", error);
+          setPurchased(false); // or handle the error state as needed
+        }
+      } catch (error) {
+        console.error("Error fetching salaries:", error);
+      } finally {
+        setLoading(false);
       }
-      setError("");
-      const formattedPeriod = formatPeriod(selectedPeriod);
-      setPeriods([...periods, { key: periods.length, label: formattedPeriod }]);
-
-      //selected period is in "09-2024"
-      const [month, year] = selectedPeriod.split("-");
-      //get next month
-      const nextMonth = parseInt(month) + 1;
-      //if next month is 13, set to 1 and increase year
-      if (nextMonth > 12) {
-        setSelectedPeriod(`01-${parseInt(year) + 1}`);
-      } else {
-        setSelectedPeriod(`${nextMonth}-${year}`);
-      }
-    } else {
-      setError("Period already added or invalid");
-    }
-  };
-
-  const handleDeletePeriod = (chipToDelete: ChipData) => () => {
-    setPeriods((chips) =>
-      chips.filter((chip) => chip.key !== chipToDelete.key)
-    );
-  };
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setImage(event.target.files[0]);
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    // Construct the payload object
-    const payload = {
-      periods: periods.map((p) => p.label),
-      price: price ?? 0,
-      company: companyId,
-      // Convert image to base64 if you want to include it in the JSON payload
-      // Note: Handling large files as base64 can be inefficient
-      // If you want to avoid using base64, you need to handle image separately
-      request: image ? await convertImageToBase64(image) : null,
     };
 
+    checkPurchased();
+  }, [period]);
+
+  // generate payment function
+  const generatePayment = async () => {
     try {
-      // Send JSON payload in the request
-      const response = await fetch("/api/purchases", {
+      setLoading(true);
+      //post with period body
+      const response = await fetch("/api/payments/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          companyId: companyId,
+          period: period,
+          update: false,
+        }),
       });
-
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Failed to create purchase");
+        throw new Error("Failed to fetch payments");
+      }
+      const data = await response.json();
+      const paymentNew = data.payment;
+      if (!paymentNew) {
+        setSnackbarMessage("Payment not found. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
       }
 
-      setSnackbarMessage("Purchase Requested successfully");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-      //wait
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      handleBackClick();
-    } catch (error: any) {
-      setError(error.message);
-      setSnackbarMessage(error.message);
+      setFormFields({
+        ...formFields,
+        epfAmount: paymentNew.epfAmount,
+        etfAmount: paymentNew.etfAmount,
+      });
+      await fetchReferenceNo();
+    } catch (error) {
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error fetching payments."
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Function to convert image to base64
-  const convertImageToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        resolve(reader.result as string);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
   };
 
   const handleSnackbarClose = (
@@ -268,262 +215,532 @@ const NewPaymentForm: React.FC<{ handleBackClick: () => void }> = ({
     setSnackbarOpen(false);
   };
 
-  useEffect(() => {
-    async function fetchPrice() {
-      setLoading(true);
-      try {
-        // Ensure periods and companyId are valid
-        if (!companyId || periods.length === 0) return;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormFields((prevFields) => ({
+      ...prevFields,
+      [name]: value,
+    }));
+  };
 
-        // Construct the query parameter string for months
-        const monthsParam = periods.map((p) => p.label).join("+");
+  const fetchReferenceNo = async () => {
+    //wait 1 seconds
+    setReferenceLoading(true);
+    //fetch epf reference no
+    try {
+      const response = await fetch("/api/companies/getReferenceNoName", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employerNo: company.employerNo,
+          period: period,
+        }),
+      });
+      const result = await response.json();
 
-        // Fetch price details from the API
-        const res = await fetch(
-          `/api/purchases/price?companyId=${companyId}&months=${monthsParam}`
-        );
-        if (!res.ok) {
-          throw new Error("Failed to fetch price details");
-        }
-
-        const data = await res.json();
-        setFinalTotalPrice(data.finalTotalPrice);
-        setTotalPrice(data.totalPrice); // Update with final total price
-      } catch (err) {
-        setError("Failed to fetch price details");
-      } finally {
-        setLoading(false);
+      // Simulate fetching company name
+      //const name = await fetchCompanyName(formFields.employerNo);
+      const referenceNo = result.referenceNo;
+      if (!referenceNo) {
+        setSnackbarMessage("Reference number not found. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
       }
+      //show in snackbar
+      setSnackbarMessage(` Found EPF Reference No: ${referenceNo}`);
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        epfReferenceNo: referenceNo,
+      }));
+    } catch (error) {
+      console.error("Error fetching EPF Reference No:", error);
+      setSnackbarMessage("Error fetching EPF Reference No. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setReferenceLoading(false);
+    }
+  };
+
+  const onSaveClick = async () => {
+    const isValid = Object.keys(errors).length === 0;
+
+    if (!isValid) {
+      return;
     }
 
-    // Fetch price if periods and companyId exist
-    if (periods && companyId) fetchPrice();
-  }, [companyId, periods]);
+    setLoading(true);
+    try {
+      // Perform POST request to add a new payment record
+      const response = await fetch("/api/payments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          payment: {
+            ...formFields, // The form data becomes the first element of the array
+            company: companyId,
+            period: period,
+          },
+        }),
+      });
 
-  const oneMonthPrice = price ?? 0;
+      const result = await response.json();
+
+      if (response.ok) {
+        setSnackbarMessage("Payment record saved successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        // Wait before clearing the form
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Clear the form after successful save
+        setErrors({});
+      } else {
+        // Handle validation or other errors returned by the API
+        setSnackbarMessage(
+          result.message || "Error saving payment. Please try again."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error saving payment:", error);
+
+      setSnackbarMessage("Error saving payment. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Box>
-      <CardHeader
-        title={
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 2,
-            }}
-          >
-            <Typography variant="h5">
-              <Tooltip title="Discard and go back" arrow>
-                <IconButton sx={{ mr: 2 }} onClick={handleBackClick}>
-                  <ArrowBack />
-                </IconButton>
-              </Tooltip>
-              New Purchase
-            </Typography>
-          </Box>
-        }
-      />
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ m: 1 }}>
-              Months to Purchase - {periods.length}
-            </Typography>
-            <Paper
+    <>
+      <Card>
+        <CardHeader
+          title={
+            <Box
               sx={{
                 display: "flex",
-                justifyContent: "left",
-                flexWrap: "wrap",
-                listStyle: "none",
-                p: 0.5,
-                m: 0,
+                justifyContent: "space-between",
+                mb: 2,
               }}
-              component="ul"
             >
-              {periods.map((data) => (
-                <li key={data.key}>
-                  <Chip
-                    label={data.label}
-                    onDelete={handleDeletePeriod(data)}
+              <Typography variant={isSmallScreen ? "h5" : "h4"}>
+                <Tooltip title="Discard and go back" arrow>
+                  <IconButton
                     sx={{
-                      m: 0.5,
-                      backgroundColor: (theme) => theme.palette.primary.main,
-                      color: (theme) => theme.palette.primary.contrastText,
-                      fontSize: "1.2rem",
-                      borderRadius: "16px",
-                      "& .MuiChip-deleteIcon": {
-                        color: (theme) => theme.palette.primary.contrastText,
-                      },
+                      mr: 2,
                     }}
-                  />
-                </li>
-              ))}
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Period"
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              placeholder="MM-YYYY"
-              fullWidth
-              error={!isValidMonthYear(selectedPeriod) && selectedPeriod !== ""}
-              helperText={
-                !isValidMonthYear(selectedPeriod) && selectedPeriod !== ""
-                  ? "Enter a valid month and year (MM-YYYY)"
-                  : error
-              }
-            />
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={handleAddPeriod}
-              sx={{ mt: 1 }}
-            >
-              Add Period
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Card variant="outlined">
-              <CardContent>
-                <div>
-                  <Typography variant="h6">Bank Details</Typography>
-                  <Typography variant="body2">
-                    Account Number: 123456789
-                  </Typography>
-                  <Typography variant="body2">Bank: Example Bank</Typography>
-                </div>
-                <hr className="my-2" />
-                <div>
-                  <Typography variant="h6">Price Details</Typography>
-                  {loading ? (
-                    <Box
+                    onClick={handleBackClick}
+                  >
+                    <ArrowBack />
+                  </IconButton>
+                </Tooltip>
+                New Payment
+                <Tooltip title="Save new payment" arrow>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      color="success"
+                      startIcon={<Save />}
                       sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "30px",
+                        ml: 2,
                       }}
+                      onClick={onSaveClick}
+                      disabled={loading} // Disable button while loading
                     >
-                      <CircularProgress />
-                    </Box>
-                  ) : (
-                    <>
-                      <Typography variant="body1">
-                        Price per Month: {formatPrice(oneMonthPrice)}
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        sx={{ fontWeight: "bold", color: "primary.main" }}
-                      >
-                        Total Price:{" "}
-                        {
-                          // Show if finalTotalPrice and totalPrice are different as a strike-through to highlight discount
-                          finalTotalPrice !== totalPrice && (
-                            <span style={{ textDecoration: "line-through" }}>
-                              {formatPrice(totalPrice ?? 0)}
-                            </span>
-                          )
-                        }{" "}
-                        {formatPrice(finalTotalPrice ?? 0)}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
-                      >
-                        {periods.length} x {formatPrice(oneMonthPrice)}
-                      </Typography>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              Please make the payment and upload the payment slip to request.
-            </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              component="label"
-              disabled={(totalPrice ?? 0) <= 0}
-            >
-              Upload Payment Slip
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageChange}
-              />
-            </Button>
+                      {loading ? <CircularProgress size={24} /> : "Save"}
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Typography>
+            </Box>
+          }
+        />
 
-            <hr className="my-2" />
-            <Tooltip title="Create purchase" arrow>
-              <span>
-                <Button
-                  variant="contained"
-                  color="success"
-                  endIcon={<ShoppingBag />}
-                  onClick={handleSubmit}
-                  disabled={loading || (totalPrice ?? 0) <= 0}
-                  startIcon={loading ? <CircularProgress size={24} /> : null}
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              {loading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                  }}
                 >
-                  {loading ? "Purchasing..." : "Purchase"}
-                </Button>
-              </span>
-            </Tooltip>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            {imagePreview && (
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", color: "primary.main" }}
+                  >
+                    Company: {company?.name}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    Employer No: {company?.employerNo}
+                  </Typography>
+                </Box>
+              )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.period}>
+                <Box
+                  display={purchased ? "grid" : "flex"}
+                  alignItems="center"
+                  gap={2}
+                >
+                  <LocalizationProvider
+                    dateAdapter={AdapterDayjs}
+                    adapterLocale="en-gb"
+                  >
+                    <DatePicker
+                      label={"Period"}
+                      views={["month", "year"]}
+                      value={period ? dayjs(period) : dayjs()}
+                      onChange={(newValue) => {
+                        setPeriod(dayjs(newValue).format("YYYY-MM"));
+                      }}
+                    />
+                    {!purchased && (
+                      <Link
+                        href={`/user/mycompanies/${companyId}?companyPageSelect=purchases&newPurchase=true&periods=${
+                          period?.split("-")[1] || ""
+                        }-${period ? period.split("-")[0] : ""}`}
+                      >
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<ShoppingBag />}
+                        >
+                          Purchase
+                        </Button>
+                      </Link>
+                    )}
+                  </LocalizationProvider>
+                  {errors.period && (
+                    <FormHelperText>{errors.period}</FormHelperText>
+                  )}
+                </Box>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                {typeof imagePreview === "string" &&
-                imagePreview.startsWith("data:application/pdf") ? (
-                  <iframe
-                    src={imagePreview}
-                    title="Uploaded PDF Preview"
-                    height={400 * (29.7 / 21)}
-                    width="400"
-                  />
-                ) : (
-                  <img
-                    src={imagePreview as string}
-                    alt="Uploaded Preview"
-                    style={{ maxWidth: "400px", height: "auto" }}
-                  />
+                <TextField
+                  label="Company Payment Method"
+                  name="companyPaymentMethod"
+                  value={company?.paymentMethod || ""}
+                  onChange={handleChange}
+                  variant="filled"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <FormHelperText>
+                  The company's default payment method
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  aria-controls="panel1-content"
+                  id="panel1-header"
+                >
+                  {loading ? (
+                    <Typography variant="h6">
+                      {`Salary Details loading...`}
+                    </Typography>
+                  ) : (
+                    <Typography variant="h6">
+                      {`Salary Details of ${period}`}
+                    </Typography>
+                  )}
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid item xs={12}>
+                    <FormControl fullWidth>
+                      {period && (
+                        <SalariesDataGrid
+                          key={period} // Adding key to force re-render when period changes
+                          user={user}
+                          isEditing={false}
+                          period={period}
+                        />
+                      )}
+                    </FormControl>
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+              <Button
+                sx={{
+                  mt: 2,
+                }}
+                variant="contained"
+                color="success"
+                onClick={generatePayment}
+                disabled={loading}
+                endIcon={loading ? <CircularProgress size={20} /> : <Sync />}
+              >
+                Calculate
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <hr className="mb-3" />
+              <Typography variant="h6">EPF Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.epfAmount}>
+                <TextField
+                  label="EPF Amount"
+                  name="epfAmount"
+                  type="number"
+                  value={formFields.epfAmount || 0}
+                  onChange={handleChange}
+                  variant="filled"
+                />
+                {errors.epfAmount && (
+                  <FormHelperText>{errors.epfAmount}</FormHelperText>
                 )}
               </FormControl>
-            )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.epfReferenceNo}>
+                <TextField
+                  label="EPF Reference No"
+                  name="epfReferenceNo"
+                  value={formFields.epfReferenceNo || ""}
+                  onChange={handleChange}
+                  variant="filled"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="Get EPF Reference No."
+                          onClick={fetchReferenceNo}
+                        >
+                          {ReferenceLoading ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            <Search />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {errors.epfReferenceNo && (
+                  <FormHelperText>{errors.epfReferenceNo}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.epfPaymentMethod}>
+                <TextField
+                  label="EPF Payment Method"
+                  name="epfPaymentMethod"
+                  value={formFields.epfPaymentMethod}
+                  onChange={handleChange}
+                  variant="filled"
+                  InputProps={{
+                    endAdornment: (
+                      //set company default
+                      <InputAdornment position="end">
+                        <Tooltip title="Set Company Default" arrow>
+                          <IconButton
+                            aria-label="Set Company Default"
+                            onClick={() => {
+                              setFormFields((prevFields) => ({
+                                ...prevFields,
+                                epfPaymentMethod: company?.paymentMethod || "",
+                              }));
+                            }}
+                          >
+                            <Refresh />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {errors.epfPaymentMethod && (
+                  <FormHelperText>{errors.epfPaymentMethod}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.epfChequeNo}>
+                <TextField
+                  label="EPF Cheque No."
+                  name="epfChequeNo"
+                  value={formFields.epfChequeNo || ""}
+                  onChange={handleChange}
+                  variant="filled"
+                />
+                {errors.epfChequeNo && (
+                  <FormHelperText>{errors.epfChequeNo}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.epfPayDay}>
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="en-gb"
+                >
+                  <DatePicker
+                    label="EPF Paid Day"
+                    name="epfPayDay"
+                    openTo="day"
+                    value={
+                      formFields.epfPayDay
+                        ? dayjs(formFields.epfPayDay as string)
+                        : null
+                    }
+                    views={["year", "month", "day"]}
+                    onChange={(newDate) => {
+                      setFormFields((prevFields) => ({
+                        ...prevFields,
+                        epfPayDay: newDate?.format("DD-MM-YYYY") as string,
+                      }));
+                    }}
+                    slotProps={{
+                      field: { clearable: true },
+                    }}
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <hr className="mb-3" />
+              <Typography variant="h6">ETF Details</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.etfAmount}>
+                <TextField
+                  label="ETF Amount"
+                  name="etfAmount"
+                  type="number"
+                  value={formFields.etfAmount || ""}
+                  onChange={handleChange}
+                  variant="filled"
+                />
+                {errors.etfAmount && (
+                  <FormHelperText>{errors.etfAmount}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.etfPaymentMethod}>
+                <TextField
+                  label="ETF Payment Method"
+                  name="etfPaymentMethod"
+                  value={formFields.etfPaymentMethod || ""}
+                  onChange={handleChange}
+                  variant="filled"
+                  InputProps={{
+                    endAdornment: (
+                      //set company default
+                      <InputAdornment position="end">
+                        <Tooltip title="Set Company Default" arrow>
+                          <IconButton
+                            aria-label="Set Company Default"
+                            onClick={() => {
+                              setFormFields((prevFields) => ({
+                                ...prevFields,
+                                etfPaymentMethod: company.paymentMethod,
+                              }));
+                            }}
+                          >
+                            <Refresh />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {errors.etfPaymentMethod && (
+                  <FormHelperText>{errors.etfPaymentMethod}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.etfChequeNo}>
+                <TextField
+                  label="ETF Cheque No."
+                  name="etfChequeNo"
+                  value={formFields.etfChequeNo || ""}
+                  onChange={handleChange}
+                  variant="filled"
+                />
+                {errors.etfChequeNo && (
+                  <FormHelperText>{errors.etfChequeNo}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.etfPayDay}>
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="en-gb"
+                >
+                  <DatePicker
+                    label="ETF Paid Day"
+                    name="etfPayDay"
+                    openTo="day"
+                    value={
+                      formFields.etfPayDay
+                        ? dayjs(formFields.etfPayDay as string)
+                        : null
+                    }
+                    views={["year", "month", "day"]}
+                    onChange={(newDate) => {
+                      setFormFields((prevFields) => ({
+                        ...prevFields,
+                        etfPayDay: newDate?.format("DD-MM-YYYY") as string,
+                      }));
+                    }}
+                    slotProps={{
+                      field: { clearable: true },
+                    }}
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            </Grid>
           </Grid>
-          <Grid item xs={12}></Grid>
-        </Grid>
-      </Box>
+        </CardContent>
+      </Card>
       <Snackbar
         open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
         TransitionComponent={SlideTransition}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        action={
-          <Button color="inherit" onClick={handleSnackbarClose}>
-            Close
-          </Button>
-        }
       >
         <Alert
           onClose={handleSnackbarClose}
           severity={snackbarSeverity}
+          variant="filled"
           sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   );
 };
 

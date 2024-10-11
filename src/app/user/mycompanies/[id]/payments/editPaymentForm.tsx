@@ -40,6 +40,7 @@ import {
   Refresh,
   Save,
   Search,
+  Sync,
 } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { paymentId } from "./payments";
@@ -140,59 +141,46 @@ const EditPaymentForm: React.FC<{
   }, [paymentId]);
 
   //gen salary
-  const fetchSalary = async () => {
-    // try {
-    //   setLoading(true);
-    //   //use post method
-    //   const response = await fetch(`/api/salaries/generate`, {
-    //     method: "POST",
-    //     body: JSON.stringify({}),
-    //   });
-    //   if (!response.ok) {
-    //     setFormFields((prevFields) => ({
-    //       ...prevFields,
-    //     }));
-    //     const data = await response.json();
-    //     if (
-    //       typeof data?.message === "string" &&
-    //       data.message.startsWith("Month not Purchased")
-    //     ) {
-    //       throw new Error(data.message);
-    //     } else {
-    //       throw new Error("Failed to fetch Salary");
-    //     }
-    //   }
-    //   const data = await response.json();
-    //   console.log(data.salaries[0]);
-    //   //check if data.salaries[0] is in correct form
-    //   if (
-    //     !data.salaries[0] ||
-    //     !data.salaries[0].employee ||
-    //     !data.salaries[0].period
-    //   ) {
-    //     throw new Error("Invalid Salary Data");
-    //   }
-    //   setFormFields((prevFields) => ({
-    //     ...prevFields,
-    //     employee: data.salaries[0].employee,
-    //     period: data.salaries[0].period,
-    //     inOut: data.salaries[0].inOut,
-    //     basic: data.salaries[0].basic,
-    //     noPay: data.salaries[0].noPay,
-    //     ot: data.salaries[0].ot,
-    //     paymentStructure: data.salaries[0].paymentStructure,
-    //     advanceAmount: data.salaries[0].advanceAmount,
-    //     finalSalary: data.salaries[0].finalSalary,
-    //   }));
-    // } catch (error) {
-    //   setSnackbarMessage(
-    //     error instanceof Error ? error.message : "Error Updating Salary."
-    //   );
-    //   setSnackbarSeverity("error");
-    //   setSnackbarOpen(true);
-    // } finally {
-    //   setLoading(false);
-    // }
+  const generatePaymentUpdate = async () => {
+    try {
+      setLoading(true);
+      //post with period body
+      const response = await fetch("/api/payments/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          companyId: companyId,
+          period: formFields.period,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch payments");
+      }
+      const data = await response.json();
+      const paymentNew = data.payment;
+      if (!paymentNew) {
+        setSnackbarMessage("Payment not found. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+      setFormFields({
+        ...formFields,
+        epfAmount: paymentNew.epfAmount,
+        etfAmount: paymentNew.etfAmount,
+      });
+      await fetchReferenceNo();
+    } catch (error) {
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error fetching payments."
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSnackbarClose = (
@@ -382,17 +370,36 @@ const EditPaymentForm: React.FC<{
   const fetchReferenceNo = async () => {
     //wait 1 seconds
     setReferenceLoading(true);
+    //fetch epf reference no
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      //set a set as epf reference
-      const referneceNo = "12345";
+      const response = await fetch("/api/companies/getReferenceNoName", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employerNo: formFields.companyEmployerNo,
+          period: formFields.period,
+        }),
+      });
+      const result = await response.json();
+
+      // Simulate fetching company name
+      //const name = await fetchCompanyName(formFields.employerNo);
+      const referenceNo = result.referenceNo;
+      if (!referenceNo) {
+        setSnackbarMessage("Reference number not found. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
       //show in snackbar
-      setSnackbarMessage(` Found EPF Reference No: ${referneceNo}`);
+      setSnackbarMessage(` Found EPF Reference No: ${referenceNo}`);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
       setFormFields((prevFields) => ({
         ...prevFields,
-        epfReferenceNo: referneceNo,
+        epfReferenceNo: referenceNo,
       }));
     } catch (error) {
       console.error("Error fetching EPF Reference No:", error);
@@ -497,9 +504,7 @@ const EditPaymentForm: React.FC<{
                   <DatePicker
                     label={"Period"}
                     views={["month", "year"]}
-                    value={
-                      formFields.period ? dayjs(formFields.period) : dayjs()
-                    }
+                    value={formFields.period ? dayjs(formFields.period) : null}
                     readOnly
                   />
                 </LocalizationProvider>
@@ -513,7 +518,7 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="Company Payment Method"
                   name="companyPaymentMethod"
-                  value={formFields.companyPaymentMethod ?? ""}
+                  value={formFields.companyPaymentMethod || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -533,7 +538,9 @@ const EditPaymentForm: React.FC<{
                   id="panel1-header"
                 >
                   {loading ? (
-                    <CircularProgress size={20} />
+                    <Typography variant="h6">
+                      {`Salary Details loading...`}
+                    </Typography>
                   ) : (
                     <Typography variant="h6">
                       {`Salary Details of ${formFields.period}`}
@@ -554,8 +561,19 @@ const EditPaymentForm: React.FC<{
                   </Grid>
                 </AccordionDetails>
               </Accordion>
+              <Button
+                sx={{
+                  mt: 2,
+                }}
+                variant="contained"
+                color="success"
+                onClick={generatePaymentUpdate}
+                disabled={loading || !isEditing}
+                endIcon={loading ? <CircularProgress size={20} /> : <Sync />}
+              >
+                Re-calculate
+              </Button>
             </Grid>
-
             <Grid item xs={12}>
               <hr className="mb-3" />
               <Typography variant="h6">EPF Details</Typography>
@@ -566,7 +584,7 @@ const EditPaymentForm: React.FC<{
                   label="EPF Amount"
                   name="epfAmount"
                   type="number"
-                  value={formFields.epfAmount}
+                  value={formFields.epfAmount || 0}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -582,8 +600,8 @@ const EditPaymentForm: React.FC<{
               <FormControl fullWidth error={!!errors.epfReferenceNo}>
                 <TextField
                   label="EPF Reference No"
-                  name="epfReferenceNo."
-                  value={formFields.epfReferenceNo}
+                  name="epfReferenceNo"
+                  value={formFields.epfReferenceNo || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -615,7 +633,7 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="EPF Payment Method"
                   name="epfPaymentMethod"
-                  value={formFields.epfPaymentMethod}
+                  value={formFields.epfPaymentMethod || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -651,7 +669,7 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="EPF Cheque No."
                   name="epfChequeNo"
-                  value={formFields.epfChequeNo}
+                  value={formFields.epfChequeNo || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -703,7 +721,7 @@ const EditPaymentForm: React.FC<{
                   label="ETF Amount"
                   name="etfAmount"
                   type="number"
-                  value={formFields.etfAmount}
+                  value={formFields.etfAmount || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -721,7 +739,7 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="ETF Payment Method"
                   name="etfPaymentMethod"
-                  value={formFields.etfPaymentMethod}
+                  value={formFields.etfPaymentMethod || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
@@ -735,7 +753,7 @@ const EditPaymentForm: React.FC<{
                             onClick={() => {
                               setFormFields((prevFields) => ({
                                 ...prevFields,
-                                epfPaymentMethod:
+                                etfPaymentMethod:
                                   formFields.companyPaymentMethod,
                               }));
                             }}
@@ -757,7 +775,7 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="ETF Cheque No."
                   name="etfChequeNo"
-                  value={formFields.etfChequeNo}
+                  value={formFields.etfChequeNo || ""}
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{

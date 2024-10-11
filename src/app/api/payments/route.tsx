@@ -167,16 +167,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
-const paymentSaveSchema = z.object({
+export const paymentSaveSchema = z.object({
   _id: z.string().optional(),
   company: z.string(),
   period: z.string(),
   epfReferenceNo: z.string().optional(),
-  epfAmount: z.number(),
+  epfAmount: z.number().gt(0, { message: "EPF amount must be above 0" }),
   epfPaymentMethod: z.string().optional(),
   epfChequeNo: z.string().optional(),
   epfPayDay: z.string().optional(),
-  etfAmount: z.number(),
+  etfAmount: z.number().gt(0, { message: "ETF amount must be above 0" }),
   etfPaymentMethod: z.string().optional(),
   etfChequeNo: z.string().optional(),
   etfPayDay: z.string().optional(),
@@ -199,12 +199,12 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const payment = paymentSaveSchema.parse(body.payment);
+    //remove id
+    delete payment._id;
 
     if (!payment) {
       return NextResponse.json({ message: "Payment invalid" }, { status: 400 });
     }
-
-    console.log(payment);
 
     await dbConnect();
 
