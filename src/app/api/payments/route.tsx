@@ -12,24 +12,6 @@ import { checkPurchased } from "../purchases/check/checkPurchased";
 import Payment from "@/app/models/Payment";
 import { FlattenMaps } from "mongoose";
 
-const paymentSchema = z.object({
-  _id: z.string().optional(),
-  company: z.string(),
-  period: z.string(),
-  companyName: z.string().optional(),
-  companyEmployerNo: z.string().optional(),
-  companyPaymentMethod: z.string().optional(),
-  epfReferenceNo: z.string().optional(),
-  epfAmount: z.number(),
-  epfPaymentMethod: z.string().optional(),
-  epfChequeNo: z.string().optional(),
-  epfPayDay: z.string().optional(),
-  etfAmount: z.number(),
-  etfPaymentMethod: z.string().optional(),
-  etfChequeNo: z.string().optional(),
-  etfPayDay: z.string().optional(),
-});
-
 //period schema
 const periodSchema = z.string();
 
