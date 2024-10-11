@@ -25,16 +25,35 @@ import { request } from "http";
 // Set dayjs format for consistency
 dayjs.locale("en-gb");
 
-export interface Purchase {
+export interface Payment {
   id: string;
+  _id: string;
+  companyName: string;
+  companyEmployerNo: string;
+  companyPaymentMethod: string;
   period: string;
   company: string;
+  epfReferenceNo: string;
+  epfAmount: number;
+  epfPaymentMethod: string;
+  epfChequeNo: string;
+  epfPayDay: string;
+  etfAmount: number;
+  etfPaymentMethod: string;
+  etfChequeNo: string;
+  etfPayDay: string;
 }
 
-const PurchasesDataGrid: React.FC<{
+export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
+  const [dd, mm, yyyy] = ddmmyyyy.split("-");
+  return `${mm}-${dd}-${yyyy}`;
+};
+
+const PaymentsDataGrid: React.FC<{
   user: { id: string; name: string; email: string };
+  isEditing: boolean;
 }> = ({ user }) => {
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -45,89 +64,113 @@ const PurchasesDataGrid: React.FC<{
 
   const columns: GridColDef[] = [
     {
-      field: "periods",
-      headerName: "Periods",
+      field: "companyName",
+      headerName: "Company",
+      flex: 1,
+    },
+    {
+      field: "companyEmployerNo",
+      headerName: "Employer No.",
+      flex: 1,
+    },
+    {
+      field: "period",
+      headerName: "Period",
       flex: 1,
       renderCell: (params) => {
-        const values = params.value;
-        if (values) {
-          return (
-            <div>
-              {values.map((value: any) => (
-                <Chip
-                  key={value}
-                  label={value}
-                  color="primary"
-                  sx={{
-                    m: 0.2,
-                    textTransform: "capitalize",
-                  }}
-                />
-              ))}
-            </div>
-          );
-        }
-        return null;
+        return (
+          <Chip
+            label={params.value}
+            color="primary"
+            sx={{
+              m: 0.2,
+              textTransform: "capitalize",
+            }}
+          />
+        );
       },
     },
     {
-      field: "price",
-      headerName: "Price",
+      field: "epfReferenceNo",
+      headerName: "EPF Ref No.",
       flex: 1,
       type: "number",
       align: "left",
       headerAlign: "left",
     },
     {
-      field: "requestDay",
+      field: "epfAmount",
+      type: "number",
       headerName: "Request Day",
       flex: 1,
     },
     {
-      field: "approvedStatus",
-      headerName: "Status",
+      field: "epfPaymentMethod",
+      headerName: "EPF Payment Method",
       flex: 1,
-      type: "singleSelect",
-      valueOptions: ["approved", "pending", "rejected"],
+    },
+    {
+      field: "epfChequeNo",
+      headerName: "EPF Cheque No.",
+      flex: 1,
+    },
+    {
+      field: "epfPayDay",
+      headerName: "EPF Pay Day",
+      flex: 1,
+    },
+    {
+      field: "etfAmount",
+      headerName: "ETF Amount",
+      flex: 1,
+    },
+    {
+      field: "etfPaymentMethod",
+      headerName: "ETF Payment Method",
+      flex: 1,
+    },
+    {
+      field: "etfChequeNo",
+      headerName: "ETF Cheque No.",
+      flex: 1,
+    },
+    {
+      field: "etfPayDay",
+      headerName: "ETF Pay Day",
+      flex: 1,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
       renderCell: (params) => {
-        const status = params.value;
-
-        let chipColor: "success" | "warning" | "error" = "success";
-
-        if (status === "pending") {
-          chipColor = "warning";
-        } else if (status === "rejected") {
-          chipColor = "error";
-        }
-
         return (
-          <Chip
-            label={status}
-            color={chipColor}
-            sx={{ fontWeight: "bold", textTransform: "capitalize" }}
-          />
+          <Link
+            href={`/user/mycompanies/${companyId}?companyPageSelect=payments&paymentId=${params.id}`}
+          >
+            <Button variant="text" color="primary" size="small">
+              View
+            </Button>
+          </Link>
         );
       },
     },
   ];
 
   useEffect(() => {
-    const fetchPurchases = async () => {
+    const fetchPayments = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/purchases/?companyId=${companyId}`);
+        const response = await fetch(`/api/payments/?companyId=${companyId}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch purchases");
+          throw new Error("Failed to fetch payments");
         }
         const data = await response.json();
-        const purchasesWithId = data.purchases.map((purchase: any) => ({
-          ...purchase,
-          id: purchase._id,
-          price: `${purchase.periods.length} x ${
-            purchase.price?.toLocaleString() || "0"
-          } = ${purchase.totalPrice?.toLocaleString() || "0"}`,
+        const paymentsWithId = data.payments.map((payment: any) => ({
+          ...payment,
+          id: payment._id,
         }));
-        setPurchases(purchasesWithId);
+        setPayments(paymentsWithId);
       } catch (error) {
         setError(
           error instanceof Error
@@ -139,7 +182,7 @@ const PurchasesDataGrid: React.FC<{
       }
     };
 
-    fetchPurchases();
+    fetchPayments();
   }, [user, companyId]);
 
   const handleSnackbarClose = (
@@ -155,7 +198,6 @@ const PurchasesDataGrid: React.FC<{
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
-      request: false,
     });
 
   return (
@@ -175,7 +217,7 @@ const PurchasesDataGrid: React.FC<{
       )}
       {!loading && !error && (
         <DataGrid
-          rows={purchases}
+          rows={payments}
           columns={columns}
           initialState={{
             pagination: {
@@ -221,4 +263,4 @@ const PurchasesDataGrid: React.FC<{
   );
 };
 
-export default PurchasesDataGrid;
+export default PaymentsDataGrid;

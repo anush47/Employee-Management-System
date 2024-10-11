@@ -70,6 +70,9 @@ const salarySchema = z.object({
   finalSalary: z.number().min(0, "Final salary must be a positive number"),
 });
 
+//period schema
+const periodSchema = z.string();
+
 // GET: Fetch a Salary
 export async function GET(req: NextRequest) {
   try {
@@ -87,6 +90,11 @@ export async function GET(req: NextRequest) {
 
     const salaryId = req.nextUrl.searchParams.get("salaryId");
     let companyId = req.nextUrl.searchParams.get("companyId");
+    let period = req.nextUrl.searchParams.get("period");
+
+    if (period) {
+      period = periodSchema.parse(period);
+    }
 
     if (!companyId && !salaryId) {
       return NextResponse.json(
@@ -207,7 +215,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch salaries of employees with those IDs and remove inOut
     const salaries = await Salary.find(
-      { employee: { $in: employeeIdList } },
+      { employee: { $in: employeeIdList }, ...(period ? { period } : {}) },
       { inOut: 0 }
     );
 
@@ -483,7 +491,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const updatedPurchase = await Salary.findByIdAndUpdate(
+    const updatedSalaries = await Salary.findByIdAndUpdate(
       parsedBody.id,
       parsedBody,
       {
@@ -492,16 +500,16 @@ export async function PUT(req: NextRequest) {
       }
     ).lean();
 
-    if (!updatedPurchase) {
+    if (!updatedSalaries) {
       return NextResponse.json(
-        { message: "Failed to update purchase" },
+        { message: "Failed to update salary" },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
-      message: "Purchase updated successfully",
-      purchase: updatedPurchase,
+      message: "Salary updated successfully",
+      salaries: updatedSalaries,
     });
   } catch (error: any) {
     //console.log(error);

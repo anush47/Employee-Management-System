@@ -1,4 +1,7 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
   Box,
   Button,
@@ -28,7 +31,7 @@ import React, { useEffect, useState } from "react";
 import { Employee } from "../employees/clientComponents/employeesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { Salary } from "./salariesDataGrid";
-import { ArrowBack, Edit, Save } from "@mui/icons-material";
+import { ArrowBack, Edit, ExpandMore, Save } from "@mui/icons-material";
 import { PaymentStructure } from "../companyDetails/paymentStructure";
 import { salaryId } from "./salaries";
 import { LoadingButton } from "@mui/lab";
@@ -296,6 +299,8 @@ const EditSalaryForm: React.FC<{
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
 
+        setIsEditing(false);
+
         // Wait before clearing the form
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -523,26 +528,38 @@ const EditSalaryForm: React.FC<{
               )}
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InOutTable
-                  inOuts={formFields.inOut.map((inOut, index) => ({
-                    id: inOut._id || index + 1,
-                    employeeName: employee?.name,
-                    employeeNIC: employee?.nic,
-                    basic: formFields.basic,
-                    divideBy: employee?.divideBy ?? 240,
-                    ...inOut,
-                  }))}
-                  setInOuts={(inOuts: any) => {
-                    setFormFields((prev) => ({
-                      ...prev,
-                      inOut: inOuts,
-                    }));
-                  }}
-                  editable={isEditing}
-                  fetchSalary={fetchSalary}
-                />
-              </FormControl>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  aria-controls="panel1-content"
+                  id="panel1-header"
+                >
+                  <Typography>In Out Details</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {" "}
+                  <FormControl fullWidth>
+                    <InOutTable
+                      inOuts={formFields.inOut.map((inOut, index) => ({
+                        id: inOut._id || index + 1,
+                        employeeName: employee?.name,
+                        employeeNIC: employee?.nic,
+                        basic: formFields.basic,
+                        divideBy: employee?.divideBy ?? 240,
+                        ...inOut,
+                      }))}
+                      setInOuts={(inOuts: any) => {
+                        setFormFields((prev) => ({
+                          ...prev,
+                          inOut: inOuts,
+                        }));
+                      }}
+                      editable={isEditing}
+                      fetchSalary={fetchSalary}
+                    />
+                  </FormControl>
+                </AccordionDetails>
+              </Accordion>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.basic}>

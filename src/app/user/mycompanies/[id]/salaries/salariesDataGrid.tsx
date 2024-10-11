@@ -60,7 +60,8 @@ export interface Salary {
 const SalariesDataGrid: React.FC<{
   user: { id: string; name: string; email: string };
   isEditing: boolean;
-}> = ({ user, isEditing }) => {
+  period?: string;
+}> = ({ user, isEditing, period }) => {
   const [salaries, setSalaries] = useState<Salary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +91,18 @@ const SalariesDataGrid: React.FC<{
       field: "period",
       headerName: "Period",
       flex: 1,
+      renderCell: (params) => {
+        return (
+          <Chip
+            label={params.value}
+            color="primary"
+            sx={{
+              m: 0.2,
+              textTransform: "capitalize",
+            }}
+          />
+        );
+      },
     },
     {
       field: "basic",
@@ -187,7 +200,10 @@ const SalariesDataGrid: React.FC<{
     const fetchSalaries = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/salaries/?companyId=${companyId}`);
+        const fetchLink = period
+          ? `/api/salaries/?companyId=${companyId}&period=${period}`
+          : `/api/salaries/?companyId=${companyId}`;
+        const response = await fetch(fetchLink);
         if (!response.ok) {
           throw new Error("Failed to fetch salaries");
         }
