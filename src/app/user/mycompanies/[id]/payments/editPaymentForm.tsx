@@ -526,7 +526,7 @@ const EditPaymentForm: React.FC<{
                   }}
                 />
                 <FormHelperText>
-                  The company's default payment method
+                  The company&apos;s default payment method
                 </FormHelperText>
               </FormControl>
             </Grid>

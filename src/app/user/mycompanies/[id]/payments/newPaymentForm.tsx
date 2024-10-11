@@ -449,7 +449,7 @@ const NewPaymentForm = ({
                   }}
                 />
                 <FormHelperText>
-                  The company's default payment method
+                  The company&apos;s default payment method
                 </FormHelperText>
               </FormControl>
             </Grid>
