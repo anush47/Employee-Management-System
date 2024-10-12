@@ -67,8 +67,9 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate the request body
     const body = await req.json();
-    // Convert memberNo to int
+    // Convert to int
     body.memberNo = parseInt(body.memberNo);
+    body.basic = parseFloat(body.basic);
     const parsedBody = employeeSchema.parse(body);
 
     // Connect to the database
