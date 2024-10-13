@@ -204,7 +204,7 @@ export async function generateSalaryForOneEmployee(
         additions: parsedAdditions, // Additions with computed values
         deductions: parsedDeductions, // Deductions with computed values
       },
-      advanceAmount: 0, // Example advance amount
+      advanceAmount: salary ? salary.advanceAmount : 0, // Example advance amount
       finalSalary,
     };
 
