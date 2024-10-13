@@ -25,11 +25,77 @@ function isProcessed(
   );
 }
 
+function calculateSalaryDetails(
+  source: {
+    paymentStructure: {
+      additions: { name: string; amount: string }[];
+      deductions: { name: string; amount: string }[];
+    };
+    basic: number;
+  },
+  salary: { noPay: { amount: number } }
+) {
+  let parsedAdditions = source.paymentStructure.additions.map(
+    (addition: { name: string; amount: string }) => ({
+      name: addition.name,
+      amount: parseValue(addition.name, addition.amount, source.basic),
+    })
+  );
+
+  let parsedDeductions = source.paymentStructure.deductions.map(
+    (deduction: { name: string; amount: string }) => {
+      if (deduction && deduction.name !== "EPF 8%") {
+        return {
+          name: deduction.name,
+          amount: parseValue(deduction.name, deduction.amount, source.basic),
+        };
+      }
+    }
+  );
+
+  let basicForSalary = 0;
+  if (salary && salary.noPay) {
+    basicForSalary = source.basic - salary.noPay.amount;
+  } else {
+    basicForSalary = source.basic;
+  }
+
+  parsedDeductions.push({
+    name: "EPF 8%",
+    amount: basicForSalary * 0.08,
+  });
+
+  //remove undefined
+  parsedDeductions = parsedDeductions.filter(
+    (deduction: { name: string; amount: number } | undefined) => deduction
+  );
+
+  parsedAdditions = parsedAdditions.filter(
+    (addition: { name: string; amount: number }) => addition
+  );
+
+  const totalAdditions = parsedAdditions.reduce(
+    (total: number, addition: { amount: number }) => total + addition.amount,
+    0
+  );
+
+  const totalDeductions = parsedDeductions.reduce(
+    (total: number, deduction: { amount: number } | undefined) =>
+      total + (deduction ? deduction.amount : 0),
+    0
+  );
+
+  return {
+    parsedAdditions,
+    parsedDeductions,
+    totalAdditions,
+    totalDeductions,
+  };
+}
+
 // Helper function to parse the value for additions/deductions
 function parseValue(name: string, value: string, basic: number): number {
-  if (name === "EPF 8%") {
-    return basic * 0.08;
-  } else if (typeof value === "string" && value.includes("-")) {
+  if (typeof value === "string" && value.includes("-")) {
     // If the value is a range like "2000-5000", pick a random multiple of 100 within the range
     const [min, max] = value.split("-").map(Number);
     const randomValue =
@@ -66,31 +132,6 @@ export async function generateSalaryForOneEmployee(
 ) {
   try {
     const source = salary || employee;
-
-    const parsedAdditions = source.paymentStructure.additions.map(
-      (addition: { name: string; amount: string }) => ({
-        name: addition.name,
-        amount: parseValue(addition.name, addition.amount, source.basic),
-      })
-    );
-
-    const parsedDeductions = source.paymentStructure.deductions.map(
-      (deduction: { name: string; amount: string }) => ({
-        name: deduction.name,
-        amount: parseValue(deduction.name, deduction.amount, source.basic),
-      })
-    );
-
-    const totalAdditions = parsedAdditions.reduce(
-      (total: number, addition: { amount: number }) => total + addition.amount,
-      0
-    );
-
-    const totalDeductions = parsedDeductions.reduce(
-      (total: number, deduction: { amount: number }) =>
-        total + deduction.amount,
-      0
-    );
 
     let ot = 0;
     let noPay = 0;
@@ -134,6 +175,13 @@ export async function generateSalaryForOneEmployee(
         ));
         break;
     }
+
+    const {
+      parsedAdditions,
+      parsedDeductions,
+      totalAdditions,
+      totalDeductions,
+    } = calculateSalaryDetails(source, salary);
 
     const finalSalary =
       employee.basic + totalAdditions + ot - totalDeductions - noPay;

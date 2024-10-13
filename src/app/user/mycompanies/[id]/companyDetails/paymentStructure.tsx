@@ -291,7 +291,7 @@ export const PaymentStructure = ({
                   </FormControl>
                 </Grid>
                 <Grid item xs={2}>
-                  {isEditing && !isSalary && (
+                  {isEditing && !isSalary && deduction.name !== "EPF 8%" && (
                     <Tooltip title="Remove" arrow>
                       <IconButton
                         color="error"

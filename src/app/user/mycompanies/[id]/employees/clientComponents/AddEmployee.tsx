@@ -55,7 +55,7 @@ const AddEmployeeForm: React.FC<{
     memberNo: 0,
     nic: "",
     active: true,
-    basic: 16000,
+    basic: 21000,
     totalSalary: "",
     remark: "",
     divideBy: 240,
