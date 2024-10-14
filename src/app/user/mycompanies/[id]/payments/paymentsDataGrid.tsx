@@ -103,7 +103,13 @@ const PaymentsDataGrid: React.FC<{
     {
       field: "epfAmount",
       type: "number",
-      headerName: "Request Day",
+      headerName: "EPF Amount",
+      flex: 1,
+    },
+    {
+      field: "epfSurcharges",
+      headerName: "EPF Surcharges",
+      type: "number",
       flex: 1,
     },
     {
@@ -124,6 +130,12 @@ const PaymentsDataGrid: React.FC<{
     {
       field: "etfAmount",
       headerName: "ETF Amount",
+      flex: 1,
+    },
+    {
+      field: "etfSurcharges",
+      headerName: "ETF Surcharges",
+      type: "number",
       flex: 1,
     },
     {
