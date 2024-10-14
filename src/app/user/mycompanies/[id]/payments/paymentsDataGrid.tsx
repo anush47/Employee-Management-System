@@ -35,10 +35,12 @@ export interface Payment {
   company: string;
   epfReferenceNo: string;
   epfAmount: number;
+  epfSurcharges: number;
   epfPaymentMethod: string;
   epfChequeNo: string;
   epfPayDay: string;
   etfAmount: number;
+  etfSurcharges: number;
   etfPaymentMethod: string;
   etfChequeNo: string;
   etfPayDay: string;

@@ -6,10 +6,12 @@ interface IPayment extends Document {
   period: string;
   epfReferenceNo: string;
   epfAmount: number;
+  epfSurcharges: number;
   epfPaymentMethod: string;
   epfChequeNo: string;
   epfPayDay: string;
   etfAmount: number;
+  etfSurcharges: number;
   etfPaymentMethod: string;
   etfChequeNo: string;
   etfPayDay: string;
@@ -34,6 +36,9 @@ const paymentSchema = new Schema<IPayment>(
       type: Number,
       required: true,
     },
+    epfSurcharges: {
+      type: Number,
+    },
     epfPaymentMethod: {
       type: String,
     },
@@ -46,6 +51,9 @@ const paymentSchema = new Schema<IPayment>(
     etfAmount: {
       type: Number,
       required: true,
+    },
+    etfSurcharges: {
+      type: Number,
     },
     etfPaymentMethod: {
       type: String,

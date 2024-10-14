@@ -71,11 +71,13 @@ const NewPaymentForm = ({
     company: string;
     period: string;
     epfAmount: number;
+    epfSurcharges: number;
     epfPaymentMethod: string;
     epfChequeNo: string;
     epfPayDay: string;
     epfReferenceNo: string;
     etfAmount: number;
+    etfSurcharges: number;
     etfPaymentMethod: string;
     etfChequeNo: string;
     etfPayDay: string;
@@ -84,11 +86,13 @@ const NewPaymentForm = ({
     company: "",
     period: "",
     epfAmount: 0,
+    epfSurcharges: 0,
     epfPaymentMethod: "",
     epfChequeNo: "",
     epfPayDay: "",
     epfReferenceNo: "",
     etfAmount: 0,
+    etfSurcharges: 0,
     etfPaymentMethod: "",
     etfChequeNo: "",
     etfPayDay: "",
@@ -596,6 +600,20 @@ const NewPaymentForm = ({
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.epfSurcharges}>
+                <TextField
+                  label="EPF Surcharges"
+                  name="epfSurcharges"
+                  value={formFields.epfSurcharges || 0}
+                  onChange={handleChange}
+                  variant="filled"
+                />
+                {errors.epfSurcharges && (
+                  <FormHelperText>{errors.epfSurcharges}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.epfPayDay}>
                 <LocalizationProvider
                   dateAdapter={AdapterDayjs}
@@ -689,6 +707,20 @@ const NewPaymentForm = ({
                 />
                 {errors.etfChequeNo && (
                   <FormHelperText>{errors.etfChequeNo}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.etfSurcharges}>
+                <TextField
+                  label="ETF Surcharges"
+                  name="etfSurcharges"
+                  value={formFields.etfSurcharges || 0}
+                  onChange={handleChange}
+                  variant="filled"
+                />
+                {errors.etfSurcharges && (
+                  <FormHelperText>{errors.etfSurcharges}</FormHelperText>
                 )}
               </FormControl>
             </Grid>
