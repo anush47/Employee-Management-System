@@ -721,7 +721,7 @@ const EditPaymentForm: React.FC<{
                     onChange={(newDate) => {
                       setFormFields((prevFields) => ({
                         ...prevFields,
-                        epfPayDay: newDate?.format("DD-MM-YYYY") as string,
+                        epfPayDay: newDate?.format("YYYY-MM-DD") as string,
                       }));
                     }}
                     slotProps={{
@@ -845,7 +845,7 @@ const EditPaymentForm: React.FC<{
                     onChange={(newDate) => {
                       setFormFields((prevFields) => ({
                         ...prevFields,
-                        etfPayDay: newDate?.format("DD-MM-YYYY") as string,
+                        etfPayDay: newDate?.format("YYYY-MM-DD") as string,
                       }));
                     }}
                     slotProps={{

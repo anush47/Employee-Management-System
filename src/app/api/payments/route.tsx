@@ -203,8 +203,8 @@ export async function POST(req: NextRequest) {
     //convert to numbers
     body.payment.epfAmount = Number(body.payment.epfAmount);
     body.payment.etfAmount = Number(body.payment.etfAmount);
-    body.payment.epfSurcharges = Number(body.payment.epfSurcharges);
-    body.payment.etfSurcharges = Number(body.payment.etfSurcharges);
+    body.payment.epfSurcharges = Number(body.payment.epfSurcharges) || 0;
+    body.payment.etfSurcharges = Number(body.payment.etfSurcharges) || 0;
 
     const payment = paymentSaveSchema.parse(body.payment);
     //remove id
@@ -336,7 +336,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const updatedSalary = await Payment.findByIdAndUpdate(
+    const updatedPayment = await Payment.findByIdAndUpdate(
       parsedBody._id,
       parsedBody,
       {
@@ -345,7 +345,7 @@ export async function PUT(req: NextRequest) {
       }
     ).lean();
 
-    if (!updatedSalary) {
+    if (!updatedPayment) {
       return NextResponse.json(
         { message: "Failed to update payment" },
         { status: 500 }
@@ -354,7 +354,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({
       message: "Payment updated successfully",
-      purchase: updatedSalary,
+      payment: updatedPayment,
     });
   } catch (error: any) {
     console.log(error);

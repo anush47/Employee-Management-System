@@ -54,7 +54,7 @@ export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
 const PaymentsDataGrid: React.FC<{
   user: { id: string; name: string; email: string };
   isEditing: boolean;
-}> = ({ user }) => {
+}> = ({ user, isEditing }) => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,22 +110,50 @@ const PaymentsDataGrid: React.FC<{
       field: "epfSurcharges",
       headerName: "EPF Surcharges",
       type: "number",
+      editable: isEditing,
       flex: 1,
     },
     {
       field: "epfPaymentMethod",
       headerName: "EPF Payment Method",
       flex: 1,
+      editable: isEditing,
     },
     {
       field: "epfChequeNo",
       headerName: "EPF Cheque No.",
       flex: 1,
+      editable: isEditing,
     },
     {
       field: "epfPayDay",
       headerName: "EPF Pay Day",
       flex: 1,
+      editable: isEditing,
+      valueGetter: (params) => {
+        // Ensure the date is formatted correctly for display
+        return params;
+      },
+      renderEditCell: (params) => (
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+          <DatePicker
+            label="EPF Paid Day"
+            openTo="day"
+            views={["year", "month", "day"]}
+            value={dayjs(params.value)}
+            onChange={(newDate) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: params.field,
+                value: newDate ? newDate.format("YYYY-MM-DD") : null,
+              });
+            }}
+            slotProps={{
+              field: { clearable: true },
+            }}
+          />
+        </LocalizationProvider>
+      ),
     },
     {
       field: "etfAmount",
@@ -137,21 +165,49 @@ const PaymentsDataGrid: React.FC<{
       headerName: "ETF Surcharges",
       type: "number",
       flex: 1,
+      editable: isEditing,
     },
     {
       field: "etfPaymentMethod",
       headerName: "ETF Payment Method",
       flex: 1,
+      editable: isEditing,
     },
     {
       field: "etfChequeNo",
       headerName: "ETF Cheque No.",
       flex: 1,
+      editable: isEditing,
     },
     {
       field: "etfPayDay",
       headerName: "ETF Pay Day",
       flex: 1,
+      editable: isEditing,
+      valueGetter: (params) => {
+        // Ensure the date is formatted correctly for display
+        return params;
+      },
+      renderEditCell: (params) => (
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+          <DatePicker
+            label="ETF Paid Day"
+            openTo="day"
+            views={["year", "month", "day"]}
+            value={dayjs(params.value)}
+            onChange={(newDate) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: params.field,
+                value: newDate ? newDate.format("YYYY-MM-DD") : null,
+              });
+            }}
+            slotProps={{
+              field: { clearable: true },
+            }}
+          />
+        </LocalizationProvider>
+      ),
     },
     {
       field: "actions",
@@ -209,9 +265,70 @@ const PaymentsDataGrid: React.FC<{
     setSnackbarOpen(false);
   };
 
+  const handleRowUpdate = async (newPayment: any) => {
+    try {
+      console.log(newPayment);
+      const response = await fetch(`/api/payments/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ payment: newPayment }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update payment");
+      }
+      setSnackbarMessage("Payment updated successfully");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      return newPayment;
+    } catch (error) {
+      console.error("Row update error:", error);
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleRowUpdateError = (params: any) => {
+    // Revert changes if necessary
+    const updatedPayments = payments.map((payment) => {
+      if (payment.id === params.id) {
+        return params.oldRow; // Revert to old row data
+      }
+      return payment;
+    });
+
+    // Log error and revert row updates
+    console.error("Row update error:", params.error?.error || params.error);
+
+    setPayments(updatedPayments); // Update state with reverted data
+
+    // Display the error details in Snackbar
+    setSnackbarMessage(
+      params.error?.message || "An unexpected error occurred." // Show detailed error message
+    );
+    setSnackbarSeverity("error"); // Set snackbar severity to error
+    setSnackbarOpen(true); // Open Snackbar
+  };
+
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
+      companyName: false,
+      companyEmployerNo: false,
+      companyPaymentMethod: false,
+      period: true,
+      company: false,
+      epfReferenceNo: false,
+      epfAmount: false,
+      etfAmount: false,
+      epfPaymentMethod: false,
+      etfPaymentMethod: false,
+      epfChequeNo: false,
+      etfChequeNo: false,
     });
 
   return (
@@ -233,6 +350,7 @@ const PaymentsDataGrid: React.FC<{
         <DataGrid
           rows={payments}
           columns={columns}
+          editMode="row"
           initialState={{
             pagination: {
               paginationModel: {
@@ -254,6 +372,8 @@ const PaymentsDataGrid: React.FC<{
           onColumnVisibilityModelChange={(newModel) =>
             setColumnVisibilityModel(newModel)
           }
+          processRowUpdate={handleRowUpdate}
+          onProcessRowUpdateError={handleRowUpdateError}
         />
       )}
 
