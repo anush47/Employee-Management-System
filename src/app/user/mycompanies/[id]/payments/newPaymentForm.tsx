@@ -604,6 +604,7 @@ const NewPaymentForm = ({
                 <TextField
                   label="EPF Surcharges"
                   name="epfSurcharges"
+                  type="number"
                   value={formFields.epfSurcharges || 0}
                   onChange={handleChange}
                   variant="filled"
@@ -716,6 +717,7 @@ const NewPaymentForm = ({
                   label="ETF Surcharges"
                   name="etfSurcharges"
                   value={formFields.etfSurcharges || 0}
+                  type="number"
                   onChange={handleChange}
                   variant="filled"
                 />

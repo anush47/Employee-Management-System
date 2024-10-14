@@ -200,6 +200,12 @@ export async function POST(req: NextRequest) {
     // Parse the request body
     const body = await req.json();
 
+    //convert to numbers
+    body.payment.epfAmount = Number(body.payment.epfAmount);
+    body.payment.etfAmount = Number(body.payment.etfAmount);
+    body.payment.epfSurcharges = Number(body.payment.epfSurcharges);
+    body.payment.etfSurcharges = Number(body.payment.etfSurcharges);
+
     const payment = paymentSaveSchema.parse(body.payment);
     //remove id
     delete payment._id;
@@ -302,6 +308,8 @@ export async function PUT(req: NextRequest) {
     //convert to numbers
     payment.epfAmount = Number(payment.epfAmount);
     payment.etfAmount = Number(payment.etfAmount);
+    payment.epfSurcharges = Number(payment.epfSurcharges);
+    payment.etfSurcharges = Number(payment.etfSurcharges);
     const parsedBody = paymentSaveSchema.parse(payment);
 
     await dbConnect();

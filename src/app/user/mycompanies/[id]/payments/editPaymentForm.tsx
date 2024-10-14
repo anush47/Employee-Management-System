@@ -688,9 +688,13 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="EPF Surcharges"
                   name="epfSurcharges"
+                  type="number"
                   value={formFields.epfSurcharges || 0}
                   onChange={handleChange}
                   variant="filled"
+                  InputProps={{
+                    readOnly: !isEditing,
+                  }}
                 />
                 {errors.epfSurcharges && (
                   <FormHelperText>{errors.epfSurcharges}</FormHelperText>
@@ -808,9 +812,13 @@ const EditPaymentForm: React.FC<{
                 <TextField
                   label="ETF Surcharges"
                   name="etfSurcharges"
+                  type="number"
                   value={formFields.etfSurcharges || 0}
                   onChange={handleChange}
                   variant="filled"
+                  InputProps={{
+                    readOnly: !isEditing,
+                  }}
                 />
                 {errors.etfSurcharges && (
                   <FormHelperText>{errors.etfSurcharges}</FormHelperText>
