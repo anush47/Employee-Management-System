@@ -14,7 +14,6 @@ import {
   Slide,
   Chip,
 } from "@mui/material";
-import { companyId } from "../clientComponents/companySideBar";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/en-gb";
@@ -217,7 +216,11 @@ const PaymentsDataGrid: React.FC<{
       renderCell: (params) => {
         return (
           <Link
-            href={`/user/mycompanies/${companyId}?companyPageSelect=payments&paymentId=${params.id}`}
+            href={`/user/mycompanies/${
+              payments.find((payment) => {
+                return payment.id === params.id;
+              })?.company
+            }?companyPageSelect=payments&paymentId=${params.id}`}
           >
             <Button variant="text" color="primary" size="small">
               View
@@ -232,7 +235,7 @@ const PaymentsDataGrid: React.FC<{
     const fetchPayments = async () => {
       try {
         setLoading(true);
-        let url = `/api/payments/?companyId=${companyId}`;
+        let url = `/api/payments/?companyId=all`;
         if (period) {
           url += `&period=${period}`;
         }
@@ -258,7 +261,7 @@ const PaymentsDataGrid: React.FC<{
     };
 
     fetchPayments();
-  }, [user, companyId]);
+  }, [user]);
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -322,7 +325,7 @@ const PaymentsDataGrid: React.FC<{
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
-      companyName: false,
+      companyName: true,
       companyEmployerNo: false,
       companyPaymentMethod: false,
       period: true,

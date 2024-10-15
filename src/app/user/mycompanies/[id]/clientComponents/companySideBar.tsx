@@ -33,6 +33,7 @@ import {
   LocalAtm,
   Payment,
   ShoppingBag,
+  Summarize,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -49,7 +50,8 @@ export type Selected =
   | "employees"
   | "payments"
   | "salaries"
-  | "purchases";
+  | "purchases"
+  | "documents";
 
 interface Props {
   window?: Window | undefined;
@@ -86,6 +88,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       "payments",
       "salaries",
       "purchases",
+      "documents",
     ].includes(selected)
   ) {
     selected = "details";
@@ -130,6 +133,11 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       icon: <Payments />,
     },
     {
+      name: "Documents",
+      key: "documents",
+      icon: <Summarize />,
+    },
+    {
       name: "Purchases",
       key: "purchases",
       icon: <ShoppingBag />,
@@ -168,6 +176,8 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
               return "Payments";
             case "purchases":
               return "Purchases";
+            case "documents":
+              return "Documents";
             default:
               return "";
           }

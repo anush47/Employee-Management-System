@@ -67,7 +67,6 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       flex: 1,
       align: "left",
       headerAlign: "left",
-      editable: true,
     },
     {
       field: "ot",
@@ -76,13 +75,11 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       flex: 1,
       align: "left",
       headerAlign: "left",
-      editable: true,
     },
     {
       field: "otReason",
       headerName: "OT Reason",
       flex: 1,
-      editable: true,
     },
     {
       field: "noPay",

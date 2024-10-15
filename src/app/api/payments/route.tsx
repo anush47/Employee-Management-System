@@ -2,18 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import dbConnect from "@/app/lib/db";
-import Purchase from "@/app/models/Purchase";
 import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
-import { request } from "http";
-import Employee from "@/app/models/Employee";
-import Salary from "@/app/models/Salary";
 import { checkPurchased } from "../purchases/check/checkPurchased";
 import Payment from "@/app/models/Payment";
 import { FlattenMaps } from "mongoose";
 
-//period schema
-const periodSchema = z.string();
+// period schema
+const periodSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}$/, { message: "Period must be in the format yyyy-mm" });
 
 // GET: Fetch payment
 export async function GET(req: NextRequest) {

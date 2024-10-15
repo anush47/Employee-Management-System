@@ -31,6 +31,7 @@ import {
   ShoppingBag,
   Groups,
   LocalAtm,
+  Payments,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -46,7 +47,8 @@ export type Selected =
   | "settings"
   | "purchases"
   | "employees"
-  | "salaries";
+  | "salaries"
+  | "payments";
 
 interface Props {
   window?: Window | undefined;
@@ -75,6 +77,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       "purchases",
       "employees",
       "salaries",
+      "payments",
     ].includes(selected)
   ) {
     selected = "dashboard";
@@ -113,6 +116,11 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       key: "salaries",
       icon: <LocalAtm />,
     },
+    {
+      name: "Payments",
+      key: "payments",
+      icon: <Payments />,
+    },
   ];
 
   if (user.role === "admin") {
@@ -150,6 +158,8 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
               return "Settings";
             case "salaries":
               return "Salaries";
+            case "payments":
+              return "Payments";
             default:
               return "";
           }

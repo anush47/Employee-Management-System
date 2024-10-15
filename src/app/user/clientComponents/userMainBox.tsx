@@ -3,14 +3,15 @@ import React, { Suspense, lazy } from "react";
 import { Box, Toolbar, LinearProgress, CircularProgress } from "@mui/material";
 import "@fontsource/roboto/400.css";
 import { selected } from "./userSideBar";
-import Purchases from "../purchases/purchases";
-import Employees from "../employees/employees";
-import Salaries from "../salaries/salaries";
 
 // Lazy load the components
 const Dashboard = lazy(() => import("../dashboard/dashboard"));
 const MyCompanies = lazy(() => import("../mycompanies/myCompanies"));
 const Settings = lazy(() => import("../settings/settings"));
+const Payments = lazy(() => import("../payments/payments"));
+const Employees = lazy(() => import("../employees/employees"));
+const Purchases = lazy(() => import("../purchases/purchases"));
+const Salaries = lazy(() => import("../salaries/salaries"));
 
 const UserMainBox = ({
   user,
@@ -48,6 +49,8 @@ const UserMainBox = ({
               return <Purchases user={user} />;
             case "salaries":
               return <Salaries user={user} />;
+            case "payments":
+              return <Payments user={user} />;
             default:
               return <div>Component not found</div>;
           }

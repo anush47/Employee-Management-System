@@ -20,7 +20,7 @@ import { LoadingButton } from "@mui/lab";
 import { handleCsvUpload } from "../salaries/csvUpload";
 import { SimpleDialog } from "../salaries/inOutTable";
 
-const Employees = ({
+const QuickTools = ({
   user,
 }: {
   user: { name: string; email: string; id: string };
@@ -173,4 +173,4 @@ const Employees = ({
   );
 };
 
-export default Employees;
+export default QuickTools;

@@ -19,6 +19,7 @@ const Dashboard = lazy(() => import("../dashboard/dashboard"));
 const Payments = lazy(() => import("../payments/payments"));
 const Salaries = lazy(() => import("../salaries/salaries"));
 const Purchases = lazy(() => import("../purchases/purchases"));
+const Documents = lazy(() => import("../documents/documents"));
 
 const CompanyMainBox = ({
   user,
@@ -57,6 +58,8 @@ const CompanyMainBox = ({
                 return <Salaries user={user} />;
               case "purchases":
                 return <Purchases user={user} />;
+              case "documents":
+                return <Documents user={user} />;
               default:
                 return <div>Component not found</div>;
             }
