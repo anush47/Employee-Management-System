@@ -343,7 +343,12 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
   };
 
   return (
-    <Card>
+    <Card
+      sx={{
+        height: "91vh",
+        overflowY: "auto",
+      }}
+    >
       <CardHeader title={"Generated Salaries"} />
       <CardContent>
         <Box

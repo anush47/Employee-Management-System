@@ -380,11 +380,8 @@ const CompanyDetails = ({
     <Card
       //set height to viewport height and make scrollable only on larger screens
       sx={{
-        height: "87vh",
+        height: "91vh",
         overflowY: "auto",
-        "@media (max-width: 650px)": {
-          height: "auto",
-        },
       }}
     >
       <CardHeader

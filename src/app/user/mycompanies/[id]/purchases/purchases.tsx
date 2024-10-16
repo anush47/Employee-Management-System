@@ -56,11 +56,8 @@ const Purchases = ({
         <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
           <Card
             sx={{
-              height: "87vh",
+              height: "91vh",
               overflowY: "auto",
-              "@media (max-width: 600px)": {
-                height: "auto",
-              },
             }}
           >
             <NewPurchaseForm handleBackClick={handleBackClick} />
@@ -69,11 +66,8 @@ const Purchases = ({
       ) : (
         <Card
           sx={{
-            height: "87vh",
+            height: "91vh",
             overflowY: "auto",
-            "@media (max-width: 600px)": {
-              height: "auto",
-            },
           }}
         >
           <CardHeader

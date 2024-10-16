@@ -437,7 +437,12 @@ const EditSalaryForm: React.FC<{
 
   return (
     <>
-      <Card>
+      <Card
+        sx={{
+          height: "91vh",
+          overflowY: "auto",
+        }}
+      >
         <CardHeader
           title={
             <Box

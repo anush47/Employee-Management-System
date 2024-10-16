@@ -331,7 +331,12 @@ const GenerateSalaryOne = ({
 
   return (
     <>
-      <Card>
+      <Card
+        sx={{
+          height: "91vh",
+          overflowY: "auto",
+        }}
+      >
         <CardHeader
           title={
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>

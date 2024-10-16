@@ -68,7 +68,12 @@ const QuickTools = ({
   };
 
   return (
-    <Card>
+    <Card
+      sx={{
+        height: "91vh",
+        overflowY: "auto",
+      }}
+    >
       <CardHeader
         title={
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>

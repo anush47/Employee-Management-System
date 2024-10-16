@@ -74,7 +74,6 @@ const CompanyMainBox = ({
       component="main"
       sx={{
         flexGrow: 1,
-        p: 2,
       }}
     >
       <Toolbar />
