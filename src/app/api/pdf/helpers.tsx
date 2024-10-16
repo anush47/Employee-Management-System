@@ -67,7 +67,7 @@ export const getData = async (
 
   // Fetch employees of the company
   const employees = await Employee.find({ company: companyId }).select(
-    "memberNo name nic"
+    "memberNo name nic designation"
   );
 
   // Ensure employees are fetched correctly
@@ -93,7 +93,7 @@ export const getData = async (
     });
   }
 
-  return { company, salaries, payment };
+  return { company, salaries, payment, employees };
 };
 
 export const setupData = (salaries: SalarySchema[]) => {

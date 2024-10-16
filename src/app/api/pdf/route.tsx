@@ -83,12 +83,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const neepPayment = pdfType !== "salary";
+    const needPayment = pdfType !== "salary";
 
     const { company, salaries, payment } = await getData(
       companyId,
       period,
-      neepPayment,
+      needPayment,
       salaryIds
     );
     //const salaries1 = Array.from({ length: 20 }, () => salaries[0]);
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (neepPayment && (!payment || Object.keys(payment).length === 0)) {
+    if (needPayment && (!payment || Object.keys(payment).length === 0)) {
       return NextResponse.json(
         {
           message: `Payment data not found for ${company.name} for ${period}`,
