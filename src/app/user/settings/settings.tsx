@@ -20,7 +20,15 @@ const Settings = ({
 
   return (
     <Box>
-      <Card>
+      <Card
+        sx={{
+          height: "91vh",
+          overflowY: "auto",
+          "@media (max-width: 600px)": {
+            height: "auto",
+          },
+        }}
+      >
         <CardHeader
           title={
             <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>

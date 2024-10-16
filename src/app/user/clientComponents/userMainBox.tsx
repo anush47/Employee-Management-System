@@ -64,7 +64,7 @@ const UserMainBox = ({
       component="main"
       sx={{
         flexGrow: 1,
-        p: 2,
+        p: 0,
       }}
     >
       <Toolbar />

@@ -43,12 +43,28 @@ const MyCompanies = ({
     <Box>
       {isAdding ? (
         <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
-          <Card>
+          <Card
+            sx={{
+              height: "91vh",
+              overflowY: "auto",
+              "@media (max-width: 600px)": {
+                height: "auto",
+              },
+            }}
+          >
             <AddCompanyForm user={user} handleBackClick={handleBackClick} />
           </Card>
         </Slide>
       ) : (
-        <Card>
+        <Card
+          sx={{
+            height: "91vh",
+            overflowY: "auto",
+            "@media (max-width: 600px)": {
+              height: "auto",
+            },
+          }}
+        >
           <CardHeader
             title={
               <Box
