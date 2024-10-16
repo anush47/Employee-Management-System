@@ -47,9 +47,6 @@ const MyCompanies = ({
             sx={{
               height: "91vh",
               overflowY: "auto",
-              "@media (max-width: 600px)": {
-                height: "auto",
-              },
             }}
           >
             <AddCompanyForm user={user} handleBackClick={handleBackClick} />
@@ -60,9 +57,6 @@ const MyCompanies = ({
           sx={{
             height: "91vh",
             overflowY: "auto",
-            "@media (max-width: 600px)": {
-              height: "auto",
-            },
           }}
         >
           <CardHeader

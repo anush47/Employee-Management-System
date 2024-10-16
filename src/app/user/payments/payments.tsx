@@ -51,9 +51,6 @@ const Payments = ({
         sx={{
           height: "91vh",
           overflowY: "auto",
-          "@media (max-width: 600px)": {
-            height: "auto",
-          },
         }}
       >
         <>

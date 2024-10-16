@@ -48,9 +48,6 @@ const Purchases = ({
             sx={{
               height: "91vh",
               overflowY: "auto",
-              "@media (max-width: 600px)": {
-                height: "auto",
-              },
             }}
           >
             <UpdatePurchaseForm
@@ -64,9 +61,6 @@ const Purchases = ({
           sx={{
             height: "91vh",
             overflowY: "auto",
-            "@media (max-width: 600px)": {
-              height: "auto",
-            },
           }}
         >
           <CardHeader
