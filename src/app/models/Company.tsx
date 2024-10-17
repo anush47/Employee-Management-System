@@ -11,6 +11,7 @@ interface ICompany extends Document {
   paymentMethod: String;
   active: boolean;
   monthlyPrice: number;
+  requiredDocs: ("epf" | "etf" | "salary" | "paySlip")[];
   mode: "self" | "visit" | "aided";
   shifts: {
     start: string;
@@ -170,6 +171,15 @@ const companySchema = new Schema<ICompany>(
         ],
         default: [{ name: "EPF 8%", amount: null }],
       },
+    },
+    requiredDocs: {
+      type: [
+        {
+          type: String,
+          enum: ["epf", "etf", "salary", "paySlip"],
+        },
+      ],
+      default: ["epf", "etf", "salary", "paySlip"],
     },
   },
   {

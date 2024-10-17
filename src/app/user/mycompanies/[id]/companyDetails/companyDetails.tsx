@@ -221,7 +221,7 @@ const CompanyDetails = ({
     setLoading(true);
     try {
       const response = await fetch(`/api/companies/one`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },

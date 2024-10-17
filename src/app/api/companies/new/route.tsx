@@ -16,6 +16,7 @@ const companySchema = z.object({
   startedAt: z.string().optional(),
   paymentMethod: z.string().optional(),
   monthlyPrice: z.number(),
+  requiredDocs: z.array(z.enum(["epf", "etf", "salary", "paySlip"])),
   workingDays: z.object({
     mon: z.string().optional(),
     tue: z.string().optional(),
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
       sat: "half",
       sun: "off",
     };
+    body.requiredDocs = ["epf", "etf", "salary", "paySlip"];
     const parsedBody = companySchema.parse(body);
 
     // Connect to the database
