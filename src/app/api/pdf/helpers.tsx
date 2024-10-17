@@ -7,6 +7,7 @@ import { degrees, PDFDocument } from "pdf-lib";
 import { getSalaryDoc } from "./salary";
 import { getEPFDoc } from "./epf";
 import { getETFDoc } from "./etf";
+import { getPaySlipDoc } from "./payslip";
 
 //salary schema type
 export type SalarySchema = {
@@ -24,6 +25,7 @@ export type SalarySchema = {
     additions: { name: string; amount: string | number }[];
     deductions: { name: string; amount: string | number }[];
   };
+  advanceAmount: number;
   finalSalary: number;
 };
 
@@ -163,6 +165,7 @@ export const setupData = (salaries: SalarySchema[]) => {
       epf12: salary.basic * 0.12,
       etf3: salary.basic * 0.03,
       epf8: salary.basic * 0.08,
+      advanceAmount: salary.advanceAmount,
       finalSalary: salary.finalSalary,
     };
 
@@ -202,6 +205,7 @@ export const setupData = (salaries: SalarySchema[]) => {
   });
 
   // Finalize columns by adding static columns like "FINAL SALARY"
+  columns.push({ dataKey: "advanceAmount", header: "ADVANCE AMOUNT" });
   columns.push({ dataKey: "finalSalary", header: "FINAL SALARY" });
 
   // Prepare data based on columns
@@ -237,18 +241,17 @@ export const setupData = (salaries: SalarySchema[]) => {
 
 export const mergePdfs = async (pdfsToMerges: ArrayBuffer[]) => {
   const mergedPdf = await PDFDocument.create();
-  const actions = pdfsToMerges.map(async (pdfBuffer) => {
-    const pdf = await PDFDocument.load(pdfBuffer);
-    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+  for (const pdfBuffer of pdfsToMerges) {
+    const pdf = await PDFDocument.load(pdfBuffer); // Load each PDF in the order of the array
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices()); // Copy pages from the original PDF
     copiedPages.forEach((page) => {
-      // console.log('page', page.getWidth(), page.getHeight());
-      // page.setWidth(210);
-      mergedPdf.addPage(page);
+      mergedPdf.addPage(page); // Add each page to the merged PDF in sequence
     });
-  });
-  await Promise.all(actions);
-  const mergedPdfFile = await mergedPdf.save();
-  return mergedPdfFile;
+  }
+
+  const mergedPdfFile = await mergedPdf.save(); // Save the merged PDF
+  return mergedPdfFile; // Return the final merged PDF file
 };
 
 export const getPDFOutput = async (
@@ -257,7 +260,14 @@ export const getPDFOutput = async (
   columns: { dataKey: string; header: string }[],
   data: (string | number)[][],
   payment: PaymentSchema,
-  pdfType: string
+  pdfType: string,
+  employees: {
+    _id: string;
+    memberNo: number;
+    name: string;
+    nic: string;
+    designation: string;
+  }[]
 ) => {
   let pdfOutput;
   if (pdfType === "salary") {
@@ -272,6 +282,14 @@ export const getPDFOutput = async (
     pdfOutput = getETFDoc(company, period, columns, data, payment).output(
       "arraybuffer"
     );
+  } else if (pdfType === "payslip") {
+    pdfOutput = await getCombinedPayslips(
+      company,
+      period,
+      columns,
+      data,
+      employees
+    );
   } else if (pdfType === "all" || pdfType === "print") {
     const salaryDoc = getSalaryDoc(company, period, columns, data).output(
       "arraybuffer"
@@ -281,6 +299,13 @@ export const getPDFOutput = async (
     );
     const etfDoc = getETFDoc(company, period, columns, data, payment).output(
       "arraybuffer"
+    );
+    const payslipDoc = await getCombinedPayslips(
+      company,
+      period,
+      columns,
+      data,
+      employees
     );
 
     // Rotate salary document pages by 90 degrees
@@ -294,6 +319,7 @@ export const getPDFOutput = async (
         rotatedSalaryPdfBuffer.buffer as ArrayBuffer,
         epfDoc,
         etfDoc,
+        payslipDoc.buffer as ArrayBuffer,
       ]);
     } else {
       //add copies
@@ -303,8 +329,90 @@ export const getPDFOutput = async (
         epfDoc,
         etfDoc,
         etfDoc,
+        payslipDoc.buffer as ArrayBuffer,
       ]);
     }
   }
   return pdfOutput;
+};
+
+const getCombinedPayslips = async (
+  company: CompanySchema,
+  period: string,
+  columns: { dataKey: string; header: string }[],
+  data: (string | number)[][],
+  employees: {
+    _id: string;
+    memberNo: number;
+    name: string;
+    nic: string;
+    designation: string;
+  }[]
+) => {
+  const mergePdfsIntoQuads = async (pdfsToMerge: ArrayBuffer[]) => {
+    const mergedPdf = await PDFDocument.create();
+    let page = mergedPdf.addPage();
+    const { width, height } = page.getSize();
+
+    let pdfIndex = 0;
+
+    for (let i = 0; i < pdfsToMerge.length; i += 4) {
+      // For each set of 4 PDFs, create a new page if necessary
+      if (i > 0) page = mergedPdf.addPage();
+
+      // Loop over a set of 4 PDFs (or less, if remaining are fewer than 4)
+      for (let j = 0; j < 4; j++) {
+        pdfIndex = i + j;
+        if (pdfIndex >= pdfsToMerge.length) break; // If no more PDFs left
+
+        const pdfBuffer = pdfsToMerge[pdfIndex];
+        const pdf = await PDFDocument.load(pdfBuffer);
+        const [embeddedPage] = await mergedPdf.embedPages(pdf.getPages());
+
+        // Calculate positions to place each PDF page in a 2x2 grid
+        const xOffset = (j % 2) * (width / 2); // Two columns
+        const yOffset = height - Math.floor(j / 2) * (height / 2) - height / 2; // Two rows
+
+        // Draw the embedded page on the merged document
+        page.drawPage(embeddedPage, {
+          x: xOffset,
+          y: yOffset,
+          width: width / 2, // Scaling to fit 4 on a single page
+          height: height / 2,
+        });
+      }
+    }
+
+    const mergedPdfFile = await mergedPdf.save();
+    return mergedPdfFile;
+  };
+
+  const paySlipDocArrays: ArrayBuffer[] = [];
+
+  // Iterate over each salary record to generate payslips, avoiding the last 3
+  for (let i = 0; i < data.length - 3; i++) {
+    const salary = data[i];
+    // Find the employee by their memberNo (first column in salary data)
+    let employee = employees.find((e) => e.memberNo === salary[0]);
+    if (!employee) {
+      employee = undefined;
+    }
+
+    // Get the payslip document (assuming getPaySlipDoc returns a jsPDF instance)
+    const payslipDoc = getPaySlipDoc(
+      company,
+      period,
+      columns,
+      salary,
+      employee
+    );
+
+    // Convert jsPDF document to arraybuffer
+    const payslipArrayBuffer = payslipDoc.output("arraybuffer");
+    paySlipDocArrays.push(payslipArrayBuffer);
+  }
+
+  // Combine the payslips into quads and await the result
+  const combinedPayslips = await mergePdfsIntoQuads(paySlipDocArrays);
+  return combinedPayslips;
 };

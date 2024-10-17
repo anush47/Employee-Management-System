@@ -83,9 +83,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const needPayment = pdfType !== "salary";
+    const needPayment = pdfType !== "salary" && pdfType !== "payslip";
 
-    const { company, salaries, payment } = await getData(
+    const { company, salaries, payment, employees } = await getData(
       companyId,
       period,
       needPayment,
@@ -118,7 +118,8 @@ export async function POST(req: NextRequest) {
       columns,
       data,
       payment,
-      pdfType
+      pdfType,
+      employees
     );
 
     if (!pdfOutput) {
