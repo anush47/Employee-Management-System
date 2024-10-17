@@ -69,6 +69,12 @@ const companyUpdateSchema = z.object({
   endedAt: z.string().optional(),
   monthlyPrice: z.number().optional(),
   active: z.boolean().optional(),
+  requiredDocs: z.object({
+    epf: z.boolean().optional(),
+    etf: z.boolean().optional(),
+    salary: z.boolean().optional(),
+    paySlip: z.boolean().optional(),
+  }),
   mode: z.string().optional(),
   workingDays: z
     .object({
@@ -119,6 +125,8 @@ export async function PUT(req: NextRequest) {
       delete companyData.mode;
       //delete monthlyPrice
       delete companyData.monthlyPrice;
+      //delete requiredDocs
+      delete companyData.requiredDocs;
     }
 
     // Connect to the database

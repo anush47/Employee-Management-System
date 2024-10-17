@@ -34,6 +34,12 @@ export type CompanySchema = {
   name: string;
   employerNo: string;
   address: string;
+  requiredDocs: {
+    epf: boolean;
+    etf: boolean;
+    salary: boolean;
+    paySlip: boolean;
+  };
 };
 
 //paymentSchema
@@ -64,7 +70,7 @@ export const getData = async (
 
   // Fetch company details
   const company = await Company.findById(companyId).select(
-    "name employerNo address"
+    "name employerNo address requiredDocs"
   );
 
   // Fetch employees of the company
@@ -239,103 +245,6 @@ export const setupData = (salaries: SalarySchema[]) => {
   };
 };
 
-export const mergePdfs = async (pdfsToMerges: ArrayBuffer[]) => {
-  const mergedPdf = await PDFDocument.create();
-
-  for (const pdfBuffer of pdfsToMerges) {
-    const pdf = await PDFDocument.load(pdfBuffer); // Load each PDF in the order of the array
-    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices()); // Copy pages from the original PDF
-    copiedPages.forEach((page) => {
-      mergedPdf.addPage(page); // Add each page to the merged PDF in sequence
-    });
-  }
-
-  const mergedPdfFile = await mergedPdf.save(); // Save the merged PDF
-  return mergedPdfFile; // Return the final merged PDF file
-};
-
-export const getPDFOutput = async (
-  company: CompanySchema,
-  period: string,
-  columns: { dataKey: string; header: string }[],
-  data: (string | number)[][],
-  payment: PaymentSchema,
-  pdfType: string,
-  employees: {
-    _id: string;
-    memberNo: number;
-    name: string;
-    nic: string;
-    designation: string;
-  }[]
-) => {
-  let pdfOutput;
-  if (pdfType === "salary") {
-    pdfOutput = getSalaryDoc(company, period, columns, data).output(
-      "arraybuffer"
-    );
-  } else if (pdfType === "epf") {
-    pdfOutput = getEPFDoc(company, period, columns, data, payment).output(
-      "arraybuffer"
-    );
-  } else if (pdfType === "etf") {
-    pdfOutput = getETFDoc(company, period, columns, data, payment).output(
-      "arraybuffer"
-    );
-  } else if (pdfType === "payslip") {
-    pdfOutput = await getCombinedPayslips(
-      company,
-      period,
-      columns,
-      data,
-      employees
-    );
-  } else if (pdfType === "all" || pdfType === "print") {
-    const salaryDoc = getSalaryDoc(company, period, columns, data).output(
-      "arraybuffer"
-    );
-    const epfDoc = getEPFDoc(company, period, columns, data, payment).output(
-      "arraybuffer"
-    );
-    const etfDoc = getETFDoc(company, period, columns, data, payment).output(
-      "arraybuffer"
-    );
-    const payslipDoc = await getCombinedPayslips(
-      company,
-      period,
-      columns,
-      data,
-      employees
-    );
-
-    // Rotate salary document pages by 90 degrees
-    const salaryPdfDoc = await PDFDocument.load(salaryDoc);
-    const rotatedSalaryPdfPages = salaryPdfDoc.getPages();
-    rotatedSalaryPdfPages.forEach((page) => page.setRotation(degrees(90)));
-    const rotatedSalaryPdfBuffer = await salaryPdfDoc.save();
-    // Combine all the documents into one
-    if (pdfType === "all") {
-      pdfOutput = await mergePdfs([
-        rotatedSalaryPdfBuffer.buffer as ArrayBuffer,
-        epfDoc,
-        etfDoc,
-        payslipDoc.buffer as ArrayBuffer,
-      ]);
-    } else {
-      //add copies
-      pdfOutput = await mergePdfs([
-        rotatedSalaryPdfBuffer.buffer as ArrayBuffer,
-        epfDoc,
-        epfDoc,
-        etfDoc,
-        etfDoc,
-        payslipDoc.buffer as ArrayBuffer,
-      ]);
-    }
-  }
-  return pdfOutput;
-};
-
 const getCombinedPayslips = async (
   company: CompanySchema,
   period: string,
@@ -415,4 +324,104 @@ const getCombinedPayslips = async (
   // Combine the payslips into quads and await the result
   const combinedPayslips = await mergePdfsIntoQuads(paySlipDocArrays);
   return combinedPayslips;
+};
+
+export const mergePdfs = async (pdfsToMerges: ArrayBuffer[]) => {
+  const mergedPdf = await PDFDocument.create();
+
+  for (const pdfBuffer of pdfsToMerges) {
+    const pdf = await PDFDocument.load(pdfBuffer); // Load each PDF in the order of the array
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices()); // Copy pages from the original PDF
+    copiedPages.forEach((page) => {
+      mergedPdf.addPage(page); // Add each page to the merged PDF in sequence
+    });
+  }
+
+  const mergedPdfFile = await mergedPdf.save(); // Save the merged PDF
+  return mergedPdfFile; // Return the final merged PDF file
+};
+
+export const getPDFOutput = async (
+  company: CompanySchema,
+  period: string,
+  columns: { dataKey: string; header: string }[],
+  data: (string | number)[][],
+  payment: PaymentSchema,
+  pdfType: string,
+  employees: {
+    _id: string;
+    memberNo: number;
+    name: string;
+    nic: string;
+    designation: string;
+  }[]
+) => {
+  let pdfOutput;
+  if (pdfType === "salary") {
+    pdfOutput = getSalaryDoc(company, period, columns, data).output(
+      "arraybuffer"
+    );
+  } else if (pdfType === "epf") {
+    pdfOutput = getEPFDoc(company, period, columns, data, payment).output(
+      "arraybuffer"
+    );
+  } else if (pdfType === "etf") {
+    pdfOutput = getETFDoc(company, period, columns, data, payment).output(
+      "arraybuffer"
+    );
+  } else if (pdfType === "payslip") {
+    pdfOutput = await getCombinedPayslips(
+      company,
+      period,
+      columns,
+      data,
+      employees
+    );
+  } else if (pdfType === "all" || pdfType === "print") {
+    const salaryDoc = company.requiredDocs.salary
+      ? getSalaryDoc(company, period, columns, data).output("arraybuffer")
+      : undefined;
+    const epfDoc = company.requiredDocs.epf
+      ? getEPFDoc(company, period, columns, data, payment).output("arraybuffer")
+      : undefined;
+    const etfDoc = company.requiredDocs.etf
+      ? getETFDoc(company, period, columns, data, payment).output("arraybuffer")
+      : undefined;
+    const payslipDoc = company.requiredDocs.paySlip
+      ? await getCombinedPayslips(company, period, columns, data, employees)
+      : undefined;
+
+    let rotatedSalaryDoc = undefined;
+    let arrayBuffers = [];
+    if (salaryDoc && pdfType === "print") {
+      // Rotate salary document pages by 90 degrees
+      const salaryPdfDoc = await PDFDocument.load(salaryDoc);
+      const rotatedSalaryPdfPages = salaryPdfDoc.getPages();
+      rotatedSalaryPdfPages.forEach((page) => page.setRotation(degrees(90)));
+      rotatedSalaryDoc = await salaryPdfDoc.save();
+    }
+
+    if (pdfType === "all") {
+      if (salaryDoc) arrayBuffers.push(salaryDoc);
+      if (epfDoc) arrayBuffers.push(epfDoc);
+      if (etfDoc) arrayBuffers.push(etfDoc);
+      if (payslipDoc) arrayBuffers.push(payslipDoc.buffer as ArrayBuffer);
+    } else {
+      if (rotatedSalaryDoc)
+        arrayBuffers.push(rotatedSalaryDoc.buffer as ArrayBuffer);
+      if (epfDoc) arrayBuffers.push(epfDoc);
+      if (epfDoc) arrayBuffers.push(epfDoc);
+      if (etfDoc) arrayBuffers.push(etfDoc);
+      if (etfDoc) arrayBuffers.push(etfDoc);
+      if (payslipDoc) arrayBuffers.push(payslipDoc.buffer as ArrayBuffer);
+    }
+
+    //if 0 throw error
+    if (arrayBuffers.length === 0) {
+      throw new Error("No documents to merge");
+    }
+    //combine
+    pdfOutput = await mergePdfs(arrayBuffers);
+  }
+  return pdfOutput;
 };

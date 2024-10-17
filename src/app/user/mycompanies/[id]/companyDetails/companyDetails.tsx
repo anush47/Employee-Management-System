@@ -63,6 +63,15 @@ const CompanyDetails = ({
     paymentMethod: "",
     startedAt: "",
     workingDays: {},
+    requiredDocs:
+      user.role === "admin"
+        ? {
+            epf: false,
+            etf: false,
+            salary: false,
+            paySlip: false,
+          }
+        : undefined,
     mode: "",
     endedAt: "",
     active: true,
@@ -167,6 +176,17 @@ const CompanyDetails = ({
     if (name === "active") {
       value = event.target.checked;
     }
+    if (name.startsWith("requiredDocs")) {
+      const requiredDocs = {
+        ...formFields.requiredDocs,
+        [name.split(".")[1]]: event.target.checked,
+      };
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        requiredDocs: requiredDocs as NonNullable<Company["requiredDocs"]>,
+      }));
+      return;
+    }
 
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
@@ -187,6 +207,7 @@ const CompanyDetails = ({
         mode: "",
         paymentMethod: "",
         startedAt: "",
+        requiredDocs: undefined,
         endedAt: "",
         active: true,
         workingDays: {
@@ -620,7 +641,7 @@ const CompanyDetails = ({
                   handleChange={handleChange}
                   paymentStructure={formFields.paymentStructure}
                   setPaymentStructure={(paymentStructure) => {
-                    console.log("Setting payment structure:", paymentStructure); // Debugging
+                    //console.log("Setting payment structure:", paymentStructure); // Debugging
                     setFormFields((prev) => ({
                       ...prev,
                       paymentStructure,
@@ -640,7 +661,7 @@ const CompanyDetails = ({
                       ...prev,
                       workingDays,
                     }));
-                    console.log("Setting working days:", formFields); // Debugging
+                    //console.log("Setting working days:", formFields); // Debugging
                   }}
                 />
               </Grid>
@@ -652,7 +673,7 @@ const CompanyDetails = ({
                   handleChange={handleChange}
                   shifts={formFields.shifts}
                   setShifts={(shifts: any) => {
-                    console.log("Setting shifts:", shifts); // Debugging
+                    //console.log("Setting shifts:", shifts); // Debugging
                     setFormFields((prev) => ({
                       ...prev,
                       shifts,
@@ -701,6 +722,61 @@ const CompanyDetails = ({
                         InputProps={{
                           readOnly: !isEditing,
                         }}
+                      />
+                    </FormControl>
+                    {/* required Documents */}
+                    <div className="mt-3" />
+                    <Typography>Required Documents</Typography>
+                    <FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formFields.requiredDocs?.epf || false}
+                            name="requiredDocs.epf"
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                          />
+                        }
+                        label="EPF"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formFields.requiredDocs?.etf || false}
+                            name="requiredDocs.etf"
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                          />
+                        }
+                        label="ETF"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formFields.requiredDocs?.salary || false}
+                            name="requiredDocs.salary"
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                          />
+                        }
+                        label="Salary"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formFields.requiredDocs?.paySlip || false}
+                            name="requiredDocs.paySlip"
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                          />
+                        }
+                        label="Pay Slip"
                       />
                     </FormControl>
                   </>

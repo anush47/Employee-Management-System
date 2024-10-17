@@ -16,6 +16,14 @@ export interface Company {
   address: string;
   mode: string;
   active: boolean;
+  requiredDocs:
+    | {
+        epf: boolean;
+        etf: boolean;
+        salary: boolean;
+        paySlip: boolean;
+      }
+    | undefined;
   paymentMethod: String;
   monthlyPrice: String;
   startedAt: Date | String;

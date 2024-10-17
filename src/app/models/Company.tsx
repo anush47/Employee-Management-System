@@ -11,7 +11,12 @@ interface ICompany extends Document {
   paymentMethod: String;
   active: boolean;
   monthlyPrice: number;
-  requiredDocs: ("epf" | "etf" | "salary" | "paySlip")[];
+  requiredDocs: {
+    epf: boolean;
+    etf: boolean;
+    salary: boolean;
+    paySlip: boolean;
+  };
   mode: "self" | "visit" | "aided";
   shifts: {
     start: string;
@@ -173,13 +178,28 @@ const companySchema = new Schema<ICompany>(
       },
     },
     requiredDocs: {
-      type: [
-        {
-          type: String,
-          enum: ["epf", "etf", "salary", "paySlip"],
+      type: {
+        epf: {
+          type: Boolean,
+          required: true,
+          default: true,
         },
-      ],
-      default: ["epf", "etf", "salary", "paySlip"],
+        etf: {
+          type: Boolean,
+          required: true,
+          default: true,
+        },
+        salary: {
+          type: Boolean,
+          required: true,
+          default: true,
+        },
+        paySlip: {
+          type: Boolean,
+          required: true,
+          default: true,
+        },
+      },
     },
   },
   {
