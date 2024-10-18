@@ -88,7 +88,6 @@ export async function POST(req: NextRequest) {
         active: true,
       });
     } else {
-      console.log(employees);
       employees = await Employee.find({
         _id: { $in: employees },
         company: companyId,
@@ -132,7 +131,6 @@ export async function POST(req: NextRequest) {
           period,
           employeeInOut as RawInOut
         );
-        console.log(generatedSalary);
         salaries.push(generatedSalary);
       } else if (update) {
         const existingSalary = existingSalaries?.find(

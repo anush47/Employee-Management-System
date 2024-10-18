@@ -1,4 +1,7 @@
-import { inOutGen, inOutProcess } from "../inOutProcessing";
+import {
+  generateSalaryWithInOut,
+  processSalaryWithInOut,
+} from "../inOutProcessing";
 
 // Types for InOut
 export type RawInOut = Date[]; // Unprocessed in/out records
@@ -151,7 +154,7 @@ export async function generateSalaryForOneEmployee(
     // Choose the appropriate overtime calculation method
     switch (employee.otMethod) {
       case "noOt":
-        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = noOtCalc(
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = await noOtCalc(
           employee,
           period,
           inOutProcessed,
@@ -159,7 +162,7 @@ export async function generateSalaryForOneEmployee(
         ));
         break;
       case "calc":
-        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = OtCalc(
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = await OtCalc(
           employee,
           period,
           inOutProcessed,
@@ -167,12 +170,8 @@ export async function generateSalaryForOneEmployee(
         ));
         break;
       default:
-        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = randomCalc(
-          employee,
-          period,
-          inOutProcessed,
-          salary
-        ));
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed } =
+          await randomCalc(employee, period, inOutProcessed, salary));
         break;
     }
 
@@ -219,7 +218,7 @@ export async function generateSalaryForOneEmployee(
 }
 
 // Random overtime calculation
-const randomCalc = (
+const randomCalc = async (
   employee: any,
   period: string,
   inOutProcessed: ProcessedInOut | RawInOut,
@@ -231,7 +230,7 @@ const randomCalc = (
     noPay,
     otReason,
     noPayReason,
-  } = inOutGen(employee, period, inOutProcessed, salary);
+  } = await generateSalaryWithInOut(employee, period, inOutProcessed, salary);
 
   return {
     ot,
@@ -243,7 +242,7 @@ const randomCalc = (
 };
 
 // No overtime calculation
-const noOtCalc = (
+const noOtCalc = async (
   employee: any,
   period: string,
   inOutProcessed: ProcessedInOut | RawInOut,
@@ -255,7 +254,7 @@ const noOtCalc = (
     noPay,
     otReason,
     noPayReason,
-  } = inOutProcess(employee, period, inOutProcessed, salary);
+  } = await processSalaryWithInOut(employee, period, inOutProcessed, salary);
 
   return {
     ot,
@@ -267,7 +266,7 @@ const noOtCalc = (
 };
 
 // Overtime calculation
-const OtCalc = (
+const OtCalc = async (
   employee: any,
   period: string,
   inOutProcessed: ProcessedInOut | RawInOut,
@@ -279,7 +278,7 @@ const OtCalc = (
     noPay,
     otReason,
     noPayReason,
-  } = inOutProcess(employee, period, inOutProcessed, salary);
+  } = await processSalaryWithInOut(employee, period, inOutProcessed, salary);
   return {
     ot,
     otReason,

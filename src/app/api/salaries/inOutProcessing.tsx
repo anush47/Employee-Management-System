@@ -1,7 +1,9 @@
 // Determine if inOut contains already processed records (objects) or unprocessed Dates
+import Holiday from "@/app/models/Holiday";
+import { getHolidays } from "../holidays/holidayHelper";
 import { ProcessedInOut, RawInOut } from "./generate/salaryGeneration";
 
-export const inOutProcess = (
+export const processSalaryWithInOut = async (
   employee: any,
   period: string,
   inOut: RawInOut | ProcessedInOut,
@@ -31,17 +33,41 @@ export const inOutProcess = (
     inDate: Date,
     outDate: Date,
     workingDayStatus = "full",
-    holiday = "",
+    holiday = {
+      date: "",
+      categories: {
+        public: false,
+        bank: false,
+        mercantile: false,
+      },
+      summary: "",
+    },
     noPay = 0,
     description = ""
   ) => {
     const workingHours =
       (outDate.getTime() - inDate.getTime()) / 1000 / 60 / 60;
     let otHours = 0;
-    if (workingHours > 8) {
-      otHours = workingHours - 8;
+    //workingHoursTreshold
+    let workingHoursTreshold = 9;
+    if (workingDayStatus === "half") {
+      workingHoursTreshold = 6;
+    } else if (workingDayStatus === "off") {
+      workingHoursTreshold = 0;
     }
+    if (workingHours > workingHoursTreshold) {
+      otHours = workingHours - workingHoursTreshold;
+    }
+    //console.log(holiday.summary);
     const ot = otHours > 0 ? (otHours * source.basic) / employee.divideBy : 0; // Example OT rate
+
+    const newDescription = description.includes(holiday.summary)
+      ? description
+      : `${description} ${holiday.summary}`;
+
+    const holidayText = `${holiday.categories.public ? "Public" : ""} ${
+      holiday.categories.mercantile ? "Mercantile" : ""
+    } ${holiday.categories.bank ? "Bank" : ""}`.trim();
 
     records.push({
       in: inDate.toISOString(),
@@ -50,32 +76,40 @@ export const inOutProcess = (
       otHours,
       ot,
       noPay,
-      holiday,
-      description,
+      holiday: holidayText,
+      description: newDescription,
     });
   };
 
   if (isProcessed) {
+    const holidays = await getHolidays(
+      (inOut as any[])[0].in,
+      (inOut as any[])[inOut.length - 1].out
+    );
     // Process the already processed records
     (inOut as any[]).forEach((record: any) => {
       const inDate = new Date(record.in);
       const outDate = new Date(record.out);
 
       const workingDayStatus = getWorkingDayStatus(inDate, employee);
+      const holiday = getHoliday(inDate, holidays.holidays);
 
       // Recalculate using the reusable function
       processRecord(
         inDate,
         outDate,
         workingDayStatus,
-        record.holiday,
+        holiday,
         record.noPay,
         record.description
       );
     });
   } else {
     // Unprocessed, proceed to process Date[] input
-    const { startDate, endDate } = startEndDates(period, inOut as Date[]);
+    const { startDate, endDate, holidays } = await startEndDates(
+      period,
+      inOut as Date[]
+    );
 
     let day = new Date(startDate);
     let inOutIndex = 0;
@@ -124,8 +158,8 @@ export const inOutProcess = (
         }
 
         const workingDayStatus = getWorkingDayStatus(inDate, employee);
-        const holiday = getHolidayStatus(day);
-
+        const holiday = getHoliday(inDate, holidays);
+        console.log(holiday);
         // Use the reusable function to process the record
         processRecord(inDate, outDate, workingDayStatus, holiday);
         day.setUTCDate(outDate.getUTCDate() + 1);
@@ -148,7 +182,7 @@ export const inOutProcess = (
   };
 };
 
-export const inOutGen = (
+export const generateSalaryWithInOut = async (
   employee: any,
   period: string,
   inOut: RawInOut | ProcessedInOut,
@@ -159,7 +193,8 @@ export const inOutGen = (
   const generateRandomRecord = (day: Date) => {
     const workingDayStatus = getWorkingDayStatus(day, employee);
     const shift = shifts[Math.floor(Math.random() * shifts.length)];
-    const holidayStatus = getHolidayStatus(day);
+    const holidayStatus = getHoliday(day, holidays);
+    //console.log(holidayStatus);
     const inDate = new Date(day);
     const inVaryEarlyMax = 60; // maximum early time in minutes
     const inVaryLateMax = 30; // maximum late time in minutes
@@ -192,7 +227,7 @@ export const inOutGen = (
       otHours: 0,
       ot: 0,
       noPay: 0,
-      holiday: holidayStatus,
+      holiday: holidayStatus.summary,
       description: "",
     };
   };
@@ -208,7 +243,7 @@ export const inOutGen = (
     description: string;
   }[] = [];
   //process existing
-  const existingProcessed = inOutProcess(
+  const existingProcessed = await processSalaryWithInOut(
     employee,
     period,
     inOut,
@@ -221,7 +256,10 @@ export const inOutGen = (
   });
 
   //get start end days
-  const { startDate, endDate } = startEndDates(period, inOut as Date[]);
+  const { startDate, endDate, holidays } = await startEndDates(
+    period,
+    inOut as Date[]
+  );
   let day = new Date(startDate);
 
   //generate random records for records that are not available
@@ -231,7 +269,8 @@ export const inOutGen = (
         (record) => new Date(record.in).getUTCDate() === day.getUTCDate()
       )
     ) {
-      inOutProcessed.push(generateRandomRecord(day));
+      const generatedRecord = generateRandomRecord(day);
+      if (generatedRecord) inOutProcessed.push(generatedRecord);
     }
     day.setUTCDate(day.getUTCDate() + 1);
   }
@@ -242,12 +281,16 @@ export const inOutGen = (
   });
 
   //reprocress all inouts
-  const reprocessed = inOutProcess(employee, period, inOutProcessed);
+  const reprocessed = await processSalaryWithInOut(
+    employee,
+    period,
+    inOutProcessed
+  );
   return reprocessed;
 };
 
 // Helper functions
-const startEndDates = (
+const startEndDates = async (
   period: string | number | Date,
   inOut: (string | number | Date)[]
 ) => {
@@ -266,7 +309,18 @@ const startEndDates = (
   }
   const endDate = new Date(startDate);
   endDate.setMonth(endDate.getMonth() + 1);
-  return { startDate, endDate };
+
+  //holidays
+  //transform to yyyy-mm-dd for holidays
+  const startDateHoliday = startDate.toISOString().split("T")[0];
+  const endDateHoliday = endDate.toISOString().split("T")[0];
+  const holidayResponse = await getHolidays(startDateHoliday, endDateHoliday);
+  if (!holidayResponse.holidays && holidayResponse.messege) {
+    throw new Error(holidayResponse.messege);
+  }
+
+  const { holidays } = holidayResponse;
+  return { startDate, endDate, holidays };
 };
 
 const getShiftEnd = (shift: string, inDate: Date): Date => {
@@ -288,11 +342,6 @@ const getTimeDifferenceInMinutes = (shift: string, inOut: Date): number => {
   return timeDiff;
 };
 
-const getHolidayStatus = (day: Date): string => {
-  // Check if the day is a holiday
-  return "";
-};
-
 const getWorkingDayStatus = (
   day: Date,
   employee: any
@@ -303,4 +352,21 @@ const getWorkingDayStatus = (
   const workingDayStatus = employee.workingDays[dayOfWeek] || "full"; // full, half, off
 
   return workingDayStatus;
+};
+
+const getHoliday = (
+  date: Date,
+  holidays: {
+    date: string;
+    categories: { public: boolean; bank: boolean; mercantile: boolean };
+    summary: string;
+  }[]
+) => {
+  const dateString = date.toISOString().split("T")[0];
+  const holiDay = holidays.find((h) => h.date === dateString) || {
+    date: dateString,
+    categories: { public: false, bank: false, mercantile: false },
+    summary: "",
+  };
+  return holiDay;
 };

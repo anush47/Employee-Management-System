@@ -128,6 +128,33 @@ const GenerateSalaryOne = ({
     }
   }, [employeeId]);
 
+  //when period changed
+  useEffect(() => {
+    setFormFields({
+      id: "",
+      employee: "",
+      period,
+      basic: 0,
+      inOut: [],
+      noPay: {
+        amount: 0,
+        reason: "",
+      },
+      ot: {
+        amount: 0,
+        reason: "",
+      },
+      paymentStructure: {
+        additions: [],
+        deductions: [],
+      },
+      advanceAmount: 0,
+      finalSalary: 0,
+      remark: "",
+    });
+    setGenerated(false);
+  }, [period]);
+
   const fetchSalary = async (update = false) => {
     try {
       setLoading(true);
