@@ -46,6 +46,9 @@ export interface Payment {
 }
 
 export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
+  if (ddmmyyyy === null) {
+    return "";
+  }
   const [dd, mm, yyyy] = ddmmyyyy.split("-");
   return `${mm}-${dd}-${yyyy}`;
 };
@@ -208,6 +211,12 @@ const PaymentsDataGrid: React.FC<{
           />
         </LocalizationProvider>
       ),
+    },
+    {
+      field: "remark",
+      headerName: "Remark",
+      flex: 1,
+      editable: isEditing,
     },
     {
       field: "actions",

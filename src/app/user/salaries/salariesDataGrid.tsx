@@ -169,6 +169,12 @@ const SalariesDataGrid: React.FC<{
       headerAlign: "left",
     },
     {
+      field: "remark",
+      headerName: "Remark",
+      flex: 1,
+      editable: isEditing,
+    },
+    {
       field: "actions",
       headerName: "Actions",
       flex: 1,
@@ -267,6 +273,10 @@ const SalariesDataGrid: React.FC<{
       nic: false,
       delete: false,
       companyEmployerNo: false,
+      remark: false,
+      ot: false,
+      noPay: false,
+      advanceAmount: false,
     });
 
   const [rowSelectionModel, setRowSelectionModel] =

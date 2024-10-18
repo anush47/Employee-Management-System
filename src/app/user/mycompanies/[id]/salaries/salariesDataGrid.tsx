@@ -55,6 +55,7 @@ export interface Salary {
   };
   advanceAmount: number;
   finalSalary: number;
+  remark: string;
 }
 
 const SalariesDataGrid: React.FC<{
@@ -159,6 +160,12 @@ const SalariesDataGrid: React.FC<{
       headerAlign: "left",
     },
     {
+      field: "remark",
+      headerName: "Remark",
+      flex: 1,
+      editable: isEditing,
+    },
+    {
       field: "actions",
       headerName: "Actions",
       flex: 1,
@@ -249,6 +256,10 @@ const SalariesDataGrid: React.FC<{
       noPayReason: false,
       nic: false,
       delete: false,
+      remark: false,
+      ot: false,
+      noPay: false,
+      advanceAmount: false,
     });
 
   const [rowSelectionModel, setRowSelectionModel] =

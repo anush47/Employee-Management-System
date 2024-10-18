@@ -81,6 +81,7 @@ const NewPaymentForm = ({
     etfPaymentMethod: string;
     etfChequeNo: string;
     etfPayDay: string;
+    remark: string;
   }>({
     _id: "",
     company: "",
@@ -96,6 +97,7 @@ const NewPaymentForm = ({
     etfPaymentMethod: "",
     etfChequeNo: "",
     etfPayDay: "",
+    remark: "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -647,7 +649,10 @@ const NewPaymentForm = ({
                     onChange={(newDate) => {
                       setFormFields((prevFields) => ({
                         ...prevFields,
-                        epfPayDay: newDate?.format("YYYY-MM-DD") as string,
+                        epfPayDay:
+                          newDate !== null
+                            ? (newDate?.format("DD-MM-YYYY") as string)
+                            : "",
                       }));
                     }}
                     slotProps={{
@@ -762,7 +767,10 @@ const NewPaymentForm = ({
                     onChange={(newDate) => {
                       setFormFields((prevFields) => ({
                         ...prevFields,
-                        etfPayDay: newDate?.format("YYYY-MM-DD") as string,
+                        etfPayDay:
+                          newDate !== null
+                            ? (newDate?.format("DD-MM-YYYY") as string)
+                            : "",
                       }));
                     }}
                     slotProps={{
@@ -770,6 +778,27 @@ const NewPaymentForm = ({
                     }}
                   />
                 </LocalizationProvider>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <hr className="mb-3" />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.remark}>
+                <TextField
+                  label="Remark"
+                  name="remark"
+                  value={formFields.remark}
+                  onChange={handleChange}
+                  variant="filled"
+                  multiline
+                  InputProps={{
+                    readOnly: loading,
+                  }}
+                />
+                {errors.remark && (
+                  <FormHelperText>{errors.remark}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
           </Grid>

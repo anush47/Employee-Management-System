@@ -35,6 +35,7 @@ interface ISalary extends Document {
   }[];
   advanceAmount: number;
   finalSalary: number;
+  remark: string;
 }
 
 // Define the schema for the Salary model
@@ -131,6 +132,9 @@ const salarySchema = new Schema<ISalary>(
     finalSalary: {
       type: Number,
       required: true,
+    },
+    remark: {
+      type: String,
     },
   },
   {

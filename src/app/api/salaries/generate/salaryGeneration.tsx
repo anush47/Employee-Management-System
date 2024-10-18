@@ -206,6 +206,7 @@ export async function generateSalaryForOneEmployee(
       },
       advanceAmount: salary ? salary.advanceAmount : 0, // Example advance amount
       finalSalary,
+      remark: null,
     };
 
     return salaryData;

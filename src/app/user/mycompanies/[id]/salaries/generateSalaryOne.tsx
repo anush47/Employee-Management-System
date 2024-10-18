@@ -77,6 +77,7 @@ const GenerateSalaryOne = ({
     },
     advanceAmount: 0,
     finalSalary: 0,
+    remark: "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const theme = useTheme();
@@ -598,6 +599,24 @@ const GenerateSalaryOne = ({
                 />
                 {errors.advanceAmount && (
                   <FormHelperText>{errors.advanceAmount}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.remark}>
+                <TextField
+                  label="Remark"
+                  name="remark"
+                  value={formFields.remark}
+                  onChange={handleChange}
+                  variant="filled"
+                  multiline
+                  InputProps={{
+                    readOnly: loading,
+                  }}
+                />
+                {errors.remark && (
+                  <FormHelperText>{errors.remark}</FormHelperText>
                 )}
               </FormControl>
             </Grid>

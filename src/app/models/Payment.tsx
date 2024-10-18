@@ -15,6 +15,7 @@ interface IPayment extends Document {
   etfPaymentMethod: string;
   etfChequeNo: string;
   etfPayDay: string;
+  remark: string;
 }
 
 // Define the schema for the Salary model
@@ -62,6 +63,9 @@ const paymentSchema = new Schema<IPayment>(
       type: String,
     },
     etfPayDay: {
+      type: String,
+    },
+    remark: {
       type: String,
     },
   },

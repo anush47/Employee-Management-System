@@ -44,9 +44,13 @@ export interface Payment {
   etfPaymentMethod: string;
   etfChequeNo: string;
   etfPayDay: string;
+  remark: string;
 }
 
 export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
+  if (ddmmyyyy === null) {
+    return "";
+  }
   const [dd, mm, yyyy] = ddmmyyyy.split("-");
   return `${mm}-${dd}-${yyyy}`;
 };
@@ -146,7 +150,7 @@ const PaymentsDataGrid: React.FC<{
               params.api.setEditCellValue({
                 id: params.id,
                 field: params.field,
-                value: newDate ? newDate.format("YYYY-MM-DD") : null,
+                value: newDate ? newDate.format("YYYY-MM-DD") : "",
               });
             }}
             slotProps={{
@@ -200,7 +204,7 @@ const PaymentsDataGrid: React.FC<{
               params.api.setEditCellValue({
                 id: params.id,
                 field: params.field,
-                value: newDate ? newDate.format("YYYY-MM-DD") : null,
+                value: newDate ? newDate.format("YYYY-MM-DD") : "",
               });
             }}
             slotProps={{
@@ -209,6 +213,12 @@ const PaymentsDataGrid: React.FC<{
           />
         </LocalizationProvider>
       ),
+    },
+    {
+      field: "remark",
+      headerName: "Remark",
+      flex: 1,
+      editable: isEditing,
     },
     {
       field: "actions",

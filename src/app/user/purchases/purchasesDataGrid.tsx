@@ -30,11 +30,6 @@ export interface Purchase {
   approvedStatus: string;
 }
 
-export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
-  const [dd, mm, yyyy] = ddmmyyyy.split("-");
-  return `${mm}-${dd}-${yyyy}`;
-};
-
 const PurchasesDataGrid: React.FC<{
   user: { id: string; name: string; email: string };
   isEditingPurchaseInHome: boolean;

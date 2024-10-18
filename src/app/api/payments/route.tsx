@@ -180,6 +180,7 @@ const paymentSaveSchema = z.object({
   etfPaymentMethod: z.string().optional(),
   etfChequeNo: z.string().optional(),
   etfPayDay: z.string().optional(),
+  remark: z.string().optional(),
 });
 // POST: Create new payments
 export async function POST(req: NextRequest) {

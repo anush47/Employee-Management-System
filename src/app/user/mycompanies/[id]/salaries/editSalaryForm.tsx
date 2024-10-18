@@ -82,6 +82,7 @@ const EditSalaryForm: React.FC<{
     },
     advanceAmount: 0,
     finalSalary: 0,
+    remark: "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -107,6 +108,7 @@ const EditSalaryForm: React.FC<{
           paymentStructure: data.salary.paymentStructure,
           advanceAmount: data.salary.advanceAmount,
           finalSalary: data.salary.finalSalary,
+          remark: data.salary.remark,
         });
         setEmployee({
           memberNo: data.salary.memberNo,
@@ -698,6 +700,24 @@ const EditSalaryForm: React.FC<{
                 />
                 {errors.advanceAmount && (
                   <FormHelperText>{errors.advanceAmount}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.remark}>
+                <TextField
+                  label="Remark"
+                  name="remark"
+                  value={formFields.remark}
+                  onChange={handleChange}
+                  variant="filled"
+                  multiline
+                  InputProps={{
+                    readOnly: loading,
+                  }}
+                />
+                {errors.remark && (
+                  <FormHelperText>{errors.remark}</FormHelperText>
                 )}
               </FormControl>
             </Grid>

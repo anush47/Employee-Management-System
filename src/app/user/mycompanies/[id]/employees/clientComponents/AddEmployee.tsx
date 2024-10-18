@@ -477,7 +477,10 @@ const AddEmployeeForm: React.FC<{
                   onChange={(newDate) => {
                     setFormFields((prevFields) => ({
                       ...prevFields,
-                      startedAt: newDate?.format("DD-MM-YYYY") as string | Date,
+                      startedAt:
+                        newDate !== null
+                          ? (newDate?.format("DD-MM-YYYY") as string)
+                          : "",
                     }));
                   }}
                   slotProps={{

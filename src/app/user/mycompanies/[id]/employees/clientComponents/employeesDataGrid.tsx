@@ -52,12 +52,16 @@ export interface Employee {
       amount: string;
     }[];
   };
-  startedAt: Date | string;
-  resignedAt: Date | string;
+  startedAt: string;
+  resignedAt: string;
   company: string;
 }
 
 export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
+  //if null return ""
+  if (ddmmyyyy === null) {
+    return "";
+  }
   const [dd, mm, yyyy] = ddmmyyyy.split("-");
   return `${mm}-${dd}-${yyyy}`;
 };
@@ -231,7 +235,7 @@ const EmployeesDataGrid: React.FC<{
               params.api.setEditCellValue({
                 id: params.id,
                 field: params.field,
-                value: newDate ? newDate.format("DD-MM-YYYY") : null,
+                value: newDate ? newDate.format("DD-MM-YYYY") : "",
               });
             }}
             slotProps={{
@@ -261,7 +265,7 @@ const EmployeesDataGrid: React.FC<{
               params.api.setEditCellValue({
                 id: params.id,
                 field: params.field,
-                value: newDate ? newDate.format("DD-MM-YYYY") : null,
+                value: newDate ? newDate.format("DD-MM-YYYY") : "",
               });
             }}
             slotProps={{

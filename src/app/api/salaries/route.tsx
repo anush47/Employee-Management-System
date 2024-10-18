@@ -68,6 +68,7 @@ const salarySchema = z.object({
     .optional(),
   advanceAmount: z.number().optional(), // Optional field
   finalSalary: z.number().min(0, "Final salary must be a positive number"),
+  remark: z.string().optional(),
 });
 
 //period schema
@@ -274,8 +275,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.log(body.salaries[0].inOut);
 
     await dbConnect();
 

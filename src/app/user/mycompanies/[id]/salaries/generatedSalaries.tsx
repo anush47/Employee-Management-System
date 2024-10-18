@@ -134,6 +134,12 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       headerAlign: "left",
     },
     {
+      field: "remark",
+      headerName: "Remark",
+      flex: 1,
+      editable: true,
+    },
+    {
       field: "delete",
       headerName: "Delete",
       flex: 1,
@@ -163,6 +169,10 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       nic: false,
       //delete: false,
       paymentStructure: false,
+      remark: false,
+      ot: false,
+      noPay: false,
+      advanceAmount: false,
     });
 
   const handleRowUpdate = async (newSalary: any) => {

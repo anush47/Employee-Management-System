@@ -594,7 +594,10 @@ const EditEmployeeForm: React.FC<{
                   onChange={(newDate) => {
                     setFormFields((prevFields) => ({
                       ...prevFields,
-                      startedAt: newDate?.format("DD-MM-YYYY") as string | Date,
+                      startedAt:
+                        newDate !== null
+                          ? (newDate?.format("DD-MM-YYYY") as string)
+                          : "",
                     }));
                   }}
                   slotProps={{
@@ -626,9 +629,10 @@ const EditEmployeeForm: React.FC<{
                   onChange={(newDate) => {
                     setFormFields((prevFields) => ({
                       ...prevFields,
-                      resignedAt: newDate?.format("DD-MM-YYYY") as
-                        | string
-                        | Date,
+                      resignedAt:
+                        newDate !== null
+                          ? (newDate?.format("DD-MM-YYYY") as string)
+                          : "",
                     }));
                   }}
                   slotProps={{
