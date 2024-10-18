@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { Add, ArrowBack } from "@mui/icons-material";
 import AddCompanyForm from "./clientComponents/AddCompany";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 // Lazily load CompaniesDataGrid
 const CompaniesDataGrid = lazy(
@@ -30,14 +32,14 @@ const MyCompanies = ({
   const [isAdding, setIsAdding] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  //fetch query from url
+  const searchParams = useSearchParams();
+  const add = searchParams.get("add");
 
-  const handleAddClick = () => {
-    setIsAdding(true);
-  };
-
-  const handleBackClick = () => {
-    setIsAdding(false);
-  };
+  //open the form if gen is true
+  useEffect(() => {
+    if (add === "true") setIsAdding(true);
+  }, [add]);
 
   return (
     <Box>
@@ -49,7 +51,12 @@ const MyCompanies = ({
               overflowY: "auto",
             }}
           >
-            <AddCompanyForm user={user} handleBackClick={handleBackClick} />
+            <AddCompanyForm
+              user={user}
+              handleBackClick={() => {
+                window.history.back();
+              }}
+            />
           </Card>
         </Slide>
       ) : (
@@ -73,14 +80,15 @@ const MyCompanies = ({
                   My Companies
                 </Typography>
                 <Tooltip title="Add a new company" arrow>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Add />}
-                    onClick={handleAddClick}
-                  >
-                    Add
-                  </Button>
+                  <Link href={`user?userPageSelect=mycompanies&add=true`}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<Add />}
+                    >
+                      Add
+                    </Button>
+                  </Link>
                 </Tooltip>
               </Box>
             }

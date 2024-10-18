@@ -18,6 +18,8 @@ import { Add, ArrowBack, Cancel, Check, Edit } from "@mui/icons-material";
 import AddEmployeeForm from "./clientComponents/AddEmployee";
 import EditEmployeeForm from "./clientComponents/EditEmployee";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { companyId } from "../clientComponents/companySideBar";
 
 // Lazily load CompaniesDataGrid
 const EmployeesDataGrid = lazy(
@@ -39,38 +41,22 @@ const Employees = ({
 
   const searchParams = useSearchParams();
   employeeId = searchParams.get("employeeId");
-
-  const handleAddClick = () => {
-    setIsAdding(true);
-  };
+  const add = searchParams.get("add");
 
   const handleBackClick = () => {
-    setIsAdding(false);
-  };
-
-  const handleBackClickEdit = () => {
-    setIsEditing(false);
-
-    // Create a new URLSearchParams object from the current query string
-    const updatedSearchParams = new URLSearchParams(window.location.search);
-
-    // Remove the employeeId query parameter
-    updatedSearchParams.delete("employeeId");
-
-    // Update the URL without reloading the page
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}?${updatedSearchParams.toString()}`
-    );
+    //go back
+    window.history.back();
   };
 
   useEffect(() => {
+    if (add) {
+      setIsAdding(true);
+      return;
+    }
     if (employeeId) {
-      setIsAdding(false);
       setIsEditing(true);
     }
-  }, [employeeId]);
+  }, [employeeId, add]);
 
   return (
     <Box>
@@ -97,7 +83,7 @@ const Employees = ({
           >
             <EditEmployeeForm
               user={user}
-              handleBackClick={handleBackClickEdit}
+              handleBackClick={handleBackClick}
               employeeId={employeeId}
             />
           </Card>
@@ -151,14 +137,17 @@ const Employees = ({
                   )}
                 </Typography>
                 <Tooltip title="Add a new employee" arrow>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Add />}
-                    onClick={handleAddClick}
+                  <Link
+                    href={`/user/mycompanies/${companyId}?companyPageSelect=employees&add=true`}
                   >
-                    Add
-                  </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<Add />}
+                    >
+                      Add
+                    </Button>
+                  </Link>
                 </Tooltip>
               </Box>
             }
