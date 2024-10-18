@@ -166,11 +166,18 @@ const Documents = ({
         const data = await response.json();
         console.log(data.message);
         //if data . message and starts with payment data not found show it in snack bar
-        if (data.message && data.message.includes("data not found for")) {
-          setSnackbarMessage(data.message);
-          setSnackbarSeverity("error");
-          setSnackbarOpen(true);
-          return;
+        if (data.message) {
+          if (data.message.includes("data not found for")) {
+            setSnackbarMessage(data.message);
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
+            return;
+          } else if (data.message.includes("not Purchased")) {
+            setSnackbarMessage(data.message);
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
+            return;
+          }
         }
         throw new Error("Failed to generate PDF");
       }

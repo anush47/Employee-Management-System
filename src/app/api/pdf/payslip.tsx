@@ -47,7 +47,7 @@ export const getPaySlipDoc = (
   //companyName
   doc.setFont("Times", "normal");
   doc.setFontSize(20);
-  const companyName = "NANAYAKKARAWASAM MAYAKADUWA KANKANMGE ANOMA S.";
+  const companyName = company.name;
   doc.text(companyName, x, y, {
     maxWidth: 100,
   });
@@ -96,10 +96,9 @@ export const getPaySlipDoc = (
       maxWidth: 100,
     }).h;
   doc.setFontSize(10);
-  const addressText = "P & S - Battaramulla,No.131/A,Main Road,Battaramulla.";
 
   // split into 3 lines maximum
-  const lines = addressText
+  const lines = company.address
     .replace(/\n/g, "")
     .split(",")
     .map((line) => line.trim());

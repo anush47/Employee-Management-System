@@ -10,7 +10,12 @@ import { z } from "zod";
 const employeeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   memberNo: z.number().min(1, "Member number is required"),
-  nic: z.string().min(1, "NIC is required"),
+  nic: z
+    .string()
+    .regex(
+      /^(?:[0-9]{9}[vVxX]|[0-9]{12})$/,
+      "NIC must be a valid format (e.g., 123456789V or 123456789012)"
+    ),
   basic: z.number().min(1, "Basic salary is required"),
   totalSalary: z.union([z.string(), z.number(), z.null()]),
   divideBy: z.union([z.literal(240), z.literal(200)]).default(240),
@@ -67,6 +72,13 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate the request body
     const body = await req.json();
+    //trim name and nic
+    body.name = body.name.trim();
+    body.nic = body.nic.trim();
+    //capitalize nic and name
+    body.name = body.name.toUpperCase();
+    body.nic = body.nic.toUpperCase();
+
     // Convert to int
     body.memberNo = parseInt(body.memberNo);
     body.basic = parseFloat(body.basic);

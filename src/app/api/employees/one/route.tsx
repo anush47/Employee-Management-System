@@ -76,7 +76,13 @@ const employeeSchema = z.object({
   _id: z.string().min(1, "Employee ID is required"),
   name: z.string().min(1, "Employee name is required"),
   memberNo: z.number().min(1, "Member number is required"),
-  nic: z.string().optional(),
+  nic: z
+    .string()
+    .regex(
+      /^(?:[0-9]{9}[vVxX]|[0-9]{12})$/,
+      "NIC must be a valid format (e.g., 123456789V or 123456789012)"
+    )
+    .optional(),
   divideBy: z.union([z.literal(240), z.literal(200)]).default(240),
   active: z.boolean().default(true),
   basic: z.number().min(0, "Basic salary must be a positive number"),
@@ -140,7 +146,15 @@ export async function PUT(req: NextRequest) {
 
     // Parse and validate the request body
     const body = await req.json();
-    body.memberNo = parseInt(body.memberNo); // Convert memberNo to integer
+    //trim name and nic
+    body.name = body.name.trim();
+    body.nic = body.nic.trim();
+    //capitalize nic and name
+    body.name = body.name.toUpperCase();
+    body.nic = body.nic.toUpperCase();
+
+    //convert to number
+    body.memberNo = parseInt(body.memberNo);
     body.basic = parseFloat(body.basic);
     const parsedBody = employeeSchema.parse(body);
 

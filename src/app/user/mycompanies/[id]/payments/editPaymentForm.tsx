@@ -595,7 +595,7 @@ const EditPaymentForm: React.FC<{
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: !isEditing,
+                    readOnly: true,
                   }}
                 />
                 {errors.epfAmount && (
@@ -750,7 +750,7 @@ const EditPaymentForm: React.FC<{
                   onChange={handleChange}
                   variant="filled"
                   InputProps={{
-                    readOnly: !isEditing,
+                    readOnly: true,
                   }}
                 />
                 {errors.etfAmount && (

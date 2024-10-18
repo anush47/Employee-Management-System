@@ -180,6 +180,12 @@ const CompaniesDataGrid = ({
                 pageSize: 5,
               },
             },
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
+              },
+            },
           }}
           pageSizeOptions={[5]}
           slots={{ toolbar: GridToolbar }}

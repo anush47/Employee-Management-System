@@ -197,6 +197,11 @@ const NewPaymentForm = ({
         epfAmount: paymentNew.epfAmount,
         etfAmount: paymentNew.etfAmount,
       });
+      setSnackbarMessage("Payment calculated successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      //wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await fetchReferenceNo();
     } catch (error) {
       setSnackbarMessage(
@@ -520,6 +525,10 @@ const NewPaymentForm = ({
                   value={formFields.epfAmount || 0}
                   onChange={handleChange}
                   variant="filled"
+                  //readonly
+                  InputProps={{
+                    readOnly: true,
+                  }}
                 />
                 {errors.epfAmount && (
                   <FormHelperText>{errors.epfAmount}</FormHelperText>
@@ -661,6 +670,9 @@ const NewPaymentForm = ({
                   value={formFields.etfAmount || ""}
                   onChange={handleChange}
                   variant="filled"
+                  InputProps={{
+                    readOnly: true,
+                  }}
                 />
                 {errors.etfAmount && (
                   <FormHelperText>{errors.etfAmount}</FormHelperText>
