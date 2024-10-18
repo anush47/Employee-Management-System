@@ -13,6 +13,11 @@ import {
   Snackbar,
   Slide,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { companyId } from "../clientComponents/companySideBar";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -21,6 +26,7 @@ import "dayjs/locale/en-gb";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Link from "next/link";
 import { request } from "http";
+import { LoadingButton } from "@mui/lab";
 
 // Set dayjs format for consistency
 dayjs.locale("en-gb");
@@ -221,6 +227,25 @@ const PaymentsDataGrid: React.FC<{
       editable: isEditing,
     },
     {
+      field: "delete",
+      headerName: "Delete",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Button
+            variant="text"
+            color="error"
+            disabled={!isEditing}
+            onClick={() => {
+              handleDeleteClick(params.id.toString());
+            }}
+          >
+            Delete
+          </Button>
+        );
+      },
+    },
+    {
       field: "actions",
       headerName: "Actions",
       flex: 1,
@@ -329,6 +354,99 @@ const PaymentsDataGrid: React.FC<{
     setSnackbarOpen(true); // Open Snackbar
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | undefined>(undefined);
+
+  const onDeleteClick = async (id: string) => {
+    try {
+      setLoading(true);
+      // Perform DELETE request to delete the salary record
+      const response = await fetch(`/api/payments/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          paymentIds: [deleteId],
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete payments");
+      }
+      setSnackbarMessage("Payments deleted successfully");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setPayments(payments.filter((payment) => payment.id !== id));
+    } catch (error) {
+      console.error("Delete error:", error);
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (delId: string) => {
+    setDialogOpen(true);
+    setDeleteId(delId);
+  };
+
+  const handleDialogClose = async (confirm: boolean) => {
+    if (confirm && deleteId) {
+      // Perform the delete action here
+      console.log(`Deleting salary record`);
+      await onDeleteClick(deleteId);
+    }
+    setDialogOpen(false);
+    setDeleteId(undefined);
+  };
+
+  interface ConfirmationDialogProps {
+    open: boolean;
+    onClose: (confirm: boolean) => void;
+    title: string;
+    message: string;
+  }
+
+  const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+    open,
+    onClose,
+    title,
+    message,
+  }) => {
+    const handleConfirm = () => {
+      onClose(true);
+    };
+
+    const handleCancel = () => {
+      onClose(false);
+    };
+
+    return (
+      <Dialog open={open} onClose={() => onClose(false)}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <LoadingButton
+            onClick={handleConfirm}
+            color="primary"
+            loading={loading}
+          >
+            Confirm
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
@@ -413,6 +531,12 @@ const PaymentsDataGrid: React.FC<{
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <ConfirmationDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete the salary record(s) ?`}
+      />
     </Box>
   );
 };

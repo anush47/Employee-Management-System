@@ -449,7 +449,7 @@ export const InOutTable = ({
         initialState={{
           pagination: {
             paginationModel: {
-              pageSize: 10,
+              pageSize: 31,
             },
           },
           filter: {
@@ -459,7 +459,7 @@ export const InOutTable = ({
             },
           },
         }}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[5, 10, 31]}
         slots={{ toolbar: GridToolbar }}
         slotProps={{
           toolbar: {

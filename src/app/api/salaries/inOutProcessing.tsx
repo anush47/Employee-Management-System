@@ -30,8 +30,9 @@ export const inOutProcess = (
   const processRecord = (
     inDate: Date,
     outDate: Date,
-    noPay = 0,
+    workingDayStatus = "full",
     holiday = "",
+    noPay = 0,
     description = ""
   ) => {
     const workingHours =
@@ -60,12 +61,15 @@ export const inOutProcess = (
       const inDate = new Date(record.in);
       const outDate = new Date(record.out);
 
+      const workingDayStatus = getWorkingDayStatus(inDate, employee);
+
       // Recalculate using the reusable function
       processRecord(
         inDate,
         outDate,
-        record.noPay,
+        workingDayStatus,
         record.holiday,
+        record.noPay,
         record.description
       );
     });
@@ -106,9 +110,12 @@ export const inOutProcess = (
           outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
         } else {
           outDate = inOut[inOutIndex] as Date;
+          const timeDifference = getTimeDifferenceInMinutes(shift.end, outDate);
           if (
-            Math.abs(getTimeDifferenceInMinutes(shift.end, outDate)) >
-            3 * 60
+            (timeDifference >= 0 && timeDifference < 6 * 60) || // Allow 6 hours after shift end
+            (timeDifference < 0 &&
+              getTimeDifferenceInMinutes(shift.in, outDate) > 0 &&
+              timeDifference >= -3 * 60) // Allow before shift end upto shift start
           ) {
             outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
           } else {
@@ -116,8 +123,11 @@ export const inOutProcess = (
           }
         }
 
+        const workingDayStatus = getWorkingDayStatus(inDate, employee);
+        const holiday = getHolidayStatus(day);
+
         // Use the reusable function to process the record
-        processRecord(inDate, outDate);
+        processRecord(inDate, outDate, workingDayStatus, holiday);
         day.setUTCDate(outDate.getUTCDate() + 1);
       }
       day.setUTCDate(day.getUTCDate() + 1);
@@ -140,10 +150,53 @@ export const inOutProcess = (
 
 export const inOutGen = (
   employee: any,
-  period: any,
-  inOut: any,
+  period: string,
+  inOut: RawInOut | ProcessedInOut,
   existingSalary: any = undefined
 ) => {
+  const { shifts } = employee;
+
+  const generateRandomRecord = (day: Date) => {
+    const workingDayStatus = getWorkingDayStatus(day, employee);
+    const shift = shifts[Math.floor(Math.random() * shifts.length)];
+    const holidayStatus = getHolidayStatus(day);
+    const inDate = new Date(day);
+    const inVaryEarlyMax = 60; // maximum early time in minutes
+    const inVaryLateMax = 30; // maximum late time in minutes
+    const randomInOffset =
+      Math.random() < 0.9
+        ? -Math.random() * inVaryEarlyMax
+        : Math.random() * inVaryLateMax; // 90% chance to be earlier
+    inDate.setUTCHours(
+      Number(shift.start.split(":")[0]),
+      Number(shift.start.split(":")[1])
+    );
+    inDate.setUTCMinutes(inDate.getUTCMinutes() + randomInOffset);
+
+    const outVaryEarlyMax = 30; // maximum early time in minutes
+    const outVaryLateMax = 60 * 4; // maximum late time in minutes
+    const randomOutOffset =
+      Math.random() < 0.1
+        ? -Math.random() * outVaryEarlyMax
+        : Math.random() * outVaryLateMax; // 10% chance to be earlier
+    const outDate = new Date(day);
+    outDate.setUTCHours(
+      Number(shift.end.split(":")[0]),
+      Number(shift.end.split(":")[1])
+    );
+    outDate.setUTCMinutes(outDate.getUTCMinutes() + randomOutOffset);
+    return {
+      in: inDate.toISOString(),
+      out: outDate.toISOString(),
+      workingHours: 0,
+      otHours: 0,
+      ot: 0,
+      noPay: 0,
+      holiday: holidayStatus,
+      description: "",
+    };
+  };
+
   const inOutProcessed: {
     in: string;
     out: string;
@@ -154,33 +207,43 @@ export const inOutGen = (
     holiday: string;
     description: string;
   }[] = [];
-  inOutProcessed.push(
-    {
-      in: new Date("2024-09-30T08:10:00").toISOString(),
-      out: new Date("2024-09-30T17:05:00").toISOString(),
-      workingHours: 0,
-      otHours: 0,
-      ot: 0,
-      noPay: 0,
-      holiday: "",
-      description: "",
-    },
-    {
-      in: new Date("2024-09-30T07:55:00").toISOString(),
-      out: new Date("2024-09-30T17:10:00").toISOString(),
-      workingHours: 0,
-      otHours: 0,
-      ot: 0,
-      noPay: 0,
-      holiday: "",
-      description: "",
-    }
+  //process existing
+  const existingProcessed = inOutProcess(
+    employee,
+    period,
+    inOut,
+    existingSalary
   );
-  let ot = 0;
-  let noPay = 1000;
-  let otReason = "no OT";
-  let noPayReason = "Unapproved leaves";
-  return { inOutProcessed, ot, otReason, noPay, noPayReason };
+
+  //push existing
+  existingProcessed.inOutProcessed.forEach((record) => {
+    inOutProcessed.push(record);
+  });
+
+  //get start end days
+  const { startDate, endDate } = startEndDates(period, inOut as Date[]);
+  let day = new Date(startDate);
+
+  //generate random records for records that are not available
+  while (day <= endDate) {
+    if (
+      !inOutProcessed.find(
+        (record) => new Date(record.in).getUTCDate() === day.getUTCDate()
+      )
+    ) {
+      inOutProcessed.push(generateRandomRecord(day));
+    }
+    day.setUTCDate(day.getUTCDate() + 1);
+  }
+
+  //sort correctly
+  inOutProcessed.sort((a, b) => {
+    return new Date(a.in).getTime() - new Date(b.in).getTime();
+  });
+
+  //reprocress all inouts
+  const reprocessed = inOutProcess(employee, period, inOutProcessed);
+  return reprocessed;
 };
 
 // Helper functions
@@ -223,4 +286,21 @@ const getTimeDifferenceInMinutes = (shift: string, inOut: Date): number => {
   const timeDiff =
     hours * 60 + minutes - (inOut.getUTCHours() * 60 + inOut.getUTCMinutes());
   return timeDiff;
+};
+
+const getHolidayStatus = (day: Date): string => {
+  // Check if the day is a holiday
+  return "";
+};
+
+const getWorkingDayStatus = (
+  day: Date,
+  employee: any
+): "full" | "half" | "off" => {
+  const dayOfWeek = day
+    .toLocaleDateString("en-US", { weekday: "short" })
+    .toLowerCase(); // mon, tue, wed, etc.
+  const workingDayStatus = employee.workingDays[dayOfWeek] || "full"; // full, half, off
+
+  return workingDayStatus;
 };

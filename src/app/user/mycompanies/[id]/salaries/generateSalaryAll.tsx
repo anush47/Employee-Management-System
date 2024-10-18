@@ -305,12 +305,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
 
   return (
     <>
-      <Card
-        sx={{
-          height: "91vh",
-          overflowY: "auto",
-        }}
-      >
+      <Card>
         <CardHeader
           title={
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>

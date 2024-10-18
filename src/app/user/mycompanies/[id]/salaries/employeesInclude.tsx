@@ -241,11 +241,11 @@ const EmployeesInclude: React.FC<Props> = ({
             initialState={{
               pagination: {
                 paginationModel: {
-                  pageSize: 5,
+                  pageSize: 20,
                 },
               },
             }}
-            pageSizeOptions={[5]}
+            pageSizeOptions={[5, 10, 20, 50]}
             slots={{ toolbar: GridToolbar }}
             slotProps={{
               toolbar: {

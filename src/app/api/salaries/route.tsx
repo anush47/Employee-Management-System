@@ -434,7 +434,6 @@ export async function PUT(req: NextRequest) {
     body.paymentStructure.deductions.forEach((deduction: any) => {
       deduction.amount = Number(deduction.amount);
     });
-    console.log(body);
     const parsedBody = salarySchema.parse(body);
 
     // Calculate total additions
@@ -481,7 +480,6 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
-    console.log(parsedBody);
     const existingSalary = await Salary.findById(parsedBody.id);
     if (!existingSalary) {
       return NextResponse.json(

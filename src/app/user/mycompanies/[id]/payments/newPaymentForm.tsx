@@ -182,13 +182,13 @@ const NewPaymentForm = ({
           update: false,
         }),
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch payments");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Failed to generate payment :" + data.message);
+      }
       const paymentNew = data.payment;
       if (!paymentNew) {
-        setSnackbarMessage("Payment not found. Please try again.");
+        setSnackbarMessage("Payment generation failed. Please try again.");
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
         return;
@@ -206,6 +206,7 @@ const NewPaymentForm = ({
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await fetchReferenceNo();
     } catch (error) {
+      console.error("Error fetching payments:", error);
       setSnackbarMessage(
         error instanceof Error ? error.message : "Error fetching payments."
       );
