@@ -1,5 +1,4 @@
 // Determine if inOut contains already processed records (objects) or unprocessed Dates
-import Holiday from "@/app/models/Holiday";
 import { getHolidays } from "../holidays/holidayHelper";
 import { ProcessedInOut, RawInOut } from "./generate/salaryGeneration";
 
