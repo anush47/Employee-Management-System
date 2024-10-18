@@ -18,6 +18,17 @@ const UserMainBox = ({
 }: {
   user: { name: string; email: string; id: string; role: string };
 }) => {
+  const fallback = (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+    >
+      <CircularProgress size={60} />
+    </Box>
+  );
+
   const RenderComponent = () => {
     // Simulate a delay
     return (
@@ -38,19 +49,47 @@ const UserMainBox = ({
         {(() => {
           switch (selected) {
             case "dashboard":
-              return <Dashboard user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <Dashboard user={user} />
+                </Suspense>
+              );
             case "mycompanies":
-              return <MyCompanies user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <MyCompanies user={user} />
+                </Suspense>
+              );
             case "settings":
-              return <Settings user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <Settings user={user} />
+                </Suspense>
+              );
             case "employees":
-              return <Employees user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <Employees user={user} />
+                </Suspense>
+              );
             case "purchases":
-              return <Purchases user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <Purchases user={user} />
+                </Suspense>
+              );
             case "salaries":
-              return <Salaries user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <Salaries user={user} />
+                </Suspense>
+              );
             case "payments":
-              return <Payments user={user} />;
+              return (
+                <Suspense fallback={fallback}>
+                  <Payments user={user} />
+                </Suspense>
+              );
             default:
               return <div>Component not found</div>;
           }

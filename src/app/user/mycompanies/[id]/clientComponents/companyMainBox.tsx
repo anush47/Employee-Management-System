@@ -26,6 +26,17 @@ const CompanyMainBox = ({
 }: {
   user: { name: string; email: string; id: string; role: string };
 }) => {
+  const fallback = (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+    >
+      <CircularProgress size={60} />
+    </Box>
+  );
+
   const RenderComponent = () => {
     // Simulate a delay
     return (
@@ -47,19 +58,47 @@ const CompanyMainBox = ({
           {(() => {
             switch (selected) {
               case "dashboard":
-                return <Dashboard user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <Dashboard user={user} />
+                  </Suspense>
+                );
               case "details":
-                return <CompanyDetails user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <CompanyDetails user={user} />
+                  </Suspense>
+                );
               case "employees":
-                return <Employees user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <Employees user={user} />
+                  </Suspense>
+                );
               case "payments":
-                return <Payments user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <Payments user={user} />
+                  </Suspense>
+                );
               case "salaries":
-                return <Salaries user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <Salaries user={user} />
+                  </Suspense>
+                );
               case "purchases":
-                return <Purchases user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <Purchases user={user} />
+                  </Suspense>
+                );
               case "documents":
-                return <Documents user={user} />;
+                return (
+                  <Suspense fallback={fallback}>
+                    <Documents user={user} />
+                  </Suspense>
+                );
               default:
                 return <div>Component not found</div>;
             }
