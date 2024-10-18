@@ -1,7 +1,7 @@
 import {
   generateSalaryWithInOut,
   processSalaryWithInOut,
-} from "../inOutProcessing";
+} from "../salaryProcessing";
 
 // Types for InOut
 export type RawInOut = Date[]; // Unprocessed in/out records
