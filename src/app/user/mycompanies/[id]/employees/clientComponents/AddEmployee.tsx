@@ -606,9 +606,8 @@ const AddEmployeeForm: React.FC<{
 };
 
 export const categories = [
-  { value: 240, label: "240 ewun" },
-  { value: 200, label: "200 ewun" },
-  { value: 240, label: "160 ewun" },
+  { value: 240, label: "240" },
+  { value: 200, label: "200" },
 ].map((category) => (
   <MenuItem key={category.label} value={category.value}>
     {category.label}

@@ -64,7 +64,6 @@ export async function GET(req: NextRequest) {
     }
 
     const purchased = await checkPurchased(companyId, month);
-    console.log(purchased);
 
     return NextResponse.json({ purchased });
   } catch (error: any) {

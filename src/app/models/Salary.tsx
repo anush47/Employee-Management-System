@@ -32,6 +32,7 @@ interface ISalary extends Document {
     noPay: number;
     holiday: string;
     description: string;
+    remark: string;
   }[];
   advanceAmount: number;
   finalSalary: number;
@@ -122,6 +123,9 @@ const salarySchema = new Schema<ISalary>(
           type: String,
         },
         description: {
+          type: String,
+        },
+        remark: {
           type: String,
         },
       },

@@ -14,6 +14,7 @@ export type ProcessedInOut = {
   noPay: number;
   holiday: string;
   description: string;
+  remark: string;
 }[];
 
 // Helper function to check if inOut is already processed

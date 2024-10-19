@@ -63,6 +63,7 @@ const EditSalaryForm: React.FC<{
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [formFields, setFormFields] = useState<Salary>({
+    _id: "",
     id: "",
     employee: "",
     period: "",
@@ -99,6 +100,7 @@ const EditSalaryForm: React.FC<{
         console.log(data);
         setFormFields({
           id: data.salary._id,
+          _id: data.salary._id,
           employee: data.salary.employee,
           period: data.salary.period,
           inOut: data.salary.inOut,

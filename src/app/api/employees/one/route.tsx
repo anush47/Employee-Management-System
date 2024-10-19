@@ -158,8 +158,6 @@ export async function PUT(req: NextRequest) {
     body.basic = parseFloat(body.basic);
     const parsedBody = employeeSchema.parse(body);
 
-    console.log(body);
-
     // Connect to the database
     await dbConnect();
 

@@ -40,7 +40,7 @@ export function calculateTotalEarnings(salary: Salary) {
   try {
     totalEarnings += salary.basic;
   } catch {
-    console.log("Error in salary");
+    console.log("Error in salary", salary);
   }
   return totalEarnings;
 }

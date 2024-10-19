@@ -29,7 +29,6 @@ import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
-import { inOutCalcOne } from "./csvUpload";
 
 const DateTimeFormat = ({ date }: { date: string }) => {
   const dateObj = dayjs(date.slice(0, 23), "YYYY-MM-DDTHH:mm:ss.SSS");
@@ -66,6 +65,7 @@ export interface InOut {
   noPay: number;
   holiday: string;
   description: string;
+  remark: string;
 }
 
 export const InOutTable = ({
@@ -86,7 +86,8 @@ export const InOutTable = ({
       employeeNIC: false,
       workingHours: false,
       otHours: false,
-      description: false,
+      holiday: false,
+      description: true,
       delete: false,
     });
 
@@ -109,6 +110,7 @@ export const InOutTable = ({
           noPay: 0,
           holiday: "",
           description: "",
+          remark: "",
         }
       : {
           id: 0,
@@ -124,6 +126,7 @@ export const InOutTable = ({
           noPay: 0,
           holiday: "",
           description: "",
+          remark: "",
         }
   );
 
@@ -242,11 +245,15 @@ export const InOutTable = ({
       field: "holiday",
       headerName: "Holiday",
       flex: 1,
-      editable: editable,
     },
     {
       field: "description",
       headerName: "Description",
+      flex: 1,
+    },
+    {
+      field: "remark",
+      headerName: "Remark",
       flex: 1,
       editable: editable,
     },

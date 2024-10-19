@@ -27,6 +27,7 @@ import { DeleteOutline } from "@mui/icons-material";
 
 export interface Salary {
   id: string;
+  _id: string;
   employee: string; // Will hold employee ID initially
   period: string;
   basic: number;
@@ -40,6 +41,7 @@ export interface Salary {
     ot: number;
     noPay: number;
     description: string;
+    remark: string;
   }[];
   noPay: {
     amount: number;

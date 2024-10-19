@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
 
     //Extract months into an array
     const monthsArray = months ? months.split(" ") : [];
-    console.log(monthsArray);
 
     // Connect to the database
     await dbConnect();
@@ -63,8 +62,6 @@ export async function GET(req: NextRequest) {
     );
 
     // Apply discount for more than 3 months
-
-    console.log(totalPrice, finalTotalPrice);
 
     return NextResponse.json({ totalPrice, finalTotalPrice });
   } catch (error: any) {

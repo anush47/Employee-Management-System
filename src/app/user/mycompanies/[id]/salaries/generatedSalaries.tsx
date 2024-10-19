@@ -88,7 +88,6 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       flex: 1,
       align: "left",
       headerAlign: "left",
-      editable: true,
     },
     {
       field: "noPayReason",
@@ -177,91 +176,23 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
 
   const handleRowUpdate = async (newSalary: any) => {
     try {
-      // Validate the new employee data
-      const errors: { [key: string]: string } = {};
-      if (!newSalary.basic) {
-        errors.basic = "Basic Salary is required";
-      }
-      if (!newSalary.finalSalary) {
-        errors.finalSalary = "Final Salary is required";
-      }
-
-      if (Object.keys(errors).length > 0) {
-        throw new Error(
-          `Validation error in ${newSalary.period}: ${Object.values(
-            errors
-          ).join(", ")}`
-        );
-      }
-      console.log(newSalary);
-
-      // Format data
-      newSalary.basic = parseFloat(newSalary.basic);
-      newSalary.ot = {
-        amount: parseFloat(newSalary.ot),
-        reason: newSalary.otReason,
-      };
-      newSalary.noPay = {
-        amount: parseFloat(newSalary.noPay),
-        reason: newSalary.noPayReason,
-      };
-      newSalary.advanceAmount = parseFloat(newSalary.advanceAmount);
-      console.log(newSalary);
-      // Calculate total additions
-      const totalAdditions = newSalary.paymentStructure.additions.reduce(
-        (total: number, addition: { amount: number }) =>
-          total + addition.amount,
-        0
-      );
-
-      // Calculate total deductions
-      const totalDeductions = newSalary.paymentStructure.deductions.reduce(
-        (total: number, deduction: { amount: number }) =>
-          total + deduction.amount,
-        0
-      );
-
-      // Calculate final salary with payment structures
-      newSalary.finalSalary =
-        newSalary.basic +
-        newSalary.ot.amount -
-        newSalary.noPay.amount -
-        newSalary.advanceAmount +
-        totalAdditions -
-        totalDeductions;
-
-      const body = {
-        ...newSalary,
-        ot: newSalary.ot,
-        noPay: newSalary.noPay,
-      };
-
-      // Perform POST request to update the employee
-      const response = await fetch("/api/salaries", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+      newSalary.advanceAmount = parseFloat(newSalary.advanceAmount || 0);
+      //set new Salary
+      const newSalaries = generatedSalaries.map((salary) => {
+        if (salary._id === newSalary._id) {
+          salary.advanceAmount = newSalary.advanceAmount;
+          salary.remark = newSalary.remark;
+        }
+        return salary;
       });
-
-      const result = await response.json();
-
-      //reset newsalary
-
-      newSalary.ot = newSalary.ot.amount;
-      newSalary.noPay = newSalary.noPay.amount;
-
-      // }
-      //console.log(newEmployee);
-
+      setGeneratedSalaries(newSalaries);
       return newSalary;
     } catch (error: any) {
       // Add type 'any' to the 'error' object
       // Pass the error details along
       throw {
         message:
-          error?.message || "An error occurred while updating the employee.",
+          error?.message || "An error occurred while updating the salary.",
         error: error,
       };
     }
@@ -269,15 +200,15 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
 
   const handleRowUpdateError = (params: any) => {
     // Revert changes if necessary
-    const updatedSalaries = generatedSalaries.map((salary: { id: any }) => {
-      if (salary.id === params.id) {
+    const updatedSalaries = generatedSalaries.map((salary: { _id: any }) => {
+      if (salary._id === params.id) {
         return params.oldRow; // Revert to old row data
       }
       return salary;
     });
 
     // Log error and revert row updates
-    console.error("Row update error:", params.error?.error || params.error);
+    console.error("Row update error:", params);
 
     setGeneratedSalaries(updatedSalaries); // Update state with reverted data
   };

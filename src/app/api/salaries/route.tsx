@@ -63,6 +63,7 @@ const salarySchema = z.object({
           .optional(),
         holiday: z.string().optional(),
         description: z.string().optional(),
+        remark: z.string().optional(),
       })
     )
     .optional(),

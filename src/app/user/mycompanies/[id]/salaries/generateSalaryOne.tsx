@@ -59,6 +59,7 @@ const GenerateSalaryOne = ({
 
   const [formFields, setFormFields] = useState<Salary>({
     id: "",
+    _id: "",
     employee: "",
     period: "",
     basic: 0,
@@ -132,6 +133,7 @@ const GenerateSalaryOne = ({
   useEffect(() => {
     setFormFields({
       id: "",
+      _id: "",
       employee: "",
       period,
       basic: 0,
@@ -170,12 +172,12 @@ const GenerateSalaryOne = ({
           update,
         }),
       });
+      const data = await response.json();
       if (!response.ok) {
         setFormFields((prevFields) => ({
           ...prevFields,
           period,
         }));
-        const data = await response.json();
         if (
           typeof data?.message === "string" &&
           data.message.startsWith("Month not Purchased")
@@ -185,7 +187,6 @@ const GenerateSalaryOne = ({
           throw new Error("Failed to fetch Salary");
         }
       }
-      const data = await response.json();
 
       //if data.exists then show salary for this month already exists
       if (data.exists && data.exists.length > 0) {
@@ -482,6 +483,7 @@ const GenerateSalaryOne = ({
                       noPay: inOut.noPay,
                       holiday: inOut.holiday,
                       description: inOut.description,
+                      remark: inOut.remark,
                     })),
                   }));
                 }}

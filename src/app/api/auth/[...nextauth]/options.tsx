@@ -28,7 +28,6 @@ export const options: NextAuthOptions = {
         const password = credentials?.password || ""; // Provide a default value for password if it is undefined
         // You can also use the `req` object to obtain more information, including the IP
         //
-        //console.log(email);
         await dbConnect();
         const user = await User.findOne({ email });
         if (user && bcrypt.compareSync(password, user.password)) {

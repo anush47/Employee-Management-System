@@ -133,6 +133,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
         // setFormFields({
         // });
         setErrors({});
+        setGeneratedSalaries([]);
       } else {
         // Handle validation or other errors returned by the API
         setSnackbarMessage(

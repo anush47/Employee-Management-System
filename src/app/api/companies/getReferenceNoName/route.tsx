@@ -50,8 +50,6 @@ export async function POST(req: NextRequest) {
     // Get reference number and name
     const [referenceNo, name] = await get_ref_no_name(employerNo, period);
 
-    //console.log(name, referenceNo);
-
     // Return success response
     return NextResponse.json({ name, referenceNo });
   } catch (error) {
@@ -128,8 +126,6 @@ const get_ref_no_name = async (employer_no: string, period: string) => {
           .split(":")[1]
           .trim()
       : null;
-
-    console.log(employer_name, reference_no);
 
     return [reference_no, employer_name];
   } catch (error) {

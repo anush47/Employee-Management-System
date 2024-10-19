@@ -6,7 +6,8 @@ export const processSalaryWithInOut = async (
   employee: any,
   period: string,
   inOut: RawInOut | ProcessedInOut,
-  existingSalary: any = undefined
+  existingSalary: any = undefined,
+  gen: boolean = false
 ) => {
   const { shifts } = employee;
   const source = existingSalary || employee;
@@ -25,6 +26,7 @@ export const processSalaryWithInOut = async (
     noPay: number;
     holiday: string;
     description: string;
+    remark: string;
   }[] = [];
 
   // Reusable function to calculate working hours, OT, and other fields
@@ -41,28 +43,31 @@ export const processSalaryWithInOut = async (
       },
       summary: "",
     },
-    noPay = 0,
-    description = ""
+    remark = "",
+    noPay = 0
   ) => {
     const workingHours =
       (outDate.getTime() - inDate.getTime()) / 1000 / 60 / 60;
-    let otHours = 0;
+
     //workingHoursTreshold
     let workingHoursTreshold = 9;
-    if (workingDayStatus === "half") {
-      workingHoursTreshold = 6;
-    } else if (workingDayStatus === "off") {
-      workingHoursTreshold = 0;
-    }
-    if (workingHours > workingHoursTreshold) {
-      otHours = workingHours - workingHoursTreshold;
-    }
-    //console.log(holiday.summary);
-    const ot = otHours > 0 ? (otHours * source.basic) / employee.divideBy : 0; // Example OT rate
+    const { ot, otHours } = calculateOT(
+      workingHours,
+      workingDayStatus,
+      holiday,
+      source.basic,
+      source.divideBy,
+      workingHoursTreshold
+    );
 
-    const newDescription = description.includes(holiday.summary)
-      ? description
-      : `${description} ${holiday.summary}`;
+    const newDescription = [
+      holiday.summary.trim(),
+      workingHours < workingHoursTreshold
+        ? workingHours === 0
+          ? "Absent"
+          : "Early"
+        : "",
+    ].join(" ");
 
     const holidayText = `${holiday.categories.public ? "Public" : ""} ${
       holiday.categories.mercantile ? "Mercantile" : ""
@@ -77,6 +82,7 @@ export const processSalaryWithInOut = async (
       noPay,
       holiday: holidayText,
       description: newDescription,
+      remark,
     });
   };
 
@@ -99,8 +105,8 @@ export const processSalaryWithInOut = async (
         outDate,
         workingDayStatus,
         holiday,
-        record.noPay,
-        record.description
+        record.remark,
+        record.noPay
       );
     });
   } else {
@@ -115,6 +121,8 @@ export const processSalaryWithInOut = async (
 
     // Iterate through each day in the period
     while (day <= endDate) {
+      let dayHasRecord = false;
+
       // Iterate through each inOut record
       while (
         inOut &&
@@ -122,6 +130,13 @@ export const processSalaryWithInOut = async (
         (inOut[inOutIndex] as Date) <= endDate
       ) {
         let inDate = inOut[inOutIndex] as Date;
+
+        // Check if the current inDate is on the current day
+        if (inDate.toDateString() !== day.toDateString()) {
+          break; // If the inDate is for a different day, exit the loop to handle missing records
+        }
+
+        dayHasRecord = true; // Mark that this day has a record
 
         const shift = shifts.find((shift: { start: string; end: string }) => {
           return (
@@ -147,8 +162,8 @@ export const processSalaryWithInOut = async (
           if (
             (timeDifference >= 0 && timeDifference < 6 * 60) || // Allow 6 hours after shift end
             (timeDifference < 0 &&
-              getTimeDifferenceInMinutes(shift.in, outDate) > 0 &&
-              timeDifference >= -3 * 60) // Allow before shift end upto shift start
+              getTimeDifferenceInMinutes(shift.start, outDate) > 0 &&
+              timeDifference >= -3 * 60) // Allow before shift end up to shift start
           ) {
             outDate = getShiftEnd(shift.end, inDate); // Default to shift end time
           } else {
@@ -158,11 +173,33 @@ export const processSalaryWithInOut = async (
 
         const workingDayStatus = getWorkingDayStatus(inDate, employee);
         const holiday = getHoliday(inDate, holidays);
-        console.log(holiday);
-        // Use the reusable function to process the record
+
+        // Process the record for the current in/out
         processRecord(inDate, outDate, workingDayStatus, holiday);
+
+        // Move to the next day
         day.setUTCDate(outDate.getUTCDate() + 1);
       }
+
+      // If no records exist for this day, create a record with shift start as both in and out times
+      if (!dayHasRecord && !gen) {
+        const shift = {
+          start: "08:00", // Default shift start time
+          end: "17:00", // Default shift end time
+        };
+
+        if (shift) {
+          const inDate = new Date(day); // Mark the in time as the start of the shift
+
+          const workingDayStatus = getWorkingDayStatus(inDate, employee);
+          const holiday = getHoliday(inDate, holidays);
+
+          // Process the record for the missing day
+          processRecord(inDate, inDate, workingDayStatus, holiday); // Same inDate for both in and out
+        }
+      }
+
+      // Move to the next day
       day.setUTCDate(day.getUTCDate() + 1);
     }
   }
@@ -193,7 +230,6 @@ export const generateSalaryWithInOut = async (
     const workingDayStatus = getWorkingDayStatus(day, employee);
     const shift = shifts[Math.floor(Math.random() * shifts.length)];
     const holidayStatus = getHoliday(day, holidays);
-    //console.log(holidayStatus);
     const inDate = new Date(day);
     const inVaryEarlyMax = 60; // maximum early time in minutes
     const inVaryLateMax = 30; // maximum late time in minutes
@@ -228,10 +264,11 @@ export const generateSalaryWithInOut = async (
       noPay: 0,
       holiday: holidayStatus.summary,
       description: "",
+      remark: "",
     };
   };
 
-  const inOutProcessed: {
+  let inOutProcessed: {
     in: string;
     out: string;
     workingHours: number;
@@ -240,13 +277,15 @@ export const generateSalaryWithInOut = async (
     noPay: number;
     holiday: string;
     description: string;
+    remark: string;
   }[] = [];
   //process existing
   const existingProcessed = await processSalaryWithInOut(
     employee,
     period,
     inOut,
-    existingSalary
+    existingSalary,
+    true
   );
 
   //push existing
@@ -368,4 +407,41 @@ const getHoliday = (
     summary: "",
   };
   return holiDay;
+};
+
+const calculateOT = (
+  workingHours: number,
+  workingDayStatus: string,
+  holiday: {
+    date: string;
+    categories: { public: boolean; bank: boolean; mercantile: boolean };
+    summary: string;
+  },
+  basic: number,
+  divideBy: number,
+  //workingHoursTreshold
+  workingHoursTreshold: number = 9
+) => {
+  if (workingHours === 0) {
+    return {
+      ot: 0,
+      otHours: 0,
+    };
+  }
+
+  let otHours = 0;
+  if (workingDayStatus === "half") {
+    workingHoursTreshold = 6;
+  } else if (workingDayStatus === "off") {
+    workingHoursTreshold = 0;
+  }
+  if (workingHours > workingHoursTreshold) {
+    otHours = workingHours - workingHoursTreshold;
+  }
+  //console.log(holiday.summary);
+  const ot = otHours > 0 ? (otHours * basic) / divideBy : 0; // Example OT rate
+  return {
+    ot,
+    otHours,
+  };
 };
