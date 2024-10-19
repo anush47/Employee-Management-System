@@ -55,6 +55,12 @@ const AddCompanyForm: React.FC<{
       additions: [],
       deductions: [],
     },
+    requiredDocs: {
+      epf: true,
+      etf: true,
+      salary: true,
+      paySlip: true,
+    },
     shifts: [], // Add the shifts property
   });
   const [loading, setLoading] = useState<boolean>(false);
@@ -136,6 +142,12 @@ const AddCompanyForm: React.FC<{
           paymentStructure: {
             additions: [],
             deductions: [],
+          },
+          requiredDocs: {
+            epf: true,
+            etf: true,
+            salary: true,
+            paySlip: true,
           },
         });
         setErrors({});
