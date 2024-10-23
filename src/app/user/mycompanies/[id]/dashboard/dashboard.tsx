@@ -401,6 +401,11 @@ const Dashboard = ({
       setAutoGenProgress(33);
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
+      //if generatedSalaries is empty error
+      if (generatedSalaries.length === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
+        throw new Error("No salaries to generate payments");
+      }
       setAutoGenStatus("Generating Payments...");
 
       // Generate Payments
@@ -417,8 +422,8 @@ const Dashboard = ({
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 second delay
     } catch (error) {
-      console.error("Error in handleGenerateAll:", error);
-      setSnackbarMessage("Error occurred during generation");
+      console.error("Error in GenerateAll:", error);
+      setSnackbarMessage("Error occurred during generation:" + error);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
