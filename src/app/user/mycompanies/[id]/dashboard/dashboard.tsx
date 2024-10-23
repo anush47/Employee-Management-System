@@ -19,6 +19,7 @@ import {
   Alert,
   IconButton,
   Tooltip,
+  LinearProgress,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { companyId } from "../clientComponents/companySideBar";
@@ -59,7 +60,8 @@ const Dashboard = ({
   const [company, setCompany] = useState<Company | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [generatedSalaries, setGeneratedSalaries] = useState<Salary[]>([]);
-  const [generatedPayment, setGeneratedPayment] = useState<Payment>();
+  const [autoGenProgress, setAutoGenProgress] = useState<number>(0);
+  const [autoGenStatus, setAutoGenStatus] = useState<string>("");
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
@@ -156,58 +158,61 @@ const Dashboard = ({
     //clear generated salaries and payments
     checkPurchased();
     setGeneratedSalaries([]);
-    setGeneratedPayment(undefined);
   }, [period]);
 
-  const handleGenerateSalaries = async () => {
-    if (
-      generatedSalaries.length > 0 &&
-      generatedSalaries[0].period === period
-    ) {
-      setSnackbarMessage(
-        "Salaries for this period have already been generated"
-      );
-      setSnackbarSeverity("warning");
-      setSnackbarOpen(true);
-      return;
-    }
-
+  const handleSalaries = async (save: boolean = false) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/salaries/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyId, period, inOut }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          data.message || `HTTP error! status: ${response.status}`
-        );
-      }
-      //if length is 0 set message
-      if (data.salaries.length === 0) {
-        setSnackbarMessage(data.message || "No salaries to generate");
-        setSnackbarSeverity("warning");
+      if (
+        save &&
+        generatedSalaries.length > 0 &&
+        generatedSalaries[0].period === period
+      ) {
+        // If saving and salaries are already generated for this period, proceed to save
+        await saveSalaries(generatedSalaries);
       } else {
-        setGeneratedSalaries(
-          data.salaries.map((salary: Salary) => ({
+        // Generate new salaries
+        const response = await fetch(`/api/salaries/generate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ companyId, period, inOut }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            data.message || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        if (data.salaries.length === 0) {
+          setSnackbarMessage(data.message || "No salaries to generate");
+          setSnackbarSeverity("warning");
+        } else {
+          const formattedSalaries = data.salaries.map((salary: Salary) => ({
             ...salary,
             id: salary._id,
             memberNo: employees.find((e) => e.id === salary.employee)?.memberNo,
             name: employees.find((e) => e.id === salary.employee)?.name,
             nic: employees.find((e) => e.id === salary.employee)?.nic,
-          }))
-        );
-        setSnackbarMessage(data.message || "Salaries generated successfully");
-        setSnackbarSeverity("success");
+          }));
+
+          if (save) {
+            await saveSalaries(formattedSalaries);
+          } else {
+            setGeneratedSalaries(formattedSalaries);
+            setSnackbarMessage(
+              data.message || "Salaries generated successfully"
+            );
+            setSnackbarSeverity("success");
+          }
+        }
       }
     } catch (error) {
-      console.error("Error generating salaries:", error);
+      console.error("Error handling salaries:", error);
       setSnackbarMessage(
         error instanceof Error
           ? error.message
-          : "An error occurred while generating salaries"
+          : "An error occurred while handling salaries"
       );
       setSnackbarSeverity("error");
     } finally {
@@ -216,32 +221,18 @@ const Dashboard = ({
     }
   };
 
-  const handleSaveSalaries = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/salaries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ salaries: generatedSalaries }),
-      });
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Failed to save salaries");
-      setSnackbarMessage(data.message || "Salaries saved successfully");
-      setSnackbarSeverity("success");
-      setGeneratedSalaries([]);
-    } catch (error) {
-      console.error("Error saving salaries:", error);
-      setSnackbarMessage(
-        error instanceof Error
-          ? error.message
-          : "An error occurred while saving salaries"
-      );
-      setSnackbarSeverity("error");
-    } finally {
-      setLoading(false);
-      setSnackbarOpen(true);
-    }
+  const saveSalaries = async (salariesToSave: Salary[]) => {
+    const response = await fetch("/api/salaries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ salaries: salariesToSave }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to save salaries");
+    setSnackbarMessage(data.message || "Salaries saved successfully");
+    setSnackbarSeverity("success");
+    setGeneratedSalaries([]);
   };
 
   const handleDeleteSalaries = () => {
@@ -252,6 +243,38 @@ const Dashboard = ({
   };
 
   const handlePayments = async () => {
+    //get reference number from api call
+    const fetchReferenceNo = async () => {
+      //fetch epf reference no
+      try {
+        const response = await fetch("/api/companies/getReferenceNoName", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            employerNo: company?.employerNo,
+            period: period,
+          }),
+        });
+        const result = await response.json();
+        const referenceNo = result.referenceNo;
+        if (!referenceNo) {
+          setSnackbarMessage("Reference number not found. Please try again.");
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+          return;
+        }
+        return referenceNo;
+      } catch (error) {
+        console.error("Error fetching EPF Reference No:", error);
+        setSnackbarMessage(
+          "Error fetching EPF Reference No. Please try again."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    };
     setLoading(true);
     try {
       // Generate payments
@@ -266,10 +289,14 @@ const Dashboard = ({
       }
 
       // Prepare payment data
+      const referenceNo = await fetchReferenceNo();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const payment = {
         ...generateData.payment,
         period,
         company: companyId,
+        epfReferenceNo: referenceNo,
       };
 
       // Save payments
@@ -299,20 +326,13 @@ const Dashboard = ({
     }
   };
 
-  const handleDeletePayments = () => {
-    setGeneratedPayment(undefined);
-    setSnackbarMessage("Payments deleted successfully");
-    setSnackbarSeverity("warning");
-    setSnackbarOpen(true);
-  };
-
   //handle generate Pdf
   const handleGetPDF = async (
     pdfType: "salary" | "epf" | "etf" | "payslip" | "all" | "print",
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent> | undefined
   ) => {
     //preventdefault
-    e.preventDefault();
+    if (e) e.preventDefault();
     setLoading(true);
     try {
       const salaryIds = undefined;
@@ -369,6 +389,43 @@ const Dashboard = ({
     setTimeout(() => {
       setLoading(false);
     }, 5000);
+  };
+
+  const handleGenerateAll = async () => {
+    setLoading(true);
+    setAutoGenProgress(5);
+    setAutoGenStatus("Generating Salaries...");
+    try {
+      // Generate Salaries
+      await handleSalaries(true);
+      setAutoGenProgress(33);
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
+      setAutoGenStatus("Generating Payments...");
+
+      // Generate Payments
+      await handlePayments();
+      setAutoGenProgress(66);
+      setAutoGenStatus("Generating Documents...");
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
+
+      // Generate Documents
+      await handleGetPDF("print", undefined);
+      setAutoGenProgress(99);
+      setAutoGenStatus("Generation Complete");
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 second delay
+    } catch (error) {
+      console.error("Error in handleGenerateAll:", error);
+      setSnackbarMessage("Error occurred during generation");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+      setAutoGenProgress(0);
+      setAutoGenStatus("");
+    }
   };
 
   return (
@@ -503,7 +560,7 @@ const Dashboard = ({
                                 loadingPosition="start"
                                 variant="outlined"
                                 color="primary"
-                                onClick={handleSaveSalaries}
+                                onClick={() => handleSalaries(true)}
                                 sx={{ flexGrow: 1, mr: 1 }}
                                 disabled={loading}
                               >
@@ -532,7 +589,7 @@ const Dashboard = ({
                               loadingPosition="start"
                               variant="outlined"
                               color="primary"
-                              onClick={handleGenerateSalaries}
+                              onClick={() => handleSalaries(false)}
                               fullWidth
                               disabled={loading}
                             >
@@ -546,35 +603,65 @@ const Dashboard = ({
                   {/* Payments */}
                   <Grid item xs={6} sm={2.4}>
                     <FormControl fullWidth>
-                      <Button
+                      <LoadingButton
+                        loading={loading}
+                        loadingPosition="start"
                         variant="outlined"
                         color="primary"
                         onClick={handlePayments}
                         disabled={loading}
                       >
                         Generate Payment
-                      </Button>
+                      </LoadingButton>
                     </FormControl>
                   </Grid>
                   {/* Documents */}
                   <Grid item xs={6} sm={2.4}>
                     <FormControl fullWidth>
-                      <Button
+                      <LoadingButton
+                        loading={loading}
+                        loadingPosition="start"
                         variant="outlined"
                         color="primary"
                         onClick={(e) => {
                           handleGetPDF("print", e);
                         }}
+                        disabled={loading}
                       >
                         Generate Documents
-                      </Button>
+                      </LoadingButton>
                     </FormControl>
                   </Grid>
                 </Grid>
               </AccordionDetails>
             </Accordion>
           </Grid>
-
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth>
+              <LoadingButton
+                loading={loading}
+                loadingPosition="start"
+                variant="contained"
+                color="primary"
+                startIcon={<AutoAwesome />}
+                onClick={handleGenerateAll}
+              >
+                Generate All
+              </LoadingButton>
+            </FormControl>
+          </Grid>
+          {/* progress */}
+          {autoGenProgress > 0 && (
+            <Grid item xs={12} sm={9}>
+              <LinearProgress
+                sx={{ height: "0.5rem" }}
+                value={autoGenProgress}
+                variant="determinate"
+                color="success"
+              />
+              <Typography variant="body2">{autoGenStatus}</Typography>
+            </Grid>
+          )}
           {/*Generated Salaries */}
           {generatedSalaries.length > 0 && (
             <Grid item xs={12}>
