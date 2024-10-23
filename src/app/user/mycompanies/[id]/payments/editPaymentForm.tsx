@@ -418,7 +418,7 @@ const EditPaymentForm: React.FC<{
     <>
       <Card
         sx={{
-          height: "91vh",
+          minHeight: "91vh",
           overflowY: "auto",
         }}
       >
@@ -476,7 +476,9 @@ const EditPaymentForm: React.FC<{
           }
         />
 
-        <CardContent>
+        <CardContent
+          sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+        >
           <Grid container spacing={3}>
             <Grid item xs={12}>
               {loading ? (

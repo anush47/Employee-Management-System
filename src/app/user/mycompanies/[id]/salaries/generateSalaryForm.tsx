@@ -84,8 +84,6 @@ const AddSalaryForm: React.FC<{
   });
 
   //salary interface
-
-  const [generatedSalaries, setGeneratedSalaries] = useState<Salary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [employees, setEmployees] = useState<
     {
@@ -215,7 +213,9 @@ const AddSalaryForm: React.FC<{
           </Box>
         }
       />
-      <CardContent>
+      <CardContent
+        sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+      >
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.employee}>

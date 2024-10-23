@@ -340,7 +340,7 @@ const NewPaymentForm = ({
     <>
       <Card
         sx={{
-          height: "91vh",
+          minHeight: "91vh",
           overflowY: "auto",
         }}
       >
@@ -386,7 +386,9 @@ const NewPaymentForm = ({
           }
         />
 
-        <CardContent>
+        <CardContent
+          sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+        >
           <Grid container spacing={3}>
             <Grid item xs={12}>
               {loading ? (
