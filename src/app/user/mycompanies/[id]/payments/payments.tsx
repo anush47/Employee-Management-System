@@ -52,7 +52,7 @@ const Payments = ({
     <Box>
       <Card
         sx={{
-          height: "91vh",
+          minHeight: "91vh",
           overflowY: "auto",
         }}
       >
@@ -133,7 +133,9 @@ const Payments = ({
                 </Box>
               }
             />
-            <CardContent>
+            <CardContent
+              sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+            >
               <Suspense fallback={<CircularProgress />}>
                 <PaymentsDataGrid user={user} isEditing={isEditing} />
               </Suspense>

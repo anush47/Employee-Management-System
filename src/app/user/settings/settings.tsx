@@ -22,7 +22,7 @@ const Settings = ({
     <Box>
       <Card
         sx={{
-          height: "91vh",
+          minHeight: "91vh",
           overflowY: "auto",
         }}
       >
@@ -33,7 +33,9 @@ const Settings = ({
             </Typography>
           }
         />
-        <CardContent>
+        <CardContent
+          sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+        >
           <EditForm user={user} />
         </CardContent>
       </Card>

@@ -46,7 +46,7 @@ const Purchases = ({
         <Slide direction="left" in={!!purchaseId} mountOnEnter unmountOnExit>
           <Card
             sx={{
-              height: "91vh",
+              minHeight: "91vh",
               overflowY: "auto",
             }}
           >
@@ -92,7 +92,9 @@ const Purchases = ({
               </Box>
             }
           />
-          <CardContent>
+          <CardContent
+            sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+          >
             <Suspense fallback={<CircularProgress />}>
               <PurchasesDataGrid
                 user={user}

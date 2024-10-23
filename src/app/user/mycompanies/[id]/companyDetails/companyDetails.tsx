@@ -401,7 +401,7 @@ const CompanyDetails = ({
     <Card
       //set height to viewport height and make scrollable only on larger screens
       sx={{
-        height: "91vh",
+        minHeight: "91vh",
         overflowY: "auto",
       }}
     >
@@ -445,7 +445,9 @@ const CompanyDetails = ({
           </Box>
         }
       />
-      <CardContent>
+      <CardContent
+        sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+      >
         {loading && <CircularProgress />}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>

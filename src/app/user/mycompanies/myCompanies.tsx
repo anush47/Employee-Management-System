@@ -62,7 +62,7 @@ const MyCompanies = ({
       ) : (
         <Card
           sx={{
-            height: "91vh",
+            minHeight: "91vh",
             overflowY: "auto",
           }}
         >
@@ -93,7 +93,9 @@ const MyCompanies = ({
               </Box>
             }
           />
-          <CardContent>
+          <CardContent
+            sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+          >
             <Suspense fallback={<CircularProgress />}>
               <CompaniesDataGrid user={user} />
             </Suspense>

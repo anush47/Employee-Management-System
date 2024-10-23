@@ -52,7 +52,7 @@ const Salaries = ({
     <Box>
       <Card
         sx={{
-          height: "91vh",
+          minHeight: "91vh",
           overflowY: "auto",
         }}
       >
@@ -108,7 +108,11 @@ const Salaries = ({
                 </Box>
               }
             />
-            <CardContent>
+            <CardContent
+              sx={{
+                maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" },
+              }}
+            >
               <Suspense fallback={<CircularProgress />}>
                 <SalariesDataGrid user={user} isEditing={isEditing} />
               </Suspense>

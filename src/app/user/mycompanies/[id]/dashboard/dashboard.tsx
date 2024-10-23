@@ -429,7 +429,7 @@ const Dashboard = ({
   };
 
   return (
-    <Card sx={{ height: "91vh", overflowY: "auto" }}>
+    <Card sx={{ minHeight: "91vh", overflowY: "auto" }}>
       <CardHeader
         title={
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
@@ -446,7 +446,9 @@ const Dashboard = ({
           </div>
         }
       />
-      <CardContent>
+      <CardContent
+        sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+      >
         <Grid container spacing={3}>
           {/* Period */}
           <Grid item xs={12} sm={4}>

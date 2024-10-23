@@ -41,7 +41,7 @@ const Dashboard = ({
     <Box>
       <Card
         sx={{
-          height: "91vh",
+          minHeight: "91vh",
           overflowY: "auto",
         }}
       >
@@ -58,7 +58,9 @@ const Dashboard = ({
             </Typography>
           }
         />
-        <CardContent>
+        <CardContent
+          sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+        >
           <Typography variant="body1">
             Welcome, {user.name}! Here is your dashboard.
           </Typography>

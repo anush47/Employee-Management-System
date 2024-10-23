@@ -92,7 +92,7 @@ const Employees = ({
         <Card
           //set height to viewport height and make scrollable only on larger screens
           sx={{
-            height: "87vh",
+            minHeight: "91vh",
             overflowY: "auto",
           }}
         >
@@ -152,7 +152,9 @@ const Employees = ({
               </Box>
             }
           />
-          <CardContent>
+          <CardContent
+            sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+          >
             <Suspense fallback={<CircularProgress />}>
               <EmployeesDataGrid
                 user={user}
