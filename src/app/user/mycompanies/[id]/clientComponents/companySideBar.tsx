@@ -45,7 +45,7 @@ const drawerWidth = 300;
 
 //export selected type
 export type Selected =
-  | "dashboard"
+  | "quick"
   | "details"
   | "employees"
   | "payments"
@@ -82,7 +82,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   //if wrong params default to dashboard
   if (
     ![
-      "dashboard",
+      "quick",
       "details",
       "employees",
       "payments",
@@ -91,7 +91,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       "documents",
     ].includes(selected)
   ) {
-    selected = "details";
+    selected = "quick";
   }
 
   const handleDrawerToggle = () => {
@@ -108,8 +108,8 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
 
   const menus = [
     {
-      name: "Dashboard",
-      key: "dashboard",
+      name: "Quick Tools",
+      key: "quick",
       icon: <Home />,
     },
     {
@@ -162,10 +162,13 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
         My Companies
       </LinkM>,
       <LinkM underline="none" key="3" color="text.main">
+        {company ? company.name : "Loading..."}
+      </LinkM>,
+      <LinkM underline="none" key="4" color="text.main">
         {(() => {
           switch (selected) {
-            case "dashboard":
-              return "Dashboard";
+            case "quick":
+              return "Quick Tools";
             case "details":
               return "Company Details";
             case "employees":
@@ -184,7 +187,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
         })()}
       </LinkM>,
     ]);
-  }, [selected]);
+  }, [selected, company]);
 
   React.useEffect(() => {
     //fetch company

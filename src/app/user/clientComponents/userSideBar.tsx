@@ -42,7 +42,7 @@ const drawerWidth = 300;
 
 //export selected type
 export type Selected =
-  | "dashboard"
+  | "quick"
   | "mycompanies"
   | "settings"
   | "purchases"
@@ -54,7 +54,7 @@ interface Props {
   window?: Window | undefined;
   user: { name: string; email: string; role: string };
 }
-export let selected: Selected = "dashboard";
+export let selected: Selected = "mycompanies";
 
 const UserSideBar: React.FC<Props> = ({ window, user }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -68,10 +68,10 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   if (selectedParam) {
     selected = selectedParam as Selected;
   }
-  //if wrong params default to dashboard
+  //if wrong params default to mycompanies
   if (
     ![
-      "dashboard",
+      "quick",
       "mycompanies",
       "settings",
       "purchases",
@@ -80,7 +80,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       "payments",
     ].includes(selected)
   ) {
-    selected = "dashboard";
+    selected = "mycompanies";
   }
 
   const handleDrawerToggle = () => {
@@ -97,8 +97,8 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
 
   const menus = [
     {
-      name: "Dashboard",
-      key: "dashboard",
+      name: "Quick Tools",
+      key: "quick",
       icon: <Home />,
     },
     {
@@ -146,8 +146,8 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
       <LinkM underline="none" key="2" color="text.main">
         {(() => {
           switch (selected) {
-            case "dashboard":
-              return "Dashboard";
+            case "quick":
+              return "Quick Tools";
             case "mycompanies":
               return "My Companies";
             case "employees":

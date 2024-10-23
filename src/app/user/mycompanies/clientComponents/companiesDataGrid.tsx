@@ -80,7 +80,7 @@ const CompaniesDataGrid = ({
     headerName: "Actions",
     flex: 1,
     renderCell: (params) => (
-      <Link href={`/user/mycompanies/${params.id}/`}>
+      <Link href={`/user/mycompanies/${params.id}?companyPageSelect=quick`}>
         <Button variant="text">View</Button>
       </Link>
     ),

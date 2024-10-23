@@ -46,7 +46,7 @@ import PaymentsDataGrid, { Payment } from "../payments/paymentsDataGrid";
 import GeneratedSalaries from "../salaries/generatedSalaries";
 import { Employee } from "../employees/clientComponents/employeesDataGrid";
 
-const Dashboard = ({
+const QuickTools = ({
   user,
 }: {
   user: { name: string; email: string; id: string };
@@ -438,7 +438,7 @@ const Dashboard = ({
       <CardHeader
         title={
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <Typography variant="h4">Dashboard</Typography>
+            <Typography variant="h4">Quick Tools</Typography>
             {editable ? (
               <IconButton onClick={() => setEditable(false)}>
                 <Done color="primary" />
@@ -539,6 +539,9 @@ const Dashboard = ({
                 />
               )}
             </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <hr className="my-2" />
           </Grid>
           {/* More Options */}
           <Grid item xs={12}>
@@ -669,6 +672,9 @@ const Dashboard = ({
               <Typography variant="body2">{autoGenStatus}</Typography>
             </Grid>
           )}
+          <Grid item xs={12}>
+            <hr className="my-2" />
+          </Grid>
           {/*Generated Salaries */}
           {generatedSalaries.length > 0 && (
             <Grid item xs={12}>
@@ -789,4 +795,4 @@ const Dashboard = ({
   );
 };
 
-export default Dashboard;
+export default QuickTools;

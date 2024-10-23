@@ -15,7 +15,7 @@ import { companyId } from "./companySideBar";
 // // Lazy load the components
 const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
 const Employees = lazy(() => import("../employees/employees"));
-const Dashboard = lazy(() => import("../dashboard/dashboard"));
+const QuickTools = lazy(() => import("../quick/quick"));
 const Payments = lazy(() => import("../payments/payments"));
 const Salaries = lazy(() => import("../salaries/salaries"));
 const Purchases = lazy(() => import("../purchases/purchases"));
@@ -57,10 +57,10 @@ const CompanyMainBox = ({
         <div>
           {(() => {
             switch (selected) {
-              case "dashboard":
+              case "quick":
                 return (
                   <Suspense fallback={fallback}>
-                    <Dashboard user={user} />
+                    <QuickTools user={user} />
                   </Suspense>
                 );
               case "details":

@@ -5,7 +5,7 @@ import "@fontsource/roboto/400.css";
 import { selected } from "./userSideBar";
 
 // Lazy load the components
-const Dashboard = lazy(() => import("../dashboard/dashboard"));
+const QuickTools = lazy(() => import("../quick/quick"));
 const MyCompanies = lazy(() => import("../mycompanies/myCompanies"));
 const Settings = lazy(() => import("../settings/settings"));
 const Payments = lazy(() => import("../payments/payments"));
@@ -48,10 +48,10 @@ const UserMainBox = ({
       >
         {(() => {
           switch (selected) {
-            case "dashboard":
+            case "quick":
               return (
                 <Suspense fallback={fallback}>
-                  <Dashboard user={user} />
+                  <QuickTools user={user} />
                 </Suspense>
               );
             case "mycompanies":

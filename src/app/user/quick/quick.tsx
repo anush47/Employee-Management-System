@@ -48,7 +48,7 @@ const Dashboard = ({
         <CardHeader
           title={
             <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
-              Dashboard
+              Quick Tools
               <Breadcrumbs
                 separator={<NavigateNext fontSize="small" />}
                 aria-label="breadcrumb"
