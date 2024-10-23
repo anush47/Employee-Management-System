@@ -100,6 +100,23 @@ export const getData = async (
       period,
     });
   }
+  //fill payment with "" or 0 if undefined
+  payment = {
+    _id: payment?._id || "",
+    company: payment?.company || "",
+    period: payment?.period || "",
+    epfReferenceNo: payment?.epfReferenceNo || "",
+    epfAmount: payment?.epfAmount || 0,
+    epfPaymentMethod: payment?.epfPaymentMethod || "",
+    epfChequeNo: payment?.epfChequeNo || "",
+    epfSurcharges: payment?.epfSurcharges || 0,
+    epfPayDay: payment?.epfPayDay || "",
+    etfAmount: payment?.etfAmount || 0,
+    etfPaymentMethod: payment?.etfPaymentMethod || "",
+    etfSurcharges: payment?.etfSurcharges || 0,
+    etfChequeNo: payment?.etfChequeNo || "",
+    etfPayDay: payment?.etfPayDay || "",
+  };
 
   return { company, salaries, payment, employees };
 };

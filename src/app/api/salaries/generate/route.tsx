@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       if (employee.otMethod === "calc" && !employeeInOut) {
         return NextResponse.json(
           {
-            message: "InOut required for calculated OT",
+            message: `InOut required for calculated OT: ${employee.name}`,
           },
           { status: 400 }
         );

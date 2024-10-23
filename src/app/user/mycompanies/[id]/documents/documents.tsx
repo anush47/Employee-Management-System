@@ -128,7 +128,7 @@ const Documents = ({
     setSnackbarOpen(false);
   };
 
-  //handle genAuto
+  //handle pdf generation
   const handleGetPDF = async (
     pdfType: "salary" | "epf" | "etf" | "payslip" | "all" | "print",
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -205,7 +205,6 @@ const Documents = ({
     setTimeout(() => {
       setLoading(false);
     }, 5000);
-    console.log(rowSelectionModel as string[]);
   };
 
   return (

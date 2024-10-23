@@ -8,6 +8,7 @@ import Employee from "@/app/models/Employee";
 import { checkPurchased } from "../../purchases/check/checkPurchased";
 import Salary from "@/app/models/Salary";
 import { generatePayment } from "./paymentGeneration";
+import Payment from "@/app/models/Payment";
 
 const IdSchema = z.string().min(1, "ID is required");
 const periodSchema = z
@@ -54,6 +55,19 @@ export async function POST(req: NextRequest) {
     if (!company) {
       return NextResponse.json(
         { message: "Company not found" },
+        { status: 400 }
+      );
+    }
+
+    //if payment already exists, return error
+    const existingPayment = await Payment.findOne({
+      company: companyId,
+      period: period,
+    });
+
+    if (existingPayment) {
+      return NextResponse.json(
+        { message: "Payment already exists for:" + period },
         { status: 400 }
       );
     }
