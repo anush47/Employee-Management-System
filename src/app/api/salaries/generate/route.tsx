@@ -124,6 +124,16 @@ export async function POST(req: NextRequest) {
         ? (inOutInitial as ProcessedInOut)
         : (inOutInitial as { [employeeId: string]: RawInOut })[employee._id];
 
+      //if employee otMethod is calc and inOut is not available return error
+      if (employee.otMethod === "calc" && !employeeInOut) {
+        return NextResponse.json(
+          {
+            message: "InOut required for calculated OT",
+          },
+          { status: 400 }
+        );
+      }
+
       if (!update) {
         // If inOutInitial is RawInOut (array of Dates), generate salary using RawInOut
         const generatedSalary = await generateSalaryForOneEmployee(

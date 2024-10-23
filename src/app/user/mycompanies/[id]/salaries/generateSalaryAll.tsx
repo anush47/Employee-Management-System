@@ -201,6 +201,23 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
         return;
       }
 
+      //check if inOut is available for calc employees who are included
+      const calcEmployees = employees.filter(
+        (employee) =>
+          employee.otMethod === "calc" && employeeIds.includes(employee.id)
+      );
+      if (calcEmployees.length > 0 && !inOut) {
+        const calcEmployeeNames = calcEmployees
+          .map((employee) => employee.name)
+          .join(", ");
+        setSnackbarMessage(
+          `InOut required for calculated OT for employees: ${calcEmployeeNames}`
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+
       //use post method
       const response = await fetch(`/api/salaries/generate`, {
         method: "POST",

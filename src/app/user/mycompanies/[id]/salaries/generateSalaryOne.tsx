@@ -157,9 +157,23 @@ const GenerateSalaryOne = ({
     setGenerated(false);
   }, [period]);
 
-  const fetchSalary = async (update = false) => {
+  const generateSalary = async (update = false) => {
     try {
       setLoading(true);
+      //if employee otMethod is calc and inOut is not available return error
+      if (
+        employee?.otMethod === "calc" &&
+        !inOut &&
+        formFields.inOut.length === 0
+      ) {
+        setSnackbarMessage(
+          `InOut required for calculated OT of ${employee?.name || "employee"}`
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+
       //use post method
       const response = await fetch(`/api/salaries/generate`, {
         method: "POST",
@@ -294,7 +308,7 @@ const GenerateSalaryOne = ({
 
     if (name === "basic") {
       formFields.basic = Number(value);
-      fetchSalary(true);
+      generateSalary(true);
     }
   };
 
@@ -451,7 +465,7 @@ const GenerateSalaryOne = ({
                       loadingPosition="center"
                       startIcon={<Autorenew />}
                       onClick={async () => {
-                        await fetchSalary();
+                        await generateSalary();
                       }}
                     >
                       <span>Generate</span>
@@ -487,7 +501,7 @@ const GenerateSalaryOne = ({
                     })),
                   }));
                 }}
-                fetchSalary={fetchSalary}
+                fetchSalary={generateSalary}
                 editable={true}
               />
             </Grid>
