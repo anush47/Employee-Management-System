@@ -352,7 +352,9 @@ const PaymentsDataGrid: React.FC<{
     <Box
       sx={{
         width: "100%",
+        maxWidth: "100%",
         height: period ? 250 : 400,
+        overflowX: "auto",
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -364,39 +366,41 @@ const PaymentsDataGrid: React.FC<{
         </Alert>
       )}
       {!loading && !error && (
-        <DataGrid
-          rows={payments}
-          columns={columns}
-          editMode="row"
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
+        <div style={{ width: "100%", height: "100%" }}>
+          <DataGrid
+            rows={payments}
+            columns={columns}
+            editMode="row"
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 5,
+                },
               },
-            },
-            filter: {
-              filterModel: {
-                items: [],
-                quickFilterExcludeHiddenColumns: false,
+              filter: {
+                filterModel: {
+                  items: [],
+                  quickFilterExcludeHiddenColumns: false,
+                },
               },
-            },
-          }}
-          pageSizeOptions={[5]}
-          slots={{ toolbar: GridToolbar }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-            },
-          }}
-          disableRowSelectionOnClick
-          disableDensitySelector
-          columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={(newModel) =>
-            setColumnVisibilityModel(newModel)
-          }
-          processRowUpdate={handleRowUpdate}
-          onProcessRowUpdateError={handleRowUpdateError}
-        />
+            }}
+            pageSizeOptions={[5]}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+              },
+            }}
+            disableRowSelectionOnClick
+            disableDensitySelector
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={(newModel) =>
+              setColumnVisibilityModel(newModel)
+            }
+            processRowUpdate={handleRowUpdate}
+            onProcessRowUpdateError={handleRowUpdateError}
+          />
+        </div>
       )}
 
       <Snackbar
