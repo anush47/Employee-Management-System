@@ -580,7 +580,15 @@ const SalariesDataGrid: React.FC<{
               },
             }}
             pageSizeOptions={[5, 10]}
-            slots={{ toolbar: GridToolbar }}
+            slots={{
+              toolbar: (props) => (
+                <GridToolbar
+                  {...props}
+                  csvOptions={{ disableToolbarButton: true }}
+                  printOptions={{ disableToolbarButton: true }}
+                />
+              ),
+            }}
             slotProps={{
               toolbar: {
                 showQuickFilter: true,
