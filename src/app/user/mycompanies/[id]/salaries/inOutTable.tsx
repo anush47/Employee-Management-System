@@ -206,6 +206,14 @@ export const InOutTable = ({
       },
     },
     {
+      field: "day",
+      headerName: "Day",
+      flex: 1,
+      renderCell(params) {
+        return dayjs(params.row.in).format("ddd");
+      },
+    },
+    {
       field: "workingHours",
       headerName: "Working Hours",
       flex: 1,

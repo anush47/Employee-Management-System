@@ -60,14 +60,34 @@ export const processSalaryWithInOut = async (
       workingHoursTreshold
     );
 
-    const newDescription = [
-      holiday.summary.trim(),
-      workingHours < workingHoursTreshold
-        ? workingHours === 0
-          ? "Absent"
-          : "Early"
-        : "",
-    ].join(" ");
+    const workingText = (() => {
+      if (
+        workingHours === 0 &&
+        (workingDayStatus === "full" || workingDayStatus === "half") &&
+        !holiday.categories.public &&
+        !holiday.categories.mercantile
+      ) {
+        return "Absent";
+      }
+
+      if (workingHours > 0) {
+        if (
+          workingDayStatus === "off" &&
+          (holiday.categories.public || holiday.categories.mercantile)
+        ) {
+          return "Worked on Off Day and Holiday";
+        } else if (workingDayStatus === "off") {
+          return "Worked on Off Day";
+        } else if (holiday.categories.public || holiday.categories.mercantile) {
+          return "Worked on Holiday";
+        }
+      } else if (workingDayStatus === "off") {
+        return "Off";
+      }
+
+      return "";
+    })();
+    const newDescription = [holiday.summary.trim(), workingText].join(" ");
 
     const holidayText = `${holiday.categories.public ? "Public" : ""} ${
       holiday.categories.mercantile ? "Mercantile" : ""
@@ -214,7 +234,7 @@ export const processSalaryWithInOut = async (
     ot,
     otReason,
     noPay,
-    noPayReason,
+    noPayReason: existingSalary ? existingSalary.noPayReason : noPayReason,
   };
 };
 
@@ -230,31 +250,78 @@ export const generateSalaryWithInOut = async (
     const workingDayStatus = getWorkingDayStatus(day, employee);
     const shift = shifts[Math.floor(Math.random() * shifts.length)];
     const holidayStatus = getHoliday(day, holidays);
-    const inDate = new Date(day);
-    const inVaryEarlyMax = 60; // maximum early time in minutes
-    const inVaryLateMax = 30; // maximum late time in minutes
-    const randomInOffset =
-      Math.random() < 0.9
-        ? -Math.random() * inVaryEarlyMax
-        : Math.random() * inVaryLateMax; // 90% chance to be earlier
-    inDate.setUTCHours(
-      Number(shift.start.split(":")[0]),
-      Number(shift.start.split(":")[1])
-    );
-    inDate.setUTCMinutes(inDate.getUTCMinutes() + randomInOffset);
 
-    const outVaryEarlyMax = 30; // maximum early time in minutes
-    const outVaryLateMax = 60 * 4; // maximum late time in minutes
-    const randomOutOffset =
-      Math.random() < 0.1
-        ? -Math.random() * outVaryEarlyMax
-        : Math.random() * outVaryLateMax; // 10% chance to be earlier
-    const outDate = new Date(day);
-    outDate.setUTCHours(
-      Number(shift.end.split(":")[0]),
-      Number(shift.end.split(":")[1])
-    );
-    outDate.setUTCMinutes(outDate.getUTCMinutes() + randomOutOffset);
+    let present = Math.random() < 0.95 ? true : false; // 98% chance to be present
+    const workOnOff = Math.random() < 0.01 ? true : false; // 1% chance to work on off
+
+    let inDate = new Date(day);
+    let outDate = new Date(day);
+
+    let randomInOffset = 0;
+    let randomOutOffset = 0;
+
+    //if holiday or off
+    if (
+      workingDayStatus === "off" ||
+      holidayStatus.categories.mercantile ||
+      holidayStatus.categories.public
+    ) {
+      if (workOnOff)
+        //worked on off
+        present = true;
+      //did not work on off
+      else present = false;
+    }
+
+    if (!present) {
+      //absent
+      inDate.setUTCHours(
+        Number(shift.start.split(":")[0]),
+        Number(shift.start.split(":")[1])
+      );
+      outDate.setUTCHours(
+        Number(shift.start.split(":")[0]),
+        Number(shift.start.split(":")[1])
+      );
+    } //present
+    else {
+      //if otmethod random
+      if (employee.otMethod === "random") {
+        const inVaryEarlyMax = 30; // maximum early time in minutes
+        const inVaryLateMax = 30; // maximum late time in minutes
+        randomInOffset =
+          Math.random() < 0.95
+            ? -Math.random() * inVaryEarlyMax
+            : Math.random() * inVaryLateMax; // 95% chance to be earlier
+
+        const outVaryEarlyMax = 30; // maximum early time in minutes
+        const outVaryLateMax = 60 * 4; // maximum late time in minutes
+        randomOutOffset =
+          Math.random() < 0.05
+            ? -Math.random() * outVaryEarlyMax
+            : Math.random() * outVaryLateMax; // 5% chance to go earlier
+      }
+
+      //set in time to shift start + offset
+      inDate.setUTCHours(
+        Number(shift.start.split(":")[0]),
+        Number(shift.start.split(":")[1]) + randomInOffset
+      );
+      //if half day
+      if (workingDayStatus === "half") {
+        outDate.setUTCHours(
+          Number(shift.start.split(":")[0]) + 6,
+          Number(shift.start.split(":")[1]) + randomOutOffset
+        );
+      } else {
+        //full day
+        outDate.setUTCHours(
+          Number(shift.start.split(":")[0]) + 9,
+          Number(shift.start.split(":")[1]) + randomOutOffset
+        );
+      }
+    }
+
     return {
       in: inDate.toISOString(),
       out: outDate.toISOString(),
@@ -432,14 +499,21 @@ const calculateOT = (
   let otHours = 0;
   if (workingDayStatus === "half") {
     workingHoursTreshold = 6;
-  } else if (workingDayStatus === "off") {
+  } else if (
+    workingDayStatus === "off" ||
+    holiday.categories.mercantile ||
+    holiday.categories.public
+  ) {
     workingHoursTreshold = 0;
   }
   if (workingHours > workingHoursTreshold) {
     otHours = workingHours - workingHoursTreshold;
   }
-  //console.log(holiday.summary);
-  const ot = otHours > 0 ? (otHours * basic) / divideBy : 0; // Example OT rate
+  let multiplier = 1.5;
+  if (holiday.categories.mercantile) {
+    multiplier = 2;
+  }
+  const ot = otHours > 0 ? (otHours * basic * multiplier) / divideBy : 0; // Example OT rate
   return {
     ot,
     otHours,
