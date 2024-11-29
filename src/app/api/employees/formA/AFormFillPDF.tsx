@@ -7,16 +7,84 @@ import { aFormMap } from "./aFormFieldMap";
 // Define schema for employee creation
 export const employeeFormSchema = z.object({
   companyId: z.string().min(1, { message: "Company is required" }),
-  name: z.string().min(1, "Employee name is required"),
-  employerNo: z.string().regex(/[A-Z]\/\d{5}/),
+  fullName: z.string().min(1, "Employee full name is required"),
+  nameWithInitials: z
+    .string()
+    .min(1, "Employee name with initials is required"),
+  employerNo: z.string().regex(/^[A-Z]\/\d{5}/, "Invalid Employer No Format"),
   memberNo: z.number().min(0),
+  startDate: z
+    .string()
+    .regex(/^\d{2}-\d{2}-\d{4}$/, "Invalid Start Date Format")
+    .optional(),
   nic: z
     .string()
     .regex(
       /^(?:[0-9]{9}[vVxX]|[0-9]{12})$/,
       "NIC must be a valid format (e.g., 123456789V or 123456789012)"
     ),
+  designation: z.string().optional(),
+  birthPlace: z.string().optional(),
+  address: z.string(),
+  nationality: z.string(),
 });
+
+const getNICDetails = (nic: string) => {
+  let year, days, birthDay, age, gender;
+
+  if (nic.length === 10) {
+    // Old NIC format
+    year = parseInt("19" + nic.substring(0, 2));
+    days = parseInt(nic.substring(2, 5));
+  } else if (nic.length === 12) {
+    // New NIC format
+    year = parseInt(nic.substring(0, 4));
+    days = parseInt(nic.substring(4, 7));
+  } else {
+    // Invalid NIC
+    const { birthDay, age, gender } = { birthDay: "", age: "", gender: "" };
+    return { birthDay, age, gender };
+  }
+
+  // Determine gender
+  if (days > 500) {
+    gender = "FEMALE";
+    days -= 500;
+  } else {
+    gender = "MALE";
+  }
+
+  // Determine date of birth
+  const dobDate = new Date(`${year}-01-01`); // January 1st of the given year
+  //check if year is leap
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  if (days > 59 && !isLeapYear) {
+    days -= 1;
+  }
+  dobDate.setDate(dobDate.getDate() + days - 1);
+
+  //format as dd/mm/yyyy
+  birthDay = `${dobDate.getDate().toString().padStart(2, "0")}-${(
+    dobDate.getMonth() + 1
+  )
+    .toString()
+    .padStart(2, "0")}-${dobDate.getFullYear()}`; // Format DD/MM/YYYY
+
+  // Calculate age
+  const today = new Date();
+  age = today.getFullYear() - year;
+  if (
+    today.getMonth() < dobDate.getMonth() ||
+    (today.getMonth() === dobDate.getMonth() &&
+      today.getDate() < dobDate.getDate())
+  ) {
+    age--;
+  }
+
+  age = age.toString();
+
+  return { birthDay, age, gender };
+};
 
 const splitIntoLetters = (text: string) => {
   //split into individual letters
@@ -35,38 +103,86 @@ export const FormAFillPDF = async (details: any) => {
   //fill abh
   const form = pdfDoc.getForm();
 
-  const fillField = (
-    fieldMap: string[],
-    text: string,
-    split: boolean = true
-  ) => {
+  const fillField = (fieldMap: string[], text: string) => {
+    //convert to uppercase
+    const textUpper = text.toUpperCase();
+    const split = fieldMap.length > 1;
     if (split) {
-      const letters = splitIntoLetters(text);
+      const letters = splitIntoLetters(textUpper);
       for (let index = 0; index < fieldMap.length; index++) {
         if (index >= letters.length) {
           break;
         }
         const element = fieldMap[index];
         const letter = letters[index];
-        form.getTextField(element).setText(letter);
+        const textField = form.getTextField(element);
+        if (textField) {
+          textField.setText(letter);
+        }
       }
     } else {
-      form.getTextField(fieldMap[0]).setText(text);
+      const textField = form.getTextField(fieldMap[0]);
+      if (textField) {
+        textField.setText(textUpper);
+      }
     }
   };
 
   //1. National Identity Card No
   fillField(aFormMap.nic, parsedDetails.nic);
+  const { birthDay, age, gender } = getNICDetails(parsedDetails.nic);
+  console.log(birthDay, age, gender);
 
   //2. Employer’s No
   //split employerNo to zone and number
   const employerNo = parsedDetails.employerNo.split("/");
-  fillField(aFormMap.employerNoNumber, employerNo[1]);
-  fillField(aFormMap.employerZone, employerNo[0]);
+  fillField(aFormMap.employerNo.number, employerNo[1]);
+  fillField(aFormMap.employerNo.zone, employerNo[0]);
 
   //3. Member’s No
   fillField(aFormMap.memberNo, parsedDetails.memberNo.toString());
-  const pdfBytesFilled = await pdfDoc.save();
 
+  //4. Date Employed From
+  //split into day month and year
+  if (parsedDetails.startDate) {
+    const [day_startDate, month_startDate, year_startDate] =
+      parsedDetails.startDate.split("-");
+    fillField(aFormMap.startDate.day, day_startDate);
+    fillField(aFormMap.startDate.month, month_startDate);
+    fillField(aFormMap.startDate.year, year_startDate);
+  }
+
+  //5. Nature of Work/ Designation
+  if (parsedDetails.designation) {
+    fillField(aFormMap.designation, parsedDetails.designation);
+  }
+
+  //6. Full Name
+  fillField(aFormMap.fullName, parsedDetails.fullName);
+
+  //7. Name with Initials
+  fillField(aFormMap.nameWithInitials, parsedDetails.nameWithInitials);
+
+  //8. Permanent Address
+  fillField(aFormMap.address, parsedDetails.address);
+
+  //9. Date of Birth
+  const [day_birthDay, month_birthDay, year_birthDay] = birthDay.split("-");
+  fillField(aFormMap.birthday.day, day_birthDay);
+  fillField(aFormMap.birthday.month, month_birthDay);
+  fillField(aFormMap.birthday.year, year_birthDay);
+
+  //10. Age
+  fillField(aFormMap.age, age);
+
+  //11. Birth Place
+  if (parsedDetails.birthPlace) {
+    fillField(aFormMap.birthPlace, parsedDetails.birthPlace);
+  }
+
+  //12. Nationality
+  fillField(aFormMap.nationality, parsedDetails.nationality);
+
+  const pdfBytesFilled = await pdfDoc.save();
   return pdfBytesFilled;
 };

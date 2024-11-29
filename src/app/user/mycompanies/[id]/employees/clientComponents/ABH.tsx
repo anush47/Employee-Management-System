@@ -11,10 +11,16 @@ const ABH: React.FC<{
   const [employee, setEmployee] = useState(null);
   const [formDetails, setFormDetails] = useState({
     companyId: companyId,
-    name: "Anushanga",
+    fullName: "Anushanga Sharada Galappaththi",
+    nameWithInitials: "A S Galappaththi",
     nic: "200105902475",
     employerNo: "B/50139",
     memberNo: "1",
+    startDate: "28-02-2001",
+    designation: "driver",
+    address: "238/1, Thunandahena, Korathota, Kaduwela.",
+    birthPlace: "Balangoda",
+    nationality: "Sinhala",
   });
 
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
