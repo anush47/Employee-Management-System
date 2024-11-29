@@ -6,20 +6,7 @@ import Employee from "@/app/models/Employee";
 import { options } from "../../auth/[...nextauth]/options";
 import Company from "@/app/models/Company";
 import Purchase from "@/app/models/Purchase";
-import { ABHFillPDF } from "./ABHFillPDF";
-
-// Define schema for employee creation
-export const employeeFormSchema = z.object({
-  companyId: z.string().min(1, { message: "Company is required" }),
-  name: z.string().min(1, "Employee name is required"),
-  memberNo: z.number().min(1, "Member number is required"),
-  nic: z
-    .string()
-    .regex(
-      /^(?:[0-9]{9}[vVxX]|[0-9]{12})$/,
-      "NIC must be a valid format (e.g., 123456789V or 123456789012)"
-    ),
-});
+import { ABHFillPDF, employeeFormSchema } from "./ABHFillPDF";
 
 export async function POST(req: NextRequest) {
   try {
