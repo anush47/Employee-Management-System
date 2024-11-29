@@ -14,14 +14,14 @@ import {
   useMediaQuery,
   Slide,
 } from "@mui/material";
-import { Add, ArrowBack, Cancel, Check, Edit } from "@mui/icons-material";
+import { Add, Check, Edit } from "@mui/icons-material";
 import AddEmployeeForm from "./clientComponents/AddEmployee";
 import EditEmployeeForm from "./clientComponents/EditEmployee";
+import ABH from "./clientComponents/ABH";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { companyId } from "../clientComponents/companySideBar";
 
-// Lazily load CompaniesDataGrid
 const EmployeesDataGrid = lazy(
   () => import("./clientComponents/employeesDataGrid")
 );
@@ -35,134 +35,122 @@ const Employees = ({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isAbh, setABH] = useState(false);
   const [isEditingEmployeeInHome, setIsEditingEmployeeInHome] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const searchParams = useSearchParams();
-  employeeId = searchParams.get("employeeId");
-  const add = searchParams.get("add");
+  employeeId = searchParams?.get("employeeId") || null;
+  const add = searchParams?.get("add") || null;
+  const abh = searchParams?.get("abh") || null;
 
-  const handleBackClick = () => {
-    //go back
-    window.history.back();
-  };
+  const handleBackClick = () => window.history.back();
 
   useEffect(() => {
-    if (add) {
-      setIsAdding(true);
-      return;
-    }
-    if (employeeId) {
-      setIsEditing(true);
-    }
-  }, [employeeId, add]);
+    if (add) setIsAdding(true);
+    else if (abh) setABH(true);
+    else if (employeeId) setIsEditing(true);
+  }, [employeeId, add, abh]);
+
+  const Header = () => (
+    <CardHeader
+      title={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
+            Employees
+            {isEditingEmployeeInHome ? (
+              <IconButton
+                sx={{ marginLeft: 1 }}
+                color="success"
+                onClick={() => setIsEditingEmployeeInHome(false)}
+              >
+                <Check />
+              </IconButton>
+            ) : (
+              <Tooltip title="Edit employees in home" arrow>
+                <IconButton
+                  sx={{ marginLeft: 1 }}
+                  color="primary"
+                  onClick={() => setIsEditingEmployeeInHome(true)}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Typography>
+          <Tooltip title="Add a new employee" arrow>
+            <Link
+              href={`/user/mycompanies/${companyId}?companyPageSelect=employees&add=true`}
+            >
+              <Button variant="outlined" color="primary" startIcon={<Add />}>
+                Add
+              </Button>
+            </Link>
+          </Tooltip>
+        </Box>
+      }
+    />
+  );
+
+  const AddEmployeeCard = () => (
+    <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
+      <Card sx={{ height: "91vh", overflowY: "auto" }}>
+        <AddEmployeeForm user={user} handleBackClick={handleBackClick} />
+      </Card>
+    </Slide>
+  );
+
+  const EditEmployeeCard = () => (
+    <Slide direction="left" in={isEditing} mountOnEnter unmountOnExit>
+      <Card sx={{ height: "87vh", overflowY: "auto" }}>
+        <EditEmployeeForm
+          user={user}
+          handleBackClick={handleBackClick}
+          employeeId={employeeId}
+        />
+      </Card>
+    </Slide>
+  );
+
+  const ABHCard = () => (
+    <Slide direction="left" in={isAbh} mountOnEnter unmountOnExit>
+      <Card sx={{ height: "91vh", overflowY: "auto" }}>
+        <ABH
+          user={user}
+          handleBackClick={handleBackClick}
+          employeeId={employeeId}
+        />
+      </Card>
+    </Slide>
+  );
+
+  const EmployeesCard = () => (
+    <Card sx={{ minHeight: "91vh", overflowY: "auto" }}>
+      <Header />
+      <CardContent
+        sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
+      >
+        <Suspense fallback={<CircularProgress />}>
+          <EmployeesDataGrid
+            user={user}
+            isEditingEmployeeInHome={isEditingEmployeeInHome}
+          />
+        </Suspense>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Box>
       {isAdding ? (
-        <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
-          <Card
-            //set height to viewport height and make scrollable only on larger screens
-            sx={{
-              height: "91vh",
-              overflowY: "auto",
-            }}
-          >
-            <AddEmployeeForm user={user} handleBackClick={handleBackClick} />
-          </Card>
-        </Slide>
+        <AddEmployeeCard />
+      ) : isAbh ? (
+        <ABHCard />
       ) : isEditing ? (
-        <Slide direction="left" in={isEditing} mountOnEnter unmountOnExit>
-          <Card
-            //set height to viewport height and make scrollable only on larger screens
-            sx={{
-              height: "87vh",
-              overflowY: "auto",
-            }}
-          >
-            <EditEmployeeForm
-              user={user}
-              handleBackClick={handleBackClick}
-              employeeId={employeeId}
-            />
-          </Card>
-        </Slide>
+        <EditEmployeeCard />
       ) : (
-        <Card
-          //set height to viewport height and make scrollable only on larger screens
-          sx={{
-            minHeight: "91vh",
-            overflowY: "auto",
-          }}
-        >
-          <CardHeader
-            title={
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mb: 2,
-                }}
-              >
-                <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
-                  Employees
-                  {isEditingEmployeeInHome ? (
-                    <IconButton
-                      sx={{
-                        marginLeft: 1,
-                      }}
-                      color="success"
-                      onClick={() => setIsEditingEmployeeInHome(false)}
-                    >
-                      <Check />
-                    </IconButton>
-                  ) : (
-                    <Tooltip
-                      title="
-                      Edit employees in home"
-                      arrow
-                    >
-                      <IconButton
-                        sx={{
-                          marginLeft: 1,
-                        }}
-                        color="primary"
-                        onClick={() => setIsEditingEmployeeInHome(true)}
-                      >
-                        <Edit />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Typography>
-                <Tooltip title="Add a new employee" arrow>
-                  <Link
-                    href={`/user/mycompanies/${companyId}?companyPageSelect=employees&add=true`}
-                  >
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      startIcon={<Add />}
-                    >
-                      Add
-                    </Button>
-                  </Link>
-                </Tooltip>
-              </Box>
-            }
-          />
-          <CardContent
-            sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
-          >
-            <Suspense fallback={<CircularProgress />}>
-              <EmployeesDataGrid
-                user={user}
-                isEditingEmployeeInHome={isEditingEmployeeInHome}
-              />
-            </Suspense>
-          </CardContent>
-        </Card>
+        <EmployeesCard />
       )}
     </Box>
   );

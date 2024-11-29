@@ -29,6 +29,7 @@ import {
   Cancel,
   Delete,
   Edit,
+  FormatAlignJustify,
   Save,
   Search,
 } from "@mui/icons-material";
@@ -57,6 +58,7 @@ import { TransitionProps } from "@mui/material/transitions";
 import { categories, otMethods } from "./AddEmployee";
 import { Shifts } from "../../companyDetails/shifts";
 import { WorkingDays } from "../../companyDetails/workingDays";
+import Link from "next/link";
 
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
@@ -748,6 +750,21 @@ const EditEmployeeForm: React.FC<{
               }));
             }}
           />
+        </Grid>
+
+        <Grid mt={3} item xs={12}>
+          <Link
+            href={`/user/mycompanies/${companyId}?companyPageSelect=employees&employeeId=${employeeId}&abh=true`}
+          >
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<FormatAlignJustify />}
+              disabled={loading} // Disable button while loading
+            >
+              {loading ? <CircularProgress size={24} /> : "Generate ABH"}
+            </Button>
+          </Link>
         </Grid>
 
         <Grid mt={3} item xs={12}>
