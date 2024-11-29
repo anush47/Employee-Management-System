@@ -6,7 +6,7 @@ import Employee from "@/app/models/Employee";
 import { options } from "../../auth/[...nextauth]/options";
 import Company from "@/app/models/Company";
 import Purchase from "@/app/models/Purchase";
-import { FormAFillPDF, employeeFormSchema } from "./ABHFillPDF";
+import { FormAFillPDF, employeeFormSchema } from "./AFormFillPDF";
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,6 +73,13 @@ export async function POST(req: NextRequest) {
     }
 
     const pdfOutput = await FormAFillPDF(formDetails);
+
+    if (!pdfOutput || pdfOutput === null) {
+      return NextResponse.json(
+        { message: "Failed to generate PDF" },
+        { status: 500 }
+      );
+    }
 
     // Return the pdf
     // Return the PDF as a response

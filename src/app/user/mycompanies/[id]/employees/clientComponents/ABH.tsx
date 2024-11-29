@@ -13,6 +13,7 @@ const ABH: React.FC<{
     companyId: companyId,
     name: "Anushanga",
     nic: "200105902475",
+    employerNo: "B/50139",
     memberNo: "1",
   });
 
