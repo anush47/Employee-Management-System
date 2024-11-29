@@ -75,7 +75,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
 
   //search params to get selected
   const searchParams = useSearchParams();
-  const selectedParam = searchParams.get("companyPageSelect");
+  const selectedParam = searchParams?.get("companyPageSelect");
   if (selectedParam) {
     selected = selectedParam as Selected;
   }
