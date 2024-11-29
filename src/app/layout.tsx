@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { NextAuthProvider } from "./NextAuthProvider";
 import AppThemeProvider from "./theme-provider";
@@ -22,7 +23,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <NextAuthProvider>
           <AppRouterCacheProvider>
-            <AppThemeProvider>{children}</AppThemeProvider>
+            <AppThemeProvider>
+              {children}
+              <SpeedInsights />
+            </AppThemeProvider>
           </AppRouterCacheProvider>
         </NextAuthProvider>
       </body>

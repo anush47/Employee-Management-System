@@ -46,7 +46,7 @@ const ABH: React.FC<{
 
   const handleGenerateABH = async () => {
     try {
-      const response = await fetch(`/api/employees/abh`, {
+      const response = await fetch(`/api/employees/formA`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +64,9 @@ const ABH: React.FC<{
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "abh.pdf");
+      //set download name
+      const filename = `formA_${formDetails.nic}.pdf`;
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       setSnackbarMessage("ABH generated successfully");

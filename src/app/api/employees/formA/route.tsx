@@ -6,7 +6,7 @@ import Employee from "@/app/models/Employee";
 import { options } from "../../auth/[...nextauth]/options";
 import Company from "@/app/models/Company";
 import Purchase from "@/app/models/Purchase";
-import { ABHFillPDF, employeeFormSchema } from "./ABHFillPDF";
+import { FormAFillPDF, employeeFormSchema } from "./ABHFillPDF";
 
 export async function POST(req: NextRequest) {
   try {
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const pdfOutput = await ABHFillPDF(formDetails);
+    const pdfOutput = await FormAFillPDF(formDetails);
 
     // Return the pdf
     // Return the PDF as a response

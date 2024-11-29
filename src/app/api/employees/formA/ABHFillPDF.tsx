@@ -16,16 +16,18 @@ export const employeeFormSchema = z.object({
     ),
 });
 
-export const ABHFillPDF = async (details: any) => {
+export const FormAFillPDF = async (details: any) => {
   const parsedDetails = employeeFormSchema.parse(details);
 
-  const filePath = path.resolve(process.cwd(), "public/abh.pdf");
+  const filePath = path.resolve(process.cwd(), "public/formA.pdf");
   const pdfBytes = readFileSync(filePath);
 
   const pdfDoc = await PDFDocument.load(pdfBytes.toString("base64"));
 
-  // Fill the PDF with parsedDetails
-  // Example: pdf.text(parsedDetails.name, 10, 10);
+  //fill abh
+  const form = pdfDoc.getForm();
+  //print all forms
+  console.log(form.getFields());
 
   const pdfBytesFilled = await pdfDoc.save();
 
