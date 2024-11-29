@@ -15,6 +15,9 @@ import {
   Checkbox,
   FormControlLabel,
   CircularProgress,
+  Tooltip,
+  IconButton,
+  Box,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { companyId } from "../../clientComponents/companySideBar";
@@ -22,6 +25,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
+import { ArrowBack } from "@mui/icons-material";
 
 const ABH: React.FC<{
   user: { id: string; name: string; email: string };
@@ -162,7 +166,29 @@ const ABH: React.FC<{
   return (
     <Card>
       <CardHeader
-        title={<Typography variant="h4">Employee Details</Typography>}
+        title={
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
+            <Typography variant={"h5"}>
+              <Tooltip title="Discard and go back to my companies" arrow>
+                <IconButton
+                  sx={{
+                    mr: 2,
+                  }}
+                  onClick={handleBackClick}
+                >
+                  <ArrowBack />
+                </IconButton>
+              </Tooltip>
+              Employee Details For AH
+            </Typography>
+          </Box>
+        }
       />
       <CardContent>
         {loading ? (
