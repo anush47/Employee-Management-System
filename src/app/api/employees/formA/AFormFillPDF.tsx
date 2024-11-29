@@ -44,6 +44,8 @@ export const employeeFormSchema = z.object({
     .string()
     .email("Invalid Email Format (e.g., example@example.com)")
     .optional(),
+  employerName: z.string().optional(),
+  employerAddress: z.string().optional(),
 });
 
 const getNICDetails = (nic: string) => {
@@ -243,6 +245,10 @@ export const FormAFillPDF = async (details: any) => {
 
   //19. E-mail
   fillTextField(form, aFormMap.email, parsedDetails.email, false);
+
+  //23. Employer Name & Address
+  const nameAndAddress = `${parsedDetails.employerName}\n${parsedDetails.employerAddress}`;
+  fillTextField(form, aFormMap.employerNameAndAddress, nameAndAddress);
 
   const pdfBytesFilled = await pdfDoc.save();
   //return null;

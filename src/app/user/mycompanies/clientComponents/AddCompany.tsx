@@ -48,6 +48,8 @@ const AddCompanyForm: React.FC<{
     endedAt: "",
     active: true,
     monthlyPrice: "",
+    employerAddress: "",
+    employerName: "",
     mode: "",
     workingDays: {},
     paymentMethod: "",
@@ -138,6 +140,8 @@ const AddCompanyForm: React.FC<{
           monthlyPrice: "",
           mode: "",
           workingDays: {},
+          employerName: "",
+          employerAddress: "",
           shifts: [],
           paymentStructure: {
             additions: [],
@@ -382,6 +386,31 @@ const AddCompanyForm: React.FC<{
               Bank name, branch EPF/ETF is paid. you may use &quot;Cash&quot; as
               well
             </FormHelperText>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Employer Name"
+                name="employerName"
+                value={formFields.employerName}
+                onChange={handleChange}
+                variant="filled"
+                size="small"
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Employer Address"
+                name="employerAddress"
+                value={formFields.employerAddress}
+                onChange={handleChange}
+                variant="filled"
+                multiline
+                size="small"
+              />
+            </FormControl>
           </Grid>
         </Grid>
       </CardContent>

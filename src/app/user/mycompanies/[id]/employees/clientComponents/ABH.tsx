@@ -26,6 +26,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { ArrowBack } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 
 const ABH: React.FC<{
   user: { id: string; name: string; email: string };
@@ -51,6 +52,8 @@ const ABH: React.FC<{
     fatherName: "S L Galappaththi",
     mobileNumber: "0717539478",
     email: "anushangasharada@gmail.com",
+    employerName: "Anushanga Owner",
+    employerAddress: "238/2, Thunandahena, Korathota, Kaduwela.",
   });
 
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -96,6 +99,8 @@ const ABH: React.FC<{
             ...prevDetails,
             ...employeeData,
             employerNo: companyResult.company.employerNo,
+            employerName: companyResult.company.employerName,
+            companyAddress: companyResult.company.employerAddress,
           }));
 
           setSnackbarMessage("Data fetched successfully");
@@ -117,6 +122,7 @@ const ABH: React.FC<{
 
   const handleGenerateABH = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`/api/employees/formA`, {
         method: "POST",
         headers: {
@@ -148,6 +154,8 @@ const ABH: React.FC<{
       setSnackbarMessage("Error generating ABH");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -191,232 +199,256 @@ const ABH: React.FC<{
         }
       />
       <CardContent>
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Full Name"
-                  name="fullName"
-                  value={formDetails.fullName}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Name with Initials"
-                  name="nameWithInitials"
-                  value={formDetails.nameWithInitials}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="NIC"
-                  name="nic"
-                  value={formDetails.nic}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Employer Number"
-                  name="employerNo"
-                  value={formDetails.employerNo}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Member Number"
-                  name="memberNo"
-                  value={formDetails.memberNo}
-                  onChange={handleChange}
-                  type="number"
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <LocalizationProvider
-                  dateAdapter={AdapterDayjs}
-                  adapterLocale="en-gb"
-                >
-                  <DatePicker
-                    readOnly={loading}
-                    label="Start Date"
-                    name="startDate"
-                    openTo="year"
-                    value={dayjs(formDetails.startDate, "DD-MM-YYYY")}
-                    views={["year", "month", "day"]}
-                    onChange={(newDate) => {
-                      setFormDetails((prevDetails) => ({
-                        ...prevDetails,
-                        startDate: newDate?.format("DD-MM-YYYY") as string,
-                      }));
-                    }}
-                    slotProps={{
-                      field: { clearable: true },
-                    }}
-                  />
-                </LocalizationProvider>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Designation"
-                  name="designation"
-                  value={formDetails.designation}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Address"
-                  name="address"
-                  value={formDetails.address}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Birth Place"
-                  name="birthPlace"
-                  value={formDetails.birthPlace}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Nationality"
-                  name="nationality"
-                  value={formDetails.nationality}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formDetails.married}
-                    name="married"
-                    onChange={handleCheckboxChange}
-                    disabled={loading}
-                  />
-                }
-                label="Married"
-              />
-            </Grid>
-            {formDetails.married && (
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <TextField
-                    label="Spouse Name"
-                    name="spouseName"
-                    value={formDetails.spouseName}
-                    onChange={handleChange}
-                    variant="filled"
-                    disabled={loading}
-                  />
-                </FormControl>
-              </Grid>
-            )}
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Mother's Name"
-                  name="motherName"
-                  value={formDetails.motherName}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Father's Name"
-                  name="fatherName"
-                  value={formDetails.fatherName}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Mobile Number"
-                  name="mobileNumber"
-                  value={formDetails.mobileNumber}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <TextField
-                  label="Email"
-                  name="email"
-                  value={formDetails.email}
-                  onChange={handleChange}
-                  variant="filled"
-                  disabled={loading}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleGenerateABH}
+        {loading && <CircularProgress sx={{ m: 3 }} />}
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Full Name"
+                name="fullName"
+                value={formDetails.fullName}
+                onChange={handleChange}
+                variant="filled"
                 disabled={loading}
-              >
-                Generate ABH
-              </Button>
-            </Grid>
+              />
+            </FormControl>
           </Grid>
-        )}
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Name with Initials"
+                name="nameWithInitials"
+                value={formDetails.nameWithInitials}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="NIC"
+                name="nic"
+                value={formDetails.nic}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Employer Number"
+                name="employerNo"
+                value={formDetails.employerNo}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Member Number"
+                name="memberNo"
+                value={formDetails.memberNo}
+                onChange={handleChange}
+                type="number"
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="en-gb"
+              >
+                <DatePicker
+                  readOnly={loading}
+                  label="Start Date"
+                  name="startDate"
+                  openTo="year"
+                  value={dayjs(formDetails.startDate, "DD-MM-YYYY")}
+                  views={["year", "month", "day"]}
+                  onChange={(newDate) => {
+                    setFormDetails((prevDetails) => ({
+                      ...prevDetails,
+                      startDate: newDate?.format("DD-MM-YYYY") as string,
+                    }));
+                  }}
+                  slotProps={{
+                    field: { clearable: true },
+                  }}
+                />
+              </LocalizationProvider>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Designation"
+                name="designation"
+                value={formDetails.designation}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Address"
+                name="address"
+                value={formDetails.address}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Birth Place"
+                name="birthPlace"
+                value={formDetails.birthPlace}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Nationality"
+                name="nationality"
+                value={formDetails.nationality}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formDetails.married}
+                  name="married"
+                  onChange={handleCheckboxChange}
+                  disabled={loading}
+                />
+              }
+              label="Married"
+            />
+          </Grid>
+          {formDetails.married && (
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField
+                  label="Spouse Name"
+                  name="spouseName"
+                  value={formDetails.spouseName}
+                  onChange={handleChange}
+                  variant="filled"
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+          )}
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Mother's Name"
+                name="motherName"
+                value={formDetails.motherName}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Father's Name"
+                name="fatherName"
+                value={formDetails.fatherName}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Mobile Number"
+                name="mobileNumber"
+                value={formDetails.mobileNumber}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Email"
+                name="email"
+                value={formDetails.email}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Employer Name"
+                name="employerName"
+                value={formDetails.employerName}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Employer Address"
+                name="employerAddress"
+                value={formDetails.employerAddress}
+                onChange={handleChange}
+                variant="filled"
+                disabled={loading}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <LoadingButton
+              variant="contained"
+              color="primary"
+              onClick={handleGenerateABH}
+              disabled={loading}
+              loading={loading}
+              loadingPosition="start"
+            >
+              <span>Generate ABH</span>
+            </LoadingButton>
+          </Grid>
+        </Grid>
+
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={5000}

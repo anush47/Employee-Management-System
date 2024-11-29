@@ -24,8 +24,8 @@ const SignInPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
-  const error = searchParams.get("error");
+  const callbackUrl = searchParams?.get("callbackUrl") ?? "/";
+  const error = searchParams?.get("error");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 

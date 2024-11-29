@@ -182,7 +182,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} sm={4}>
                   <FormControl fullWidth>
                     <TextField
                       label="Amount"
@@ -264,7 +264,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} sm={4}>
                   <FormControl fullWidth>
                     <TextField
                       label="Amount"

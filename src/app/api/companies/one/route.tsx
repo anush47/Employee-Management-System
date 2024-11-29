@@ -69,6 +69,8 @@ const companyUpdateSchema = z.object({
   endedAt: z.string().optional(),
   monthlyPrice: z.number().optional(),
   active: z.boolean().optional(),
+  employerName: z.string().optional(),
+  employerAddress: z.string().optional(),
   requiredDocs: z.object({
     epf: z.boolean().optional(),
     etf: z.boolean().optional(),

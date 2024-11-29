@@ -11,6 +11,8 @@ interface ICompany extends Document {
   paymentMethod: String;
   active: boolean;
   monthlyPrice: number;
+  employerName: string;
+  employerAddress: string;
   requiredDocs: {
     epf: boolean;
     etf: boolean;
@@ -200,6 +202,12 @@ const companySchema = new Schema<ICompany>(
           default: true,
         },
       },
+    },
+    employerName: {
+      type: String,
+    },
+    employerAddress: {
+      type: String,
     },
   },
   {

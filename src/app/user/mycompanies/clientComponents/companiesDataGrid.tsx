@@ -26,6 +26,8 @@ export interface Company {
     | undefined;
   paymentMethod: String;
   monthlyPrice: String;
+  employerName: String;
+  employerAddress: String;
   startedAt: Date | String;
   endedAt: Date | String;
   workingDays: {

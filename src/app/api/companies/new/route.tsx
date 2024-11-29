@@ -32,6 +32,8 @@ const companySchema = z.object({
     sun: z.string().optional(),
   }),
   active: z.boolean().default(true),
+  employerName: z.string().optional(),
+  employerAddress: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {

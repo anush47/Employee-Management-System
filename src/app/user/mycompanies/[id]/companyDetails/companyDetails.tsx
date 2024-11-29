@@ -62,6 +62,8 @@ const CompanyDetails = ({
     monthlyPrice: "",
     paymentMethod: "",
     startedAt: "",
+    employerName: "",
+    employerAddress: "",
     workingDays: {},
     requiredDocs:
       user.role === "admin"
@@ -207,6 +209,8 @@ const CompanyDetails = ({
         mode: "",
         paymentMethod: "",
         startedAt: "",
+        employerName: "",
+        employerAddress: "",
         requiredDocs: undefined,
         endedAt: "",
         active: true,
@@ -682,6 +686,37 @@ const CompanyDetails = ({
                     }));
                   }}
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <TextField
+                    label="Employer Name"
+                    name="employerName"
+                    value={formFields.employerName}
+                    onChange={handleChange}
+                    variant="filled"
+                    size="small"
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <TextField
+                    label="Employer Address"
+                    name="employerAddress"
+                    value={formFields.employerAddress}
+                    onChange={handleChange}
+                    variant="filled"
+                    multiline
+                    size="small"
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                  />
+                </FormControl>
               </Grid>
               <Grid item xs={12}>
                 <hr className="my-2" />
