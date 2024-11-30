@@ -435,7 +435,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
         open={snackbarOpen}
         autoHideDuration={5000}
         onClose={handleSnackbarClose}
-        TransitionComponent={SlideTransition}
+        //TransitionComponent={SlideTransition}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert

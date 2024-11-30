@@ -326,7 +326,7 @@ const AddSalaryForm: React.FC<{
         open={snackbarOpen}
         autoHideDuration={5000}
         onClose={handleSnackbarClose}
-        TransitionComponent={SlideTransition}
+        //TransitionComponent={SlideTransition}
       >
         <Alert
           onClose={handleSnackbarClose}

@@ -548,7 +548,7 @@ const EmployeesDataGrid: React.FC<{
         open={snackbarOpen}
         autoHideDuration={5000}
         onClose={handleSnackbarClose}
-        TransitionComponent={(props) => <Slide {...props} direction="up" />}
+        //TransitionComponent={(props) => <Slide {...props} direction="up" />}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert

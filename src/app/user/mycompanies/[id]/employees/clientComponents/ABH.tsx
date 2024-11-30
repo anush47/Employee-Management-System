@@ -2,7 +2,6 @@
 import {
   Button,
   Snackbar,
-  Slide,
   Alert,
   TextField,
   Grid,
@@ -349,8 +348,8 @@ const ABH: React.FC<{
               label="Married"
             />
           </Grid>
-          {formDetails.married && (
-            <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
+            {formDetails.married && (
               <FormControl fullWidth>
                 <TextField
                   label="Spouse Name"
@@ -358,11 +357,11 @@ const ABH: React.FC<{
                   value={formDetails.spouseName}
                   onChange={handleChange}
                   variant="filled"
-                  disabled={loading}
+                  disabled={loading || !formDetails.married}
                 />
               </FormControl>
-            </Grid>
-          )}
+            )}
+          </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <TextField
@@ -436,16 +435,18 @@ const ABH: React.FC<{
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <LoadingButton
-              variant="contained"
-              color="primary"
-              onClick={handleGenerateABH}
-              disabled={loading}
-              loading={loading}
-              loadingPosition="start"
-            >
-              <span>Generate ABH</span>
-            </LoadingButton>
+            <FormControl>
+              <LoadingButton
+                variant="contained"
+                color="primary"
+                onClick={handleGenerateABH}
+                disabled={loading}
+                loading={loading}
+                loadingPosition="start"
+              >
+                <span>Generate ABH</span>
+              </LoadingButton>
+            </FormControl>
           </Grid>
         </Grid>
 
@@ -453,7 +454,6 @@ const ABH: React.FC<{
           open={snackbarOpen}
           autoHideDuration={5000}
           onClose={handleSnackbarClose}
-          TransitionComponent={(props) => <Slide {...props} direction="up" />}
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
         >
           <Alert

@@ -501,7 +501,7 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
       </Box>
       <Snackbar
         open={snackbarOpen}
-        TransitionComponent={SlideTransition}
+        //TransitionComponent={SlideTransition}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}

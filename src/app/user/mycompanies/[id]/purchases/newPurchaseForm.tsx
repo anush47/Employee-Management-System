@@ -82,7 +82,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
   const [finalTotalPrice, setFinalTotalPrice] = useState<number | null>(null); // New state for final total price
 
   const searchParams = useSearchParams();
-  const periodsInitial = searchParams.get("periods");
+  const periodsInitial = searchParams ? searchParams.get("periods") : null;
 
   useEffect(() => {
     if (periodsInitial) {
@@ -505,7 +505,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
       </Box>
       <Snackbar
         open={snackbarOpen}
-        TransitionComponent={SlideTransition}
+        //TransitionComponent={SlideTransition}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
