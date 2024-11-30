@@ -34,8 +34,7 @@ const MyCompanies = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   //fetch query from url
   const searchParams = useSearchParams();
-  const add = searchParams.get("add");
-
+  const add = searchParams ? searchParams.get("add") : null;
   //open the form if gen is true
   useEffect(() => {
     if (add === "true") setIsAdding(true);
