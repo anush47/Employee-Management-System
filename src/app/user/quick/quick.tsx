@@ -9,6 +9,7 @@ import {
   Box,
   Breadcrumbs,
   Link,
+  Alert,
 } from "@mui/material";
 import { NavigateNext } from "@mui/icons-material";
 
@@ -49,12 +50,6 @@ const Dashboard = ({
           title={
             <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
               Quick Tools
-              <Breadcrumbs
-                separator={<NavigateNext fontSize="small" />}
-                aria-label="breadcrumb"
-              >
-                {breadcrumbs}
-              </Breadcrumbs>
             </Typography>
           }
         />
@@ -62,8 +57,11 @@ const Dashboard = ({
           sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
         >
           <Typography variant="body1">
-            Welcome, {user.name}! Here is your dashboard.
+            Welcome, {user.name}! Here will be your quick tools.
           </Typography>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            This section is still under development. Stay tuned for updates!
+          </Alert>
         </CardContent>
       </Card>
     </Box>
