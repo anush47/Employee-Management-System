@@ -60,14 +60,21 @@ export const processSalaryWithInOut = async (
       workingHoursTreshold
     );
 
+    const shift = shifts.reduce((prev: any, curr: any) => {
+      const prevDiff = Math.abs(getTimeDifferenceInMinutes(prev.start, inDate));
+      const currDiff = Math.abs(getTimeDifferenceInMinutes(curr.start, inDate));
+      return currDiff < prevDiff && currDiff <= 6 * 60 ? curr : prev;
+    });
     const workingText = (() => {
+      const texts = [];
+
       if (
         workingHours === 0 &&
         (workingDayStatus === "full" || workingDayStatus === "half") &&
         !holiday.categories.public &&
         !holiday.categories.mercantile
       ) {
-        return "Absent";
+        texts.push("Absent");
       }
 
       if (workingHours > 0) {
@@ -75,17 +82,36 @@ export const processSalaryWithInOut = async (
           workingDayStatus === "off" &&
           (holiday.categories.public || holiday.categories.mercantile)
         ) {
-          return "Worked on Off Day and Holiday";
+          texts.push("Worked on Off Day and Holiday");
         } else if (workingDayStatus === "off") {
-          return "Worked on Off Day";
+          texts.push("Worked on Off Day");
         } else if (holiday.categories.public || holiday.categories.mercantile) {
-          return "Worked on Holiday";
+          texts.push("Worked on Holiday");
+        } else if (workingDayStatus === "full" && workingHours < 9) {
+          texts.push(
+            `Left ${(9 - workingHours).toFixed(2)} h early on a Full Day`
+          );
+        } else if (workingDayStatus === "half" && workingHours < 6) {
+          texts.push(
+            `Left ${(6 - workingHours).toFixed(2)} h early on a Half Day`
+          );
         }
       } else if (workingDayStatus === "off") {
-        return "Off";
+        texts.push("Off");
       }
 
-      return "";
+      const shiftStart = new Date(inDate);
+      shiftStart.setUTCHours(
+        Number(shift.start.split(":")[0]),
+        Number(shift.start.split(":")[1])
+      );
+      if (inDate > shiftStart) {
+        const lateHours =
+          (inDate.getTime() - shiftStart.getTime()) / 1000 / 60 / 60;
+        texts.push(`Came ${lateHours.toFixed(2)} h late`);
+      }
+
+      return texts.join(", ");
     })();
     const newDescription = [holiday.summary.trim(), workingText].join(" ");
 
@@ -249,13 +275,37 @@ export const processSalaryWithInOut = async (
     return acc;
   }, 0);
 
-  const otReason =
-    otNormalHours > 0 ? `${otNormalHours.toFixed(2)} normal OT hrs` : "";
+  const otReason = [
+    otNormalHours > 0 ? `${otNormalHours.toFixed(2)} normal OT h` : "",
+    otDoubleHours > 0 ? `${otDoubleHours.toFixed(2)} double OT h` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
 
-  const otDoubleReason =
-    otDoubleHours > 0 ? `${otDoubleHours.toFixed(2)} double OT hrs` : "";
+  const noPayReason = (() => {
+    const leftEarlyHours = records.reduce((acc, cur) => {
+      if (cur.description.includes("Left")) {
+        return acc + (9 - cur.workingHours);
+      }
+      return acc;
+    }, 0);
 
-  const noPayReason = noPay > 0 ? `${noPay.toFixed(2)} no pay hours` : "";
+    const absentDays = records.reduce((acc, cur) => {
+      if (cur.workingHours === 0 && cur.description.includes("Absent")) {
+        return acc + 1;
+      }
+      return acc;
+    }, 0);
+
+    const reasons = [];
+    if (leftEarlyHours > 0) {
+      reasons.push(`${leftEarlyHours.toFixed(2)} left early h`);
+    }
+    if (absentDays > 0) {
+      reasons.push(`${absentDays} absent days`);
+    }
+    return reasons.join(", ");
+  })();
 
   return {
     inOutProcessed: records,
@@ -316,18 +366,18 @@ export const generateSalaryWithInOut = async (
       //if otmethod random
       if (employee.otMethod === "random") {
         const inVaryEarlyMax = 30; // maximum early time in minutes
-        const inVaryLateMax = 30; // maximum late time in minutes
+        const inVaryLateMax = 60 * 4; // maximum late time in minutes
         randomInOffset =
-          Math.random() < 0.95
+          Math.random() < 0.98
             ? -Math.random() * inVaryEarlyMax
             : Math.random() * inVaryLateMax; // 95% chance to be earlier
 
-        const outVaryEarlyMax = 30; // maximum early time in minutes
+        const outVaryEarlyMax = 60 * 4; // maximum early time in minutes
         const outVaryLateMax = 60 * 4; // maximum late time in minutes
         randomOutOffset =
-          Math.random() < 0.05
+          Math.random() < 0.02
             ? -Math.random() * outVaryEarlyMax
-            : Math.random() * outVaryLateMax; // 5% chance to go earlier
+            : Math.random() * outVaryLateMax; // 2% chance to go earlier
       }
 
       //set in time to shift start + offset
