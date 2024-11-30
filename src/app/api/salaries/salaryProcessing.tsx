@@ -106,18 +106,21 @@ export const processSalaryWithInOut = async (
     });
   };
 
+  let holidays: any[] = [];
   if (isProcessed) {
-    const holidays = await getHolidays(
-      (inOut as any[])[0].in,
-      (inOut as any[])[inOut.length - 1].out
-    );
+    holidays = (
+      await getHolidays(
+        (inOut as any[])[0].in,
+        (inOut as any[])[inOut.length - 1].out
+      )
+    ).holidays;
     // Process the already processed records
     (inOut as any[]).forEach((record: any) => {
       const inDate = new Date(record.in);
       const outDate = new Date(record.out);
 
       const workingDayStatus = getWorkingDayStatus(inDate, employee);
-      const holiday = getHoliday(inDate, holidays.holidays);
+      const holiday = getHoliday(inDate, holidays);
 
       // Recalculate using the reusable function
       processRecord(
@@ -131,10 +134,12 @@ export const processSalaryWithInOut = async (
     });
   } else {
     // Unprocessed, proceed to process Date[] input
-    const { startDate, endDate, holidays } = await startEndDates(
-      period,
-      inOut as Date[]
-    );
+    const {
+      startDate,
+      endDate,
+      holidays: fetchedHolidays,
+    } = await startEndDates(period, inOut as Date[]);
+    holidays = fetchedHolidays;
 
     let day = new Date(startDate);
     let inOutIndex = 0;
@@ -226,8 +231,31 @@ export const processSalaryWithInOut = async (
 
   const ot = records.reduce((acc, cur) => acc + cur.ot, 0);
   const noPay = records.reduce((acc, cur) => acc + cur.noPay, 0);
-  const otReason = "OT recalculated";
-  const noPayReason = "Unapproved leaves recalculated";
+
+  // Descriptive analysis for OT and No Pay reasons
+  const otNormalHours = records.reduce((acc, cur) => {
+    const holiday = getHoliday(new Date(cur.in), holidays);
+    if (!holiday.categories.mercantile) {
+      return acc + cur.otHours;
+    }
+    return acc;
+  }, 0);
+
+  const otDoubleHours = records.reduce((acc, cur) => {
+    const holiday = getHoliday(new Date(cur.in), holidays);
+    if (holiday.categories.mercantile) {
+      return acc + cur.otHours;
+    }
+    return acc;
+  }, 0);
+
+  const otReason =
+    otNormalHours > 0 ? `${otNormalHours.toFixed(2)} normal OT hrs` : "";
+
+  const otDoubleReason =
+    otDoubleHours > 0 ? `${otDoubleHours.toFixed(2)} double OT hrs` : "";
+
+  const noPayReason = noPay > 0 ? `${noPay.toFixed(2)} no pay hours` : "";
 
   return {
     inOutProcessed: records,
