@@ -247,22 +247,6 @@ const AddSalaryForm: React.FC<{
                     label="Employee"
                     variant="filled"
                     fullWidth
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {/* all button */}
-                          <Button
-                            variant="text"
-                            color="primary"
-                            onClick={() => setEmployeeSelection("all")}
-                          >
-                            All
-                          </Button>
-                          {loading ? <CircularProgress size={20} /> : null}
-                        </>
-                      ),
-                    }}
                   />
                 )}
                 isOptionEqualToValue={(option, value) =>
