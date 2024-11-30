@@ -394,39 +394,53 @@ const QuickTools = ({
 
   const handleGenerateAll = async () => {
     setLoading(true);
-    setAutoGenProgress(5);
-    setAutoGenStatus("Generating Salaries...");
+    setAutoGenProgress(0);
+    setAutoGenStatus("Starting generation process...");
+
+    const steps = [
+      { name: "Generating Salaries", progress: 5 },
+      { name: "Generating Payments", progress: 33 },
+      { name: "Generating Documents", progress: 70 },
+    ];
+
     try {
-      // Generate Salaries
-      await handleSalaries(true);
-      setAutoGenProgress(33);
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
-      //if generatedSalaries is empty error
-      setAutoGenStatus("Generating Payments...");
+      for (const step of steps) {
+        setAutoGenStatus(step.name);
+        setAutoGenProgress(step.progress);
 
-      // Generate Payments
-      await handlePayments();
-      setAutoGenProgress(66);
-      setAutoGenStatus("Generating Documents...");
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
+        switch (step.name) {
+          case "Generating Salaries":
+            await handleSalaries(true);
+            break;
+          case "Generating Payments":
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Allow UI update
+            await handlePayments();
+            break;
+          case "Generating Documents":
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Allow UI update
+            await handleGetPDF("print", undefined);
+            break;
+        }
+      }
 
-      // Generate Documents
-      await handleGetPDF("print", undefined);
-      setAutoGenProgress(99);
       setAutoGenStatus("Generation Complete!");
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 second delay
+      setAutoGenProgress(100);
+      setSnackbarMessage("All documents generated successfully");
+      setSnackbarSeverity("success");
     } catch (error) {
       console.error("Error in GenerateAll:", error);
-      setSnackbarMessage("Error occurred during generation:" + error);
+      setSnackbarMessage(
+        error instanceof Error
+          ? `Generation failed: ${error.message}`
+          : "Generation failed: Unknown error"
+      );
       setSnackbarSeverity("error");
-      setSnackbarOpen(true);
     } finally {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Show completion state
       setLoading(false);
       setAutoGenProgress(0);
       setAutoGenStatus("");
+      setSnackbarOpen(true);
     }
   };
 
