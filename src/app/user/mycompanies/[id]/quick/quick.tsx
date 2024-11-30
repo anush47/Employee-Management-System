@@ -187,6 +187,7 @@ const QuickTools = ({
         if (data.salaries.length === 0) {
           setSnackbarMessage(data.message || "No salaries to generate");
           setSnackbarSeverity("warning");
+          throw new Error("No salaries to generate");
         } else {
           const formattedSalaries = data.salaries.map((salary: Salary) => ({
             ...salary,
@@ -402,10 +403,6 @@ const QuickTools = ({
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
       //if generatedSalaries is empty error
-      if (generatedSalaries.length === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
-        throw new Error("No salaries to generate payments");
-      }
       setAutoGenStatus("Generating Payments...");
 
       // Generate Payments
@@ -418,7 +415,7 @@ const QuickTools = ({
       // Generate Documents
       await handleGetPDF("print", undefined);
       setAutoGenProgress(99);
-      setAutoGenStatus("Generation Complete");
+      setAutoGenStatus("Generation Complete!");
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 second delay
     } catch (error) {
