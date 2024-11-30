@@ -326,28 +326,35 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
       <Card>
         <CardHeader
           title={
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              Generated Salary Information
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "flex-start", sm: "center" },
+                gap: 2,
+              }}
+            >
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                Generated Salary Information
+              </Typography>
               <Tooltip title="Save new salary record" arrow>
-                <>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      ml: 3,
-                    }}
-                    color="success"
-                    startIcon={<Save />}
-                    onClick={onSaveClick}
-                    disabled={
-                      loading ||
-                      (generatedSalaries && generatedSalaries.length <= 0)
-                    } // Disable button while loading
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Save"}
-                  </Button>
-                </>
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<Save />}
+                  onClick={onSaveClick}
+                  disabled={
+                    loading ||
+                    (generatedSalaries && generatedSalaries.length <= 0)
+                  } // Disable button while loading
+                  sx={{
+                    width: { xs: "100%", sm: "auto" },
+                  }}
+                >
+                  {loading ? <CircularProgress size={24} /> : "Save"}
+                </Button>
               </Tooltip>
-            </Typography>
+            </Box>
           }
           subheader={`Period: ${period}`}
         />

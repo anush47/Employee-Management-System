@@ -125,7 +125,7 @@ const Salaries = ({
                       color="primary"
                       startIcon={<Add />}
                     >
-                      Generate Salary
+                      Generate
                     </Button>
                   </Link>
                 </Box>
