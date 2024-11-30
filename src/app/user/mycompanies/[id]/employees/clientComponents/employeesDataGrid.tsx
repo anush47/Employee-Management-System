@@ -504,6 +504,7 @@ const EmployeesDataGrid: React.FC<{
       totalSalary: false,
       email: false,
       phoneNumber: false,
+      address: false,
     });
 
   return (
