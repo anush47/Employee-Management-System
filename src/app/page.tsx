@@ -33,8 +33,8 @@ export default async function Home() {
                 Welcome back, {session?.user?.name}!
               </Typography>
               <Typography variant="body1" className="mt-2">
-                We're glad to see you again. Explore your dashboard to manage
-                your salary details.
+                We&apos;re glad to see you again. Explore your dashboard to
+                manage your salary details.
               </Typography>
               <Divider
                 sx={{
