@@ -1,4 +1,11 @@
-import { Box, Button, Card, CardContent, Divider } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Typography,
+} from "@mui/material";
 import { options } from "./api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
@@ -7,12 +14,12 @@ export default async function Home() {
   const session = await getServerSession(options);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4 sm:p-8">
       <Card
         sx={{
           width: "100%",
-          maxWidth: "md",
-          p: 4,
+          maxWidth: { xs: "100%", md: "md" },
+          p: { xs: 2, sm: 4 },
           borderRadius: 4,
           boxShadow: 4,
           textAlign: "center",
@@ -22,24 +29,28 @@ export default async function Home() {
         <CardContent>
           {session ? (
             <div>
-              <h1 className="text-4xl font-bold text-gray-800">
+              <Typography variant="h4" component="h1" className="font-bold">
                 Welcome back, {session?.user?.name}!
-              </h1>
+              </Typography>
+              <Typography variant="body1" className="mt-2">
+                We're glad to see you again. Explore your dashboard to manage
+                your salary details.
+              </Typography>
               <Divider
                 sx={{
                   my: 3,
                 }}
               />
-
               <Box
                 className="mt-6"
                 sx={{
                   display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
                   justifyContent: "center",
-                  gap: 3,
+                  gap: 2,
                 }}
               >
-                <Link href="/user?userPageSelect=quick">
+                <Link href="/user?userPageSelect=mycompanies">
                   <Button variant="contained" color="primary" className="mr-4">
                     Get Started
                   </Button>
@@ -53,12 +64,12 @@ export default async function Home() {
             </div>
           ) : (
             <div>
-              <h1 className="text-4xl font-bold text-gray-800">
-                Welcome to Your App!
-              </h1>
-              <p className="text-xl mt-4 text-gray-600">
+              <Typography variant="h4" component="h1" className="font-bold">
+                Welcome to Salary App!
+              </Typography>
+              <Typography variant="body1" className="mt-2">
                 Please sign in to access your dashboard.
-              </p>
+              </Typography>
               <div className="mt-6">
                 <Link href="/api/auth/signin">
                   <Button variant="contained" color="primary">
