@@ -88,6 +88,9 @@ const EditEmployeeForm: React.FC<{
       deductions: [],
     },
     company: companyId || "",
+    phoneNumber: "",
+    email: "",
+    address: "", // Add this line
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [memberNoLoading, setNameLoading] = useState<boolean>(false);
@@ -108,6 +111,8 @@ const EditEmployeeForm: React.FC<{
     divideBy?: string;
     startedAt?: string;
     resignedAt?: string;
+    phoneNumber?: string;
+    email?: string;
   }>({
     additions: {},
     totalSalary: "",
@@ -252,6 +257,9 @@ const EditEmployeeForm: React.FC<{
             deductions: [],
           },
           company: companyId,
+          phoneNumber: "",
+          email: "",
+          address: "",
         });
         setErrors({
           additions: {},
@@ -327,6 +335,9 @@ const EditEmployeeForm: React.FC<{
             deductions: [],
           },
           company: companyId,
+          phoneNumber: "",
+          email: "",
+          address: "",
         });
         setErrors({
           additions: {},
@@ -704,6 +715,52 @@ const EditEmployeeForm: React.FC<{
               />
             </FormControl>
           </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Phone Number"
+                name="phoneNumber"
+                variant="filled"
+                value={formFields.phoneNumber}
+                onChange={handleChange}
+                helperText={errors.phoneNumber}
+                error={!!errors.phoneNumber}
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Email"
+                name="email"
+                variant="filled"
+                value={formFields.email}
+                onChange={handleChange}
+                helperText={errors.email}
+                error={!!errors.email}
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <TextField
+                label="Address"
+                name="address"
+                variant="filled"
+                value={formFields.address}
+                onChange={handleChange}
+                InputProps={{
+                  readOnly: !isEditing,
+                }}
+              />
+            </FormControl>
+          </Grid>
         </Grid>
         <Grid mt={3} item xs={12}>
           <PaymentStructure
@@ -730,7 +787,7 @@ const EditEmployeeForm: React.FC<{
                 ...prev,
                 workingDays,
               }));
-              console.log("Setting working days:", formFields); // Debugging
+              //console.log("Setting working days:", formFields); // Debugging
             }}
           />
         </Grid>
@@ -743,7 +800,7 @@ const EditEmployeeForm: React.FC<{
             handleChange={handleChange}
             shifts={formFields.shifts}
             setShifts={(shifts) => {
-              console.log("Setting shifts:", shifts); // Debugging
+              //console.log("Setting shifts:", shifts); // Debugging
               setFormFields((prev) => ({
                 ...prev,
                 shifts,

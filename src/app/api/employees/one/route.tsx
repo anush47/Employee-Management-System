@@ -128,6 +128,12 @@ const employeeSchema = z.object({
       ),
     })
     .optional(),
+  phoneNumber: z
+    .string()
+    .regex(/^\d{10}$/, "Phone number must be a valid")
+    .optional(),
+  email: z.string().email("Email must be a valid email").optional(),
+  address: z.string().optional(), // Add this line
 });
 
 export async function PUT(req: NextRequest) {

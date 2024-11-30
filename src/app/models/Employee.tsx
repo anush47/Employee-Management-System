@@ -12,6 +12,9 @@ interface IEmployee extends Document {
   startedAt: string;
   resignedAt: string;
   remark: string;
+  phoneNumber: string;
+  email: string;
+  address: string; // Add this line
   workingDays: {
     [key: string]: "full" | "half" | "off";
   };
@@ -147,6 +150,15 @@ const employeeSchema = new Schema<IEmployee>(
     active: {
       type: Boolean,
       default: true,
+    },
+    phoneNumber: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+    address: {
+      type: String, // Add this block
     },
     paymentStructure: {
       additions: {

@@ -55,6 +55,9 @@ export interface Employee {
   startedAt: string;
   resignedAt: string;
   company: string;
+  phoneNumber: string;
+  email: string;
+  address: string; // Add this line
 }
 
 export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
@@ -283,6 +286,24 @@ const EmployeesDataGrid: React.FC<{
       type: "boolean",
     },
     {
+      field: "email",
+      headerName: "Email",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "phoneNumber",
+      headerName: "Phone",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
+      field: "address", // Add this block
+      headerName: "Address",
+      flex: 1,
+      editable: isEditingEmployeeInHome,
+    },
+    {
       field: "actions",
       headerName: "Actions",
       flex: 1,
@@ -481,6 +502,8 @@ const EmployeesDataGrid: React.FC<{
       workingDays: false,
       remark: false,
       totalSalary: false,
+      email: false,
+      phoneNumber: false,
     });
 
   return (

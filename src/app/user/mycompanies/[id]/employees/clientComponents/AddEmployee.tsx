@@ -70,6 +70,9 @@ const AddEmployeeForm: React.FC<{
       deductions: [],
     },
     company: companyId || "",
+    phoneNumber: "",
+    email: "",
+    address: "", // Add this line
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [memberNoLoading, setNameLoading] = useState<boolean>(false);
@@ -243,6 +246,9 @@ const AddEmployeeForm: React.FC<{
             deductions: [],
           },
           company: companyId,
+          phoneNumber: "",
+          email: "",
+          address: "", // Add this line
         });
         setErrors({});
         handleBackClick();
@@ -534,6 +540,17 @@ const AddEmployeeForm: React.FC<{
                 onChange={handleChange}
                 variant="filled"
                 multiline
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <TextField
+                label="Address"
+                name="address"
+                variant="filled"
+                value={formFields.address}
+                onChange={handleChange}
               />
             </FormControl>
           </Grid>
