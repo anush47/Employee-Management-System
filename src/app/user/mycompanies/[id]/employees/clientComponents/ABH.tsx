@@ -35,24 +35,24 @@ const ABH: React.FC<{
   const [loading, setLoading] = useState<boolean>(false);
   const [formDetails, setFormDetails] = useState({
     companyId: companyId,
-    fullName: "Anushanga Sharada Galappaththi",
-    nameWithInitials: "A S Galappaththi",
-    nic: "200105902475",
-    employerNo: "B/50139",
-    memberNo: "1",
-    startDate: "28-02-2001",
-    designation: "driver",
-    address: "238/1, Thunandahena, Korathota, Kaduwela.",
-    birthPlace: "Balangoda",
-    nationality: "Sinhala",
+    fullName: "",
+    nameWithInitials: "",
+    nic: "",
+    employerNo: "",
+    memberNo: "",
+    startDate: "",
+    designation: "",
+    address: "",
+    birthPlace: "",
+    nationality: "",
     married: true,
-    spouseName: "S N Kumarage",
-    motherName: "A P S Manel",
-    fatherName: "S L Galappaththi",
-    mobileNumber: "0717539478",
-    email: "anushangasharada@gmail.com",
-    employerName: "Anushanga Owner",
-    employerAddress: "238/2, Thunandahena, Korathota, Kaduwela.",
+    spouseName: "",
+    motherName: "",
+    fatherName: "",
+    mobileNumber: "",
+    email: "",
+    employerName: "",
+    employerAddress: "",
   });
 
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -87,6 +87,9 @@ const ABH: React.FC<{
               nic: employeeResult.employee.nic,
               memberNo: employeeResult.employee.memberNo,
               designation: employeeResult.employee.designation,
+              mobileNumber: employeeResult.employee.phoneNumber,
+              email: employeeResult.employee.email,
+              address: employeeResult.employee.address,
             };
           }
 
