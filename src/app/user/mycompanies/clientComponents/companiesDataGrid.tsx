@@ -99,7 +99,7 @@ const CompaniesDataGrid = ({
           throw new Error("Failed to fetch companies");
         }
         const companiesData = await companiesResponse.json();
-        console.log(companiesData);
+        //console.log(companiesData);
 
         // Fetch user details for each company
         const companiesWithUserNames = await Promise.all(

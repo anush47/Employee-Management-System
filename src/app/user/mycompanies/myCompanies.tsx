@@ -13,11 +13,17 @@ import {
   useTheme,
   useMediaQuery,
   Slide,
+  ToggleButton,
+  Switch,
 } from "@mui/material";
 import { Add, ArrowBack } from "@mui/icons-material";
 import AddCompanyForm from "./clientComponents/AddCompany";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+
+const CompaniesCards = lazy(
+  () => import("./clientComponents/companiesDataGrid copy")
+);
 
 // Lazily load CompaniesDataGrid
 const CompaniesDataGrid = lazy(
@@ -30,6 +36,7 @@ const MyCompanies = ({
   user: { name: string; email: string; id: string; role: string };
 }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [advanced, setAdvanced] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   //fetch query from url
@@ -89,6 +96,19 @@ const MyCompanies = ({
                     </Button>
                   </Link>
                 </Tooltip>
+                <Box sx={{ flexGrow: 1 }} />
+                <Tooltip title="Show advanced options" arrow>
+                  <Box display="flex" alignItems="center">
+                    <Typography variant="body2" sx={{ mr: 1 }}>
+                      Advanced
+                    </Typography>
+                    <Switch
+                      checked={advanced}
+                      onChange={() => setAdvanced(!advanced)}
+                      color="primary"
+                    />
+                  </Box>
+                </Tooltip>
               </Box>
             }
           />
@@ -96,7 +116,11 @@ const MyCompanies = ({
             sx={{ maxWidth: { xs: "100vw", md: "calc(100vw - 240px)" } }}
           >
             <Suspense fallback={<CircularProgress />}>
-              <CompaniesDataGrid user={user} />
+              {advanced ? (
+                <CompaniesDataGrid user={user} />
+              ) : (
+                <CompaniesCards user={user} />
+              )}
             </Suspense>
           </CardContent>
         </Card>
