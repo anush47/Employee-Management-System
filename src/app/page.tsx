@@ -5,6 +5,7 @@ import {
   CardContent,
   Divider,
   Typography,
+  Avatar,
 } from "@mui/material";
 import { options } from "./api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
@@ -14,14 +15,14 @@ export default async function Home() {
   const session = await getServerSession(options);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4 sm:p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-500 via-green-500 to-teal-500 p-4 sm:p-8">
       <Card
         sx={{
           width: "100%",
           maxWidth: { xs: "100%", md: "md" },
-          p: { xs: 2, sm: 4 },
+          p: { xs: 3, sm: 5 },
           borderRadius: 4,
-          boxShadow: 4,
+          boxShadow: 6,
           textAlign: "center",
           gap: 3,
         }}
@@ -29,6 +30,11 @@ export default async function Home() {
         <CardContent>
           {session ? (
             <div>
+              <Avatar
+                alt={session?.user?.name || ""}
+                src={session?.user?.image || ""}
+                sx={{ width: 80, height: 80, margin: "0 auto 16px" }}
+              />
               <Typography variant="h4" component="h1" className="font-bold">
                 Welcome back, {session?.user?.name}!
               </Typography>

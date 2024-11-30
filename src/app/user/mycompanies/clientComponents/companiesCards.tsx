@@ -18,6 +18,8 @@ import {
   Chip,
   Stack,
   Typography,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import Link from "next/link";
 import { Business, Cancel, CheckCircle, People } from "@mui/icons-material";
@@ -72,11 +74,15 @@ const CompaniesCards = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   const filteredCompanies = companies.filter(
     (company) =>
-      normalizeString(company.name).includes(normalizeString(searchQuery)) ||
-      normalizeString(company.employerNo).includes(normalizeString(searchQuery))
+      (normalizeString(company.name).includes(normalizeString(searchQuery)) ||
+        normalizeString(company.employerNo).includes(
+          normalizeString(searchQuery)
+        )) &&
+      (!showActiveOnly || company.active)
   );
 
   const totalCompanies = companies.length;
@@ -223,21 +229,36 @@ const CompaniesCards = ({
       )}
       {!loading && !error && (
         <>
-          <TextField
-            label="Search Companies"
-            variant="outlined"
-            fullWidth
-            sx={{ mb: 2 }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">
-              Total Companies: {totalCompanies}
-            </Typography>
-            <Typography variant="h6">
-              Active Companies: {activeCompanies}
-            </Typography>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+            <TextField
+              label="Search Companies"
+              variant="outlined"
+              fullWidth
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showActiveOnly}
+                  onChange={(e) => setShowActiveOnly(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Active Only"
+            />
+          </Box>
+          <Box display="flex" gap={1} mb={2}>
+            <Chip
+              label={`Total: ${totalCompanies}`}
+              color="primary"
+              variant="outlined"
+            />
+            <Chip
+              label={`Active: ${activeCompanies}`}
+              color="success"
+              variant="outlined"
+            />
           </Box>
           <Grid container spacing={3}>
             {filteredCompanies.map((company) => (

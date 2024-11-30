@@ -69,42 +69,91 @@ const MyCompanies = ({
           }}
         >
           <CardHeader
+            sx={{
+              background: (theme) => theme.palette.background.default,
+              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+              "& .MuiCardHeader-content": { width: "100%" },
+            }}
             title={
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mb: 2,
+                  flexDirection: { xs: "column", sm: "row" },
+                  alignItems: { xs: "flex-start", sm: "center" },
+                  gap: { xs: 2, sm: 3 },
+                  width: "100%",
                 }}
               >
-                <Typography variant={isSmallScreen ? "h5" : "h4"} gutterBottom>
-                  My Companies
-                </Typography>
-                <Tooltip title="Add a new company" arrow>
-                  <Link href={`user?userPageSelect=mycompanies&add=true`}>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      startIcon={<Add />}
-                    >
-                      Add
-                    </Button>
-                  </Link>
-                </Tooltip>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    variant={isSmallScreen ? "h5" : "h4"}
+                    sx={{
+                      fontWeight: 600,
+                      background: (theme) =>
+                        `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    My Companies
+                  </Typography>
+                  <Tooltip title="Add a new company" arrow>
+                    <Link href={`user?userPageSelect=mycompanies&add=true`}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<Add />}
+                        sx={{
+                          borderRadius: 2,
+                          textTransform: "none",
+                          boxShadow: 2,
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            transition: "transform 0.2s",
+                          },
+                        }}
+                      >
+                        Add Company
+                      </Button>
+                    </Link>
+                  </Tooltip>
+                </Box>
                 <Box sx={{ flexGrow: 1 }} />
-                <Tooltip title="Show advanced options" arrow>
-                  <Box display="flex" alignItems="center">
-                    <Typography variant="body2" sx={{ mr: 1 }}>
-                      Advanced
-                    </Typography>
-                    <Switch
-                      checked={advanced}
-                      onChange={() => setAdvanced(!advanced)}
-                      color="primary"
-                    />
-                  </Box>
-                </Tooltip>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    bgcolor: (theme) => theme.palette.background.paper,
+                    borderRadius: 2,
+                    px: 2,
+                    py: 0.5,
+                    boxShadow: 1,
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mr: 1,
+                      fontWeight: 500,
+                      color: "text.secondary",
+                    }}
+                  >
+                    Advanced View
+                  </Typography>
+                  <Switch
+                    checked={advanced}
+                    onChange={() => setAdvanced(!advanced)}
+                    color="primary"
+                    size="small"
+                  />
+                </Box>
               </Box>
             }
           />

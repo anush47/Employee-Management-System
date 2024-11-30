@@ -23,6 +23,9 @@ import dayjs from "dayjs";
 import Slide from "@mui/material/Slide";
 import { companyId } from "../clientComponents/companySideBar";
 import { useSearchParams } from "next/navigation";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 interface ChipData {
   key: number;
@@ -165,24 +168,23 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
     ) {
       if (purchasedPeriods.includes(formatPeriod(selectedPeriod))) {
         setError("Period already purchased");
+        //show snackbar and status
+        setSnackbarMessage(
+          "Period already purchased " + formatPeriod(selectedPeriod)
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
         return;
       }
       setError("");
       const formattedPeriod = formatPeriod(selectedPeriod);
       setPeriods([...periods, { key: periods.length, label: formattedPeriod }]);
 
-      //selected period is in "09-2024"
+      // Automatically select next month
       const [month, year] = selectedPeriod.split("-");
-      //get next month
-      const nextMonth = parseInt(month) + 1;
-      //if next month is 13, set to 1 and increase year
-      if (nextMonth > 12) {
-        setSelectedPeriod(`01-${parseInt(year) + 1}`);
-      } else {
-        setSelectedPeriod(`${nextMonth}-${year}`);
-      }
-    } else {
-      setError("Period already added or invalid");
+      const date = dayjs(`${year}-${month}-01`);
+      const nextMonth = date.add(1, "month");
+      setSelectedPeriod(nextMonth.format("MM-YYYY"));
     }
   };
 
@@ -302,223 +304,290 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
 
   const oneMonthPrice = price ?? 0;
 
+  const handleDateChange = (newDate: any) => {
+    if (newDate) {
+      setSelectedPeriod(newDate.format("MM-YYYY"));
+    }
+  };
+
   return (
-    <Box>
-      <CardHeader
-        title={
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 2,
-            }}
-          >
-            <Typography variant="h5">
+    <Box sx={{ maxWidth: 1200, margin: "0 auto" }}>
+      <Card elevation={0} sx={{ mb: 3, bgcolor: "transparent" }}>
+        <CardHeader
+          title={
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <Tooltip title="Discard and go back" arrow>
                 <IconButton sx={{ mr: 2 }} onClick={handleBackClick}>
                   <ArrowBack />
                 </IconButton>
               </Tooltip>
-              New Purchase
-            </Typography>
-          </Box>
-        }
-      />
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ m: 1 }}>
-              Months to Purchase - {periods.length}
-            </Typography>
-            <Paper
-              sx={{
-                display: "flex",
-                justifyContent: "left",
-                flexWrap: "wrap",
-                listStyle: "none",
-                p: 0.5,
-                m: 0,
-              }}
-              component="ul"
-            >
-              {periods.map((data) => (
-                <li key={data.key}>
-                  <Chip
-                    label={data.label}
-                    onDelete={handleDeletePeriod(data)}
-                    sx={{
-                      m: 0.5,
-                      backgroundColor: (theme) => theme.palette.primary.main,
-                      color: (theme) => theme.palette.primary.contrastText,
-                      fontSize: "1.2rem",
-                      borderRadius: "16px",
-                      "& .MuiChip-deleteIcon": {
-                        color: (theme) => theme.palette.primary.contrastText,
-                      },
-                    }}
-                  />
-                </li>
-              ))}
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Period"
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              placeholder="MM-YYYY"
-              fullWidth
-              error={!isValidMonthYear(selectedPeriod) && selectedPeriod !== ""}
-              helperText={
-                !isValidMonthYear(selectedPeriod) && selectedPeriod !== ""
-                  ? "Enter a valid month and year (MM-YYYY)"
-                  : error
-              }
-            />
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={handleAddPeriod}
-              sx={{ mt: 1 }}
-            >
-              Add Period
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Card variant="outlined">
-              <CardContent>
-                <div>
-                  <Typography variant="h6">Bank Details</Typography>
-                  <Typography variant="body2">
-                    Account Number: 123456789
-                  </Typography>
-                  <Typography variant="body2">Bank: Example Bank</Typography>
-                </div>
-                <hr className="my-2" />
-                <div>
-                  <Typography variant="h6">Price Details</Typography>
-                  {loading ? (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "30px",
-                      }}
-                    >
-                      <CircularProgress />
-                    </Box>
-                  ) : (
-                    <>
-                      <Typography variant="body1">
-                        Price per Month: {formatPrice(oneMonthPrice)}
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        sx={{ fontWeight: "bold", color: "primary.main" }}
-                      >
-                        Total Price:{" "}
-                        {
-                          // Show if finalTotalPrice and totalPrice are different as a strike-through to highlight discount
-                          finalTotalPrice !== totalPrice && (
-                            <span style={{ textDecoration: "line-through" }}>
-                              {formatPrice(totalPrice ?? 0)}
-                            </span>
-                          )
-                        }{" "}
-                        {formatPrice(finalTotalPrice ?? 0)}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
-                      >
-                        {periods.length} x {formatPrice(oneMonthPrice)}
-                      </Typography>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              Please make the payment and upload the payment slip to request.
-            </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              component="label"
-              disabled={(totalPrice ?? 0) <= 0}
-            >
-              Upload Payment Slip
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageChange}
-              />
-            </Button>
+              <Typography variant="h5" fontWeight="bold">
+                New Purchase
+              </Typography>
+            </Box>
+          }
+        />
+      </Card>
 
-            <hr className="my-2" />
-            <Tooltip title="Create purchase" arrow>
-              <span>
+      <Box component="form" onSubmit={handleSubmit}>
+        <Grid container spacing={3}>
+          {/* Period Selection Section */}
+          <Grid item xs={12}>
+            <Card
+              sx={{
+                p: 3,
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: "medium" }}>
+                Select Periods ({periods.length})
+              </Typography>
+              <Box sx={{ mb: 3 }}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "grey.800"
+                        : "common.white",
+                    minHeight: "100px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                    alignItems: "flex-start",
+                  }}
+                >
+                  {periods.map((data) => (
+                    <Chip
+                      key={data.key}
+                      label={data.label}
+                      onDelete={handleDeletePeriod(data)}
+                      color="primary"
+                      sx={{
+                        py: 1,
+                        px: 1,
+                        fontSize: "0.875rem",
+                        fontWeight: 500,
+                        borderRadius: 2,
+                        boxShadow: "0 6px 12px rgba(0,0,0,0.3)",
+                        "&:hover": {
+                          bgcolor: (theme) => theme.palette.primary.dark,
+                        },
+                        "& .MuiChip-deleteIcon": {
+                          color: "error.main",
+                          "&:hover": {
+                            color: (theme) => theme.palette.error.main,
+                          },
+                        },
+                      }}
+                    />
+                  ))}
+                </Paper>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Select Month"
+                    value={dayjs(selectedPeriod, "MM-YYYY")}
+                    onChange={handleDateChange}
+                    views={["month", "year"]}
+                    format="MM-YYYY"
+                    sx={{
+                      minWidth: 200,
+                    }}
+                    minDate={dayjs("1990-01-01")}
+                    maxDate={dayjs("2026-12-31")}
+                  />
+                </LocalizationProvider>
                 <Button
                   variant="contained"
-                  color="success"
-                  endIcon={<ShoppingBag />}
+                  onClick={handleAddPeriod}
+                  sx={{
+                    height: 56,
+                    bgcolor: (theme) => theme.palette.success.main,
+                    "&:hover": {
+                      bgcolor: (theme) => theme.palette.success.dark,
+                    },
+                    fontWeight: "bold",
+                  }}
+                >
+                  Add Period
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+
+          {/* Payment Details Section */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                p: 3,
+                height: "100%",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: "medium" }}>
+                Payment Details
+              </Typography>
+              <Box
+                sx={{
+                  bgcolor: "background.default",
+                  p: 2,
+                  borderRadius: 1,
+                  mb: 3,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  fontWeight="bold"
+                  sx={{ mb: 2 }}
+                >
+                  Bank Information
+                </Typography>
+                <Typography variant="body1">
+                  Account Number: 123456789
+                </Typography>
+                <Typography variant="body1">Bank: Example Bank</Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  bgcolor: loading ? "background.default" : "primary.900",
+                  p: 3,
+                  borderRadius: 2,
+                  color: "common.white",
+                }}
+              >
+                {loading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  <>
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                      Monthly Fee: {formatPrice(oneMonthPrice)}
+                    </Typography>
+                    <Typography variant="h5" color="primary" fontWeight="bold">
+                      Total: {formatPrice(finalTotalPrice ?? 0)}
+                    </Typography>
+                    {finalTotalPrice !== totalPrice && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          textDecoration: "line-through",
+                          color: "text.secondary",
+                        }}
+                      >
+                        Original: {formatPrice(totalPrice ?? 0)}
+                      </Typography>
+                    )}
+                  </>
+                )}
+              </Box>
+            </Card>
+          </Grid>
+
+          {/* Upload Section */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                p: 3,
+                height: "100%",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: "medium" }}>
+                Payment Proof
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                  alignItems: "flex-start",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  component="label"
+                  disabled={(totalPrice ?? 0) <= 0}
+                  startIcon={<ShoppingBag />}
+                  sx={{ mb: 2 }}
+                >
+                  Upload Payment Slip
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleImageChange}
+                  />
+                </Button>
+
+                {imagePreview && (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      bgcolor: "background.default",
+                    }}
+                  >
+                    <img
+                      src={imagePreview as string}
+                      alt="Payment Slip"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </Box>
+                )}
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
                   onClick={handleSubmit}
                   disabled={loading || (totalPrice ?? 0) <= 0}
-                  startIcon={loading ? <CircularProgress size={24} /> : null}
+                  startIcon={
+                    loading ? <CircularProgress size={20} /> : <ShoppingBag />
+                  }
+                  sx={{
+                    mt: "auto",
+                    bgcolor: (theme) => theme.palette.primary.main,
+                    "&:hover": {
+                      bgcolor: (theme) => theme.palette.primary.dark,
+                    },
+                    fontWeight: "bold",
+                    py: 1.5,
+                  }}
                 >
-                  {loading ? "Purchasing..." : "Purchase"}
+                  {loading ? "Processing..." : "Confirm Purchase"}
                 </Button>
-              </span>
-            </Tooltip>
+              </Box>
+            </Card>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            {imagePreview && (
-              <FormControl fullWidth>
-                {typeof imagePreview === "string" &&
-                imagePreview.startsWith("data:application/pdf") ? (
-                  <iframe
-                    src={imagePreview}
-                    title="Uploaded PDF Preview"
-                    height={400 * (29.7 / 21)}
-                    width="400"
-                  />
-                ) : (
-                  <img
-                    src={imagePreview as string}
-                    alt="Uploaded Preview"
-                    style={{ maxWidth: "400px", height: "auto" }}
-                  />
-                )}
-              </FormControl>
-            )}
-          </Grid>
-          <Grid item xs={12}></Grid>
         </Grid>
       </Box>
+
       <Snackbar
         open={snackbarOpen}
-        //TransitionComponent={SlideTransition}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
-        action={
-          <Button color="inherit" onClick={handleSnackbarClose}>
-            Close
-          </Button>
-        }
       >
         <Alert
+          elevation={6}
+          variant="filled"
           onClose={handleSnackbarClose}
           severity={snackbarSeverity}
-          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>
