@@ -21,9 +21,7 @@ import AddCompanyForm from "./clientComponents/AddCompany";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-const CompaniesCards = lazy(
-  () => import("./clientComponents/companiesDataGrid copy")
-);
+const CompaniesCards = lazy(() => import("./clientComponents/companiesCards"));
 
 // Lazily load CompaniesDataGrid
 const CompaniesDataGrid = lazy(
