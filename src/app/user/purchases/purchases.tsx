@@ -32,7 +32,7 @@ const Purchases = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const searchParams = useSearchParams();
-  purchaseId = searchParams.get("purchaseId");
+  purchaseId = searchParams ? searchParams.get("purchaseId") : null;
   const [isEditingPurchaseInHome, setIsEditingPurchaseInHome] = useState(false);
 
   const handleBackClick = () => {
@@ -43,19 +43,17 @@ const Purchases = ({
   return (
     <Box>
       {purchaseId ? (
-        <Slide direction="left" in={!!purchaseId} mountOnEnter unmountOnExit>
-          <Card
-            sx={{
-              minHeight: "91vh",
-              overflowY: "auto",
-            }}
-          >
-            <UpdatePurchaseForm
-              purchaseId={purchaseId}
-              handleBackClick={handleBackClick}
-            />
-          </Card>
-        </Slide>
+        <Card
+          sx={{
+            minHeight: "91vh",
+            overflowY: "auto",
+          }}
+        >
+          <UpdatePurchaseForm
+            purchaseId={purchaseId}
+            handleBackClick={handleBackClick}
+          />
+        </Card>
       ) : (
         <Card
           sx={{

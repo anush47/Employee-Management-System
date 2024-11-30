@@ -15,15 +15,6 @@ import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
 export default function ChangePasswordDialog({
   open,
   setOpen,
@@ -81,7 +72,6 @@ export default function ChangePasswordDialog({
   return (
     <Dialog
       open={open}
-      TransitionComponent={Transition}
       PaperProps={{
         component: "form",
         onSubmit: handleSubmit,

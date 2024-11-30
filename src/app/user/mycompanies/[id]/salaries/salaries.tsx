@@ -40,8 +40,8 @@ const Salaries = ({
 
   //fetch query from url
   const searchParams = useSearchParams();
-  const gen = searchParams.get("gen");
-  salaryId = searchParams.get("salaryId");
+  const gen = searchParams?.get("gen") || null;
+  salaryId = searchParams?.get("salaryId") || null;
 
   //open the form if gen is true
   useEffect(() => {
@@ -65,17 +65,15 @@ const Salaries = ({
             }}
           />
         ) : showAddForm ? (
-          <Slide direction="left" in={showAddForm} mountOnEnter unmountOnExit>
-            <div>
-              <AddSalaryForm
-                user={user}
-                handleBackClick={() => {
-                  //go back in browser
-                  window.history.back();
-                }}
-              />
-            </div>
-          </Slide>
+          <div>
+            <AddSalaryForm
+              user={user}
+              handleBackClick={() => {
+                //go back in browser
+                window.history.back();
+              }}
+            />
+          </div>
         ) : (
           <>
             <CardHeader

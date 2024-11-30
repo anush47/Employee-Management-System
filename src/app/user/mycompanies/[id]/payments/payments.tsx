@@ -40,8 +40,8 @@ const Payments = ({
 
   //fetch query from url
   const searchParams = useSearchParams();
-  const gen = searchParams.get("gen");
-  paymentId = searchParams.get("paymentId");
+  const gen = searchParams ? searchParams.get("gen") : null;
+  paymentId = searchParams ? searchParams.get("paymentId") : null;
 
   //open the form if gen is true
   useEffect(() => {
@@ -65,17 +65,15 @@ const Payments = ({
             }}
           />
         ) : showAddForm ? (
-          <Slide direction="left" in={showAddForm} mountOnEnter unmountOnExit>
-            <div>
-              <NewPaymentForm
-                handleBackClick={() => {
-                  //go back in browser
-                  window.history.back();
-                }}
-                user={user}
-              />
-            </div>
-          </Slide>
+          <div>
+            <NewPaymentForm
+              handleBackClick={() => {
+                //go back in browser
+                window.history.back();
+              }}
+              user={user}
+            />
+          </div>
         ) : (
           <>
             <CardHeader

@@ -50,21 +50,19 @@ const MyCompanies = ({
   return (
     <Box>
       {isAdding ? (
-        <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
-          <Card
-            sx={{
-              height: "91vh",
-              overflowY: "auto",
+        <Card
+          sx={{
+            height: "91vh",
+            overflowY: "auto",
+          }}
+        >
+          <AddCompanyForm
+            user={user}
+            handleBackClick={() => {
+              window.history.back();
             }}
-          >
-            <AddCompanyForm
-              user={user}
-              handleBackClick={() => {
-                window.history.back();
-              }}
-            />
-          </Card>
-        </Slide>
+          />
+        </Card>
       ) : (
         <Card
           sx={{

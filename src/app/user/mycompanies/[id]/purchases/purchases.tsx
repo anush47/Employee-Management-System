@@ -36,8 +36,8 @@ const Purchases = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const searchParams = useSearchParams();
-  purchaseId = searchParams.get("purchaseId");
-  newPurchase = searchParams.get("newPurchase");
+  purchaseId = searchParams?.get("purchaseId") || null;
+  newPurchase = searchParams?.get("newPurchase") || null;
 
   const handleBackClick = () => {
     //go back
@@ -53,16 +53,14 @@ const Purchases = ({
   return (
     <Box>
       {isAdding ? (
-        <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
-          <Card
-            sx={{
-              height: "91vh",
-              overflowY: "auto",
-            }}
-          >
-            <NewPurchaseForm handleBackClick={handleBackClick} />
-          </Card>
-        </Slide>
+        <Card
+          sx={{
+            height: "91vh",
+            overflowY: "auto",
+          }}
+        >
+          <NewPurchaseForm handleBackClick={handleBackClick} />
+        </Card>
       ) : (
         <Card
           sx={{

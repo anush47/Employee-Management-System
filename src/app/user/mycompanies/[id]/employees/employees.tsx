@@ -94,35 +94,29 @@ const Employees = ({
   );
 
   const AddEmployeeCard = () => (
-    <Slide direction="left" in={isAdding} mountOnEnter unmountOnExit>
-      <Card sx={{ height: "91vh", overflowY: "auto" }}>
-        <AddEmployeeForm user={user} handleBackClick={handleBackClick} />
-      </Card>
-    </Slide>
+    <Card sx={{ height: "91vh", overflowY: "auto" }}>
+      <AddEmployeeForm user={user} handleBackClick={handleBackClick} />
+    </Card>
   );
 
   const EditEmployeeCard = () => (
-    <Slide direction="left" in={isEditing} mountOnEnter unmountOnExit>
-      <Card sx={{ height: "87vh", overflowY: "auto" }}>
-        <EditEmployeeForm
-          user={user}
-          handleBackClick={handleBackClick}
-          employeeId={employeeId}
-        />
-      </Card>
-    </Slide>
+    <Card sx={{ height: "87vh", overflowY: "auto" }}>
+      <EditEmployeeForm
+        user={user}
+        handleBackClick={handleBackClick}
+        employeeId={employeeId}
+      />
+    </Card>
   );
 
   const ABHCard = () => (
-    <Slide direction="left" in={isAbh} mountOnEnter unmountOnExit>
-      <Card sx={{ height: "91vh", overflowY: "auto" }}>
-        <ABH
-          user={user}
-          handleBackClick={handleBackClick}
-          employeeId={employeeId}
-        />
-      </Card>
-    </Slide>
+    <Card sx={{ height: "91vh", overflowY: "auto" }}>
+      <ABH
+        user={user}
+        handleBackClick={handleBackClick}
+        employeeId={employeeId}
+      />
+    </Card>
   );
 
   const EmployeesCard = () => (
