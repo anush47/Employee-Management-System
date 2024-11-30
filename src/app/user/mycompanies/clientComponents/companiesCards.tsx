@@ -79,6 +79,9 @@ const CompaniesCards = ({
       normalizeString(company.employerNo).includes(normalizeString(searchQuery))
   );
 
+  const totalCompanies = companies.length;
+  const activeCompanies = companies.filter((company) => company.active).length;
+
   useEffect(() => {
     const fetchCompaniesAndUsers = async () => {
       try {
@@ -228,6 +231,14 @@ const CompaniesCards = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography variant="h6">
+              Total Companies: {totalCompanies}
+            </Typography>
+            <Typography variant="h6">
+              Active Companies: {activeCompanies}
+            </Typography>
+          </Box>
           <Grid container spacing={3}>
             {filteredCompanies.map((company) => (
               <Grid item xs={12} sm={6} md={4} key={company.id}>
