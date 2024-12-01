@@ -46,8 +46,33 @@ export const processSalaryWithInOut = async (
     remark = "",
     noPay = 0
   ) => {
+    const shift = shifts.reduce((prev: any, curr: any) => {
+      const prevDiff = Math.abs(getTimeDifferenceInMinutes(prev.start, inDate));
+      const currDiff = Math.abs(getTimeDifferenceInMinutes(curr.start, inDate));
+      return currDiff < prevDiff && currDiff <= 6 * 60 ? curr : prev;
+    });
+    const shiftStartHours = Number(shift.start.split(":")[0]);
+    const shiftStartMinutes = Number(shift.start.split(":")[1]);
+    const actualInTime =
+      inDate.getUTCHours() > shiftStartHours ||
+      (inDate.getUTCHours() === shiftStartHours &&
+        inDate.getUTCMinutes() > shiftStartMinutes)
+        ? inDate
+        : new Date(inDate.getTime()).setUTCHours(
+            shiftStartHours,
+            shiftStartMinutes,
+            0,
+            0
+          );
+
     const workingHours =
-      (outDate.getTime() - inDate.getTime()) / 1000 / 60 / 60;
+      (outDate.getTime() -
+        (typeof actualInTime === "number"
+          ? actualInTime
+          : actualInTime.getTime())) /
+      1000 /
+      60 /
+      60;
 
     //workingHoursTreshold
     let workingHoursTreshold = 9;
@@ -59,12 +84,6 @@ export const processSalaryWithInOut = async (
       source.divideBy,
       workingHoursTreshold
     );
-
-    const shift = shifts.reduce((prev: any, curr: any) => {
-      const prevDiff = Math.abs(getTimeDifferenceInMinutes(prev.start, inDate));
-      const currDiff = Math.abs(getTimeDifferenceInMinutes(curr.start, inDate));
-      return currDiff < prevDiff && currDiff <= 6 * 60 ? curr : prev;
-    });
     const workingText = (() => {
       const texts = [];
 
@@ -297,12 +316,25 @@ export const processSalaryWithInOut = async (
       return acc;
     }, 0);
 
+    const lateDayHours = records.reduce((acc, cur) => {
+      if (cur.description.includes("Came")) {
+        const lateHours = parseFloat(
+          cur.description.match(/Came ([\d.]+) h late/)?.[1] || "0"
+        );
+        return acc + lateHours;
+      }
+      return acc;
+    }, 0);
+
     const reasons = [];
-    if (leftEarlyHours > 0) {
-      reasons.push(`${leftEarlyHours.toFixed(2)} left early h`);
-    }
     if (absentDays > 0) {
       reasons.push(`${absentDays} absent days`);
+    }
+    if (leftEarlyHours > 0) {
+      reasons.push(`${leftEarlyHours.toFixed(2)}h left early`);
+    }
+    if (lateDayHours > 0) {
+      reasons.push(`${lateDayHours.toFixed(2)}h came late`);
     }
     return reasons.join(", ");
   })();
@@ -575,14 +607,14 @@ const calculateOT = (
   }
 
   let otHours = 0;
-  if (workingDayStatus === "half") {
-    workingHoursTreshold = 6;
-  } else if (
+  if (
     workingDayStatus === "off" ||
     holiday.categories.mercantile ||
     holiday.categories.public
   ) {
     workingHoursTreshold = 0;
+  } else if (workingDayStatus === "half") {
+    workingHoursTreshold = 6;
   }
   if (workingHours > workingHoursTreshold) {
     otHours = workingHours - workingHoursTreshold;
@@ -591,7 +623,22 @@ const calculateOT = (
   if (holiday.categories.mercantile) {
     multiplier = 2;
   }
-  const ot = otHours > 0 ? (otHours * basic * multiplier) / divideBy : 0; // Example OT rate
+
+  if (
+    (holiday.categories.public || holiday.categories.mercantile) &&
+    otHours > 6
+  ) {
+    otHours -= 1; //reduce break hour
+  }
+  let ot = 0;
+  if (otHours > 0) {
+    ot = (otHours * basic * multiplier) / divideBy;
+    if (holiday.categories.mercantile && otHours > 8) {
+      ot =
+        (8 * basic * multiplier) / divideBy +
+        ((otHours - 8) * basic * 3) / divideBy; // tripleot
+    }
+  }
   return {
     ot,
     otHours,
