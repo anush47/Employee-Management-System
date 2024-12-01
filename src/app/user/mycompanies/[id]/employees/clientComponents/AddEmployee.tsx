@@ -554,6 +554,29 @@ const AddEmployeeForm: React.FC<{
               />
             </FormControl>
           </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Phone Number"
+                name="phoneNumber"
+                variant="filled"
+                value={formFields.phoneNumber}
+                onChange={handleChange}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <TextField
+                label="Email"
+                name="email"
+                type="email"
+                variant="filled"
+                value={formFields.email}
+                onChange={handleChange}
+              />
+            </FormControl>
+          </Grid>
         </Grid>
         <Grid mt={3} item xs={12}>
           <PaymentStructure

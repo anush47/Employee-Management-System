@@ -162,6 +162,16 @@ export async function PUT(req: NextRequest) {
     //convert to number
     body.memberNo = parseInt(body.memberNo);
     body.basic = parseFloat(body.basic);
+    //email phone number and address if ""
+    if (body.email === "") {
+      delete body.email;
+    }
+    if (body.phoneNumber === "") {
+      delete body.phoneNumber;
+    }
+    if (body.address === "") {
+      delete body.address;
+    }
     const parsedBody = employeeSchema.parse(body);
 
     // Connect to the database
