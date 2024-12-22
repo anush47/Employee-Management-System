@@ -414,7 +414,7 @@ const QuickTools = ({
           case "Generating Salaries":
             const success = await handleSalaries(true);
             if (!success) {
-              await new Promise((resolve) => setTimeout(resolve, 1000)); // Allow UI update
+              await new Promise((resolve) => setTimeout(resolve, 2000)); // Allow UI update
               throw new Error("Failed to generate salaries");
             }
             break;
