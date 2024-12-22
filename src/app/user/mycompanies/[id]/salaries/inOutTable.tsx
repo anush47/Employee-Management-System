@@ -316,22 +316,23 @@ export const InOutTable = ({
     }
   };
 
-  const handleRowUpdateError = (params: any) => {
-    // Revert changes if necessary
-    const updatedInOuts = inOuts.map((inOut) => {
-      if (inOut.id === params.id) {
-        return params.oldRow; // Revert to old row data
-      }
-      return inOut;
-    });
+  // const handleRowUpdateError = (params: any) => {
+  //   // Revert changes if necessary
+  //   const updatedInOuts = inOuts.map((inOut) => {
+  //     if (inOut.id === params.id) {
+  //       return params.oldRow; // Revert to old row data
+  //     }
+  //     return inOut;
+  //   });
 
-    // Log error and revert row updates
-    console.error("Row update error:", params.error?.error || params.error);
+  //   // Log error and revert row updates
+  //   console.error("Row update error:", params.error?.error || params.error);
 
-    //setInOuts(updatedInOuts); // Update state with reverted data
-  };
+  //   //setInOuts(updatedInOuts); // Update state with reverted data
+  // };
 
   // State for managing dialog visibility
+
   const [openDelete, setOpenDelete] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
 
