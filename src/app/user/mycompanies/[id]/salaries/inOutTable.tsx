@@ -479,8 +479,8 @@ export const InOutTable = ({
           toolbar: (props) => (
             <GridToolbar
               {...props}
-              csvOptions={{ disableToolbarButton: true }}
-              printOptions={{ disableToolbarButton: true }}
+              // csvOptions={{ disableToolbarButton: true }}
+              // printOptions={{ disableToolbarButton: true }}
             />
           ),
         }}
