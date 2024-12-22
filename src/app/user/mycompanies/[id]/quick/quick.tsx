@@ -160,7 +160,7 @@ const QuickTools = ({
     setGeneratedSalaries([]);
   }, [period]);
 
-  const handleSalaries = async (save: boolean = false) => {
+  const handleSalaries = async (save: boolean = false): Promise<boolean> => {
     setLoading(true);
     try {
       if (
@@ -208,6 +208,7 @@ const QuickTools = ({
           }
         }
       }
+      return true; // Return true if successful
     } catch (error) {
       console.error("Error handling salaries:", error);
       setSnackbarMessage(
@@ -216,6 +217,7 @@ const QuickTools = ({
           : "An error occurred while handling salaries"
       );
       setSnackbarSeverity("error");
+      return false; // Return false if an error occurs
     } finally {
       setLoading(false);
       setSnackbarOpen(true);
@@ -410,7 +412,11 @@ const QuickTools = ({
 
         switch (step.name) {
           case "Generating Salaries":
-            await handleSalaries(true);
+            const success = await handleSalaries(true);
+            if (!success) {
+              await new Promise((resolve) => setTimeout(resolve, 1000)); // Allow UI update
+              throw new Error("Failed to generate salaries");
+            }
             break;
           case "Generating Payments":
             await new Promise((resolve) => setTimeout(resolve, 1000)); // Allow UI update
