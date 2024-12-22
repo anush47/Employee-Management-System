@@ -480,7 +480,7 @@ export const InOutTable = ({
             <GridToolbar
               {...props}
               // csvOptions={{ disableToolbarButton: true }}
-              // printOptions={{ disableToolbarButton: true }}
+              printOptions={{ disableToolbarButton: true }}
             />
           ),
         }}
