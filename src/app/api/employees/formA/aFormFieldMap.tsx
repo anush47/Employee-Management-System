@@ -68,4 +68,38 @@ export const aFormMap = {
   date_H_2: ["Date Field 1_2"],
   witnessName_H: ["Text Box 4_5"],
   witnessDescriptionAddress: ["Text Box 5"],
+  nominees: [
+    {
+      name: ["Text Box 4_6"],
+      nic: ["Text Box 4_8"].concat(
+        Array.from({ length: 11 }, (_, i) => `Text Box 4_${i + 17}`)
+      ),
+      relationship: ["Text Box 4_7"],
+      proportion: ["Numeric Field 1"],
+    },
+    {
+      name: ["Text Box 4_9"],
+      nic: Array.from({ length: 12 }, (_, i) => `Text Box 4_${i + 28}`),
+      relationship: ["Text Box 4_13"],
+      proportion: ["Numeric Field 1_2"],
+    },
+    {
+      name: ["Text Box 4_10"],
+      nic: Array.from({ length: 12 }, (_, i) => `Text Box 4_${i + 40}`),
+      relationship: ["Text Box 4_14"],
+      proportion: ["Numeric Field 1_3"],
+    },
+    {
+      name: ["Text Box 4_11"],
+      nic: Array.from({ length: 12 }, (_, i) => `Text Box 4_${i + 52}`),
+      relationship: ["Text Box 4_15"],
+      proportion: ["Numeric Field 1_4"],
+    },
+    {
+      name: ["Text Box 4_12"],
+      nic: Array.from({ length: 12 }, (_, i) => `Text Box 4_${i + 64}`),
+      relationship: ["Text Box 4_16"],
+      proportion: ["Numeric Field 1_5"],
+    },
+  ],
 };

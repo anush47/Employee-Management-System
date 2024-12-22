@@ -18,13 +18,10 @@ export const employeeFormSchema = z.object({
     .number()
     .min(0, { message: "Member No must be a positive number" })
     .optional(),
-  startDate: z
-    .string()
-    .regex(/^\d{2}-\d{2}-\d{4}$/, { message: "Invalid Start Date Format" })
-    .optional(),
+  startDate: z.string().optional(),
   nic: z
     .string()
-    .regex(/^(?:[0-9]{9}[vVxX]|[0-9]{12})$/, {
+    .refine((val) => val === "" || /^(?:[0-9]{9}[vVxX]|[0-9]{12})$/.test(val), {
       message: "NIC must be a valid format (e.g., 123456789V or 123456789012)",
     })
     .optional(),
@@ -47,6 +44,25 @@ export const employeeFormSchema = z.object({
   employerName: z.string().optional(),
   employerAddress: z.string().optional(),
   date: z.string().optional(),
+  nominees: z
+    .record(
+      z.object({
+        name: z.string().optional(),
+        relationship: z.string().optional(),
+        proportion: z.union([z.string(), z.number()]).optional(),
+        nic: z
+          .string()
+          .refine(
+            (val) => val === "" || /^(?:[0-9]{9}[vVxX]|[0-9]{12})$/.test(val),
+            {
+              message:
+                "NIC must be a valid format (e.g., 123456789V or 123456789012)",
+            }
+          )
+          .optional(),
+      })
+    )
+    .optional(),
 });
 
 const getNICDetails = (nic: string) => {
@@ -152,7 +168,28 @@ const fillRadioGroup = (
   radioGroup.select(fieldMap.options[option]);
 };
 
+const validateAndConvertProportions = (
+  nominees: Record<string, { proportion: string | number }>
+) => {
+  // Convert all proportions to numbers and calculate the total sum
+  const totalProportion = Object.values(nominees)
+    .map((nominee) => {
+      // Convert proportion to a number, default to 0 if empty or invalid
+      const proportionNumber = parseFloat(nominee.proportion.toString()) || 0;
+      // Update the nominee's proportion to be a number
+      nominee.proportion = proportionNumber;
+      return proportionNumber;
+    })
+    .reduce((sum, current) => sum + current, 0); // Sum up all proportions
+
+  return totalProportion === 100;
+};
+
 export const FormAFillPDF = async (details: any) => {
+  if (!validateAndConvertProportions(details.nominees)) {
+    throw new Error("Proportions should sum to 100");
+  }
+
   const parsedDetails = employeeFormSchema.parse(details);
 
   const filePath = path.resolve(process.cwd(), "public/formA.pdf");
@@ -294,6 +331,31 @@ export const FormAFillPDF = async (details: any) => {
     form,
     aFormMap.witnessDescriptionAddress,
     `${"Owner"}\n${parsedDetails.employerAddress}`
+  );
+
+  //39. SCHEDULE
+  Object.entries(parsedDetails.nominees || {}).forEach(
+    ([index, nominee], i) => {
+      // Nominee Name
+      fillTextField(form, aFormMap.nominees[i].name, nominee.name);
+
+      // Nominee NIC
+      fillTextField(form, aFormMap.nominees[i].nic, nominee.nic);
+
+      // Nominee Relationship
+      fillTextField(
+        form,
+        aFormMap.nominees[i].relationship,
+        nominee.relationship
+      );
+
+      // Nominee Proportion
+      fillTextField(
+        form,
+        aFormMap.nominees[i].proportion,
+        nominee.proportion?.toString()
+      );
+    }
   );
 
   const pdfBytesFilled = await pdfDoc.save();

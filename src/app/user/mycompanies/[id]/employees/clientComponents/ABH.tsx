@@ -17,6 +17,9 @@ import {
   Tooltip,
   IconButton,
   Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { companyId } from "../../clientComponents/companySideBar";
@@ -24,7 +27,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-import { ArrowBack } from "@mui/icons-material";
+import { ArrowBack, ExpandMore, HorizontalRule } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 
 const ABH: React.FC<{
@@ -54,6 +57,38 @@ const ABH: React.FC<{
     employerName: "",
     employerAddress: "",
     date: "",
+    nominees: {
+      0: {
+        name: "",
+        nic: "",
+        relationship: "",
+        proportion: "100",
+      },
+      1: {
+        name: "",
+        nic: "",
+        relationship: "",
+        proportion: "",
+      },
+      2: {
+        name: "",
+        nic: "",
+        relationship: "",
+        proportion: "",
+      },
+      3: {
+        name: "",
+        nic: "",
+        relationship: "",
+        proportion: "",
+      },
+      4: {
+        name: "",
+        nic: "",
+        relationship: "",
+        proportion: "",
+      },
+    },
   });
 
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -91,15 +126,15 @@ const ABH: React.FC<{
         .map((initial: string) =>
           initial.endsWith(".") ? initial : `${initial}.`
         )
-        .join(" ");
+        .join("");
 
       // Return the formatted name
       if (/^[A-Z]\.?$/.test(fullNames[0])) {
         // Case: Initials at the beginning
-        return `${formattedInitials} ${fullNames.join(" ")}`;
+        return `${formattedInitials}${fullNames.join(" ")}`;
       } else {
         // Case: Full names at the beginning
-        return `${formattedInitials} ${fullNames.join(" ")}`;
+        return `${formattedInitials}${fullNames.join(" ")}`;
       }
     }
 
@@ -127,6 +162,7 @@ const ABH: React.FC<{
               mobileNumber: employeeResult.employee.phoneNumber,
               email: employeeResult.employee.email,
               address: employeeResult.employee.address,
+              nationality: "SRI LANKAN",
             };
           }
 
@@ -202,6 +238,26 @@ const ABH: React.FC<{
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
+    //nominees
+    if (name.startsWith("nominees")) {
+      //get the index and field
+      const [_, indexStr, nomineeField] = name.split(".");
+      const index = parseInt(indexStr) as 0 | 1 | 2 | 3 | 4;
+      setFormDetails((prevDetails) => {
+        return {
+          ...prevDetails,
+          nominees: {
+            ...prevDetails.nominees,
+            [index]: {
+              ...prevDetails.nominees[index],
+              [nomineeField]: value,
+            },
+          },
+        };
+      });
+
+      return;
+    }
     setFormDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
@@ -501,18 +557,366 @@ const ABH: React.FC<{
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <FormControl>
-              <LoadingButton
-                variant="contained"
-                color="primary"
-                onClick={handleGenerateABH}
-                disabled={loading}
-                loading={loading}
-                loadingPosition="start"
+            {/* nominations */}
+            <Accordion defaultExpanded>
+              <AccordionSummary
+                expandIcon={<ExpandMore />}
+                aria-controls="panel1-content"
+                id="panel1-header"
               >
-                <span>Generate ABH</span>
-              </LoadingButton>
-            </FormControl>
+                <Typography variant="h6">Nominations</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {/* 1 */}
+                <FormControl fullWidth>
+                  <hr className="my-2" />
+                  <Accordion defaultExpanded>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      aria-controls="panel1-content"
+                      id="panel1-header"
+                    >
+                      <Typography variant="h6">{`Nominee ${0 + 1}`}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Name"
+                              name={`nominees.${0}.name`}
+                              value={formDetails.nominees[0].name}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="NIC"
+                              name={`nominees.${0}.nic`}
+                              value={formDetails.nominees[0].nic}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Relationship"
+                              name={`nominees.${0}.relationship`}
+                              value={formDetails.nominees[0].relationship}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Propotion"
+                              name={`nominees.${0}.proportion`}
+                              value={formDetails.nominees[0].proportion}
+                              onChange={handleChange}
+                              type="number"
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                </FormControl>
+                {/* 2 */}
+                <FormControl fullWidth>
+                  <hr className="my-2" />
+                  <Accordion>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      aria-controls="panel1-content"
+                      id="panel1-header"
+                    >
+                      <Typography variant="h6">{`Nominee ${1 + 1}`}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Name"
+                              name={`nominees.${1}.name`}
+                              value={formDetails.nominees[1].name}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="NIC"
+                              name={`nominees.${1}.nic`}
+                              value={formDetails.nominees[1].nic}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Relationship"
+                              name={`nominees.${1}.relationship`}
+                              value={formDetails.nominees[1].relationship}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Propotion"
+                              name={`nominees.${1}.proportion`}
+                              value={formDetails.nominees[1].proportion}
+                              onChange={handleChange}
+                              type="number"
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                </FormControl>
+                {/* 3 */}
+                <FormControl fullWidth>
+                  <hr className="my-2" />
+                  <Accordion>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      aria-controls="panel1-content"
+                      id="panel1-header"
+                    >
+                      <Typography variant="h6">{`Nominee ${2 + 1}`}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Name"
+                              name={`nominees.${2}.name`}
+                              value={formDetails.nominees[2].name}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="NIC"
+                              name={`nominees.${2}.nic`}
+                              value={formDetails.nominees[2].nic}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Relationship"
+                              name={`nominees.${2}.relationship`}
+                              value={formDetails.nominees[2].relationship}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Propotion"
+                              name={`nominees.${2}.proportion`}
+                              value={formDetails.nominees[2].proportion}
+                              onChange={handleChange}
+                              type="number"
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                </FormControl>
+                {/* 4 */}
+                <FormControl fullWidth>
+                  <hr className="my-2" />
+                  <Accordion>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      aria-controls="panel1-content"
+                      id="panel1-header"
+                    >
+                      <Typography variant="h6">{`Nominee ${3 + 1}`}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Name"
+                              name={`nominees.${3}.name`}
+                              value={formDetails.nominees[3].name}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="NIC"
+                              name={`nominees.${3}.nic`}
+                              value={formDetails.nominees[3].nic}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Relationship"
+                              name={`nominees.${3}.relationship`}
+                              value={formDetails.nominees[3].relationship}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Propotion"
+                              name={`nominees.${3}.proportion`}
+                              value={formDetails.nominees[3].proportion}
+                              onChange={handleChange}
+                              type="number"
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                </FormControl>
+                {/* 5 */}
+                <FormControl fullWidth>
+                  <hr className="my-2" />
+                  <Accordion>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      aria-controls="panel1-content"
+                      id="panel1-header"
+                    >
+                      <Typography variant="h6">{`Nominee ${4 + 1}`}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Name"
+                              name={`nominees.${4}.name`}
+                              value={formDetails.nominees[4].name}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="NIC"
+                              name={`nominees.${4}.nic`}
+                              value={formDetails.nominees[4].nic}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Relationship"
+                              name={`nominees.${4}.relationship`}
+                              value={formDetails.nominees[4].relationship}
+                              onChange={handleChange}
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Propotion"
+                              name={`nominees.${4}.proportion`}
+                              value={formDetails.nominees[4].proportion}
+                              onChange={handleChange}
+                              type="number"
+                              variant="filled"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                </FormControl>
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="body2" color="textSecondary">
+              Note: This form is generated based on the data provided above.
+              Make sure the data is correct before generating the form.
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <LoadingButton
+              variant="contained"
+              color="primary"
+              onClick={handleGenerateABH}
+              disabled={loading}
+              loading={loading}
+              loadingPosition="center"
+            >
+              <span>Generate ABH</span>
+            </LoadingButton>
           </Grid>
         </Grid>
 
