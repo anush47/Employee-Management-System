@@ -72,9 +72,45 @@ const ABH: React.FC<{
     setSnackbarOpen(false);
   };
 
+  function formatName(input: string) {
+    // Normalize input to uppercase and trim whitespace
+    const trimmedInput = input.trim().toUpperCase();
+
+    // Split the input into words
+    const words = trimmedInput.split(/\s+/);
+
+    // Check if initials are at the beginning or the end
+    const initials = words.filter(
+      (word: string) => /^[A-Z]\.?$/.test(word) || /^[A-Z]$/.test(word)
+    );
+    const fullNames = words.filter((word: any) => !initials.includes(word));
+
+    if (initials.length > 0 && fullNames.length > 0) {
+      // Normalize initials to have dots and reassemble
+      const formattedInitials = initials
+        .map((initial: string) =>
+          initial.endsWith(".") ? initial : `${initial}.`
+        )
+        .join(" ");
+
+      // Return the formatted name
+      if (/^[A-Z]\.?$/.test(fullNames[0])) {
+        // Case: Initials at the beginning
+        return `${formattedInitials} ${fullNames.join(" ")}`;
+      } else {
+        // Case: Full names at the beginning
+        return `${formattedInitials} ${fullNames.join(" ")}`;
+      }
+    }
+
+    // Return input unchanged if format doesn't match expected patterns
+    return input;
+  }
+
   useEffect(() => {
     if (companyId) {
       setLoading(true);
+
       const fetchEmployeeData = async () => {
         try {
           let employeeData = {};
@@ -84,7 +120,7 @@ const ABH: React.FC<{
             );
             const employeeResult = await employeeResponse.json();
             employeeData = {
-              fullName: employeeResult.employee.name,
+              nameWithInitials: formatName(employeeResult.employee.name),
               nic: employeeResult.employee.nic,
               memberNo: employeeResult.employee.memberNo,
               designation: employeeResult.employee.designation,
