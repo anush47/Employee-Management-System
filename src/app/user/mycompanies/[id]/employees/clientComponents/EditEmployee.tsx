@@ -183,10 +183,6 @@ const EditEmployeeForm: React.FC<{
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
   ) => {
     let { name, value } = event.target;
-    //capitalize for name,nic
-    if (name === "name" || name === "nic") {
-      value = value.toUpperCase();
-    }
     if (name === "active") {
       value = event.target.checked;
     }
@@ -214,6 +210,13 @@ const EditEmployeeForm: React.FC<{
     }
 
     setLoading(true);
+    //capitalize for name,nic
+    if (formFields.name) {
+      formFields.name = formFields.name.toUpperCase();
+    }
+    if (formFields.nic) {
+      formFields.nic = formFields.nic.toUpperCase();
+    }
     try {
       // Perform POST request to update the employee
       const response = await fetch("/api/employees/one", {
