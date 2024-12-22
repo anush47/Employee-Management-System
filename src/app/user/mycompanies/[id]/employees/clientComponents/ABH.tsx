@@ -53,6 +53,7 @@ const ABH: React.FC<{
     email: "",
     employerName: "",
     employerAddress: "",
+    date: "",
   });
 
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -435,6 +436,32 @@ const ABH: React.FC<{
                 variant="filled"
                 disabled={loading}
               />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="en-gb"
+              >
+                <DatePicker
+                  readOnly={loading}
+                  label="Date"
+                  name="date"
+                  openTo="year"
+                  value={dayjs(formDetails.date, "DD-MM-YYYY")}
+                  views={["year", "month", "day"]}
+                  onChange={(newDate) => {
+                    setFormDetails((prevDetails) => ({
+                      ...prevDetails,
+                      date: newDate?.format("DD-MM-YYYY") as string,
+                    }));
+                  }}
+                  slotProps={{
+                    field: { clearable: true },
+                  }}
+                />
+              </LocalizationProvider>
             </FormControl>
           </Grid>
           <Grid item xs={12}>

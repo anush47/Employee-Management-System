@@ -46,6 +46,7 @@ export const employeeFormSchema = z.object({
     .optional(),
   employerName: z.string().optional(),
   employerAddress: z.string().optional(),
+  date: z.string().optional(),
 });
 
 const getNICDetails = (nic: string) => {
@@ -249,6 +250,51 @@ export const FormAFillPDF = async (details: any) => {
   //23. Employer Name & Address
   const nameAndAddress = `${parsedDetails.employerName}\n${parsedDetails.employerAddress}`;
   fillTextField(form, aFormMap.employerNameAndAddress, nameAndAddress);
+
+  //25. Date
+  if (parsedDetails.date) {
+    fillTextField(form, aFormMap.date, parsedDetails.date.replace(/-/g, "/"));
+  }
+
+  //27.Employer’s No
+  if (parsedDetails.employerNo) {
+    const employerNo = parsedDetails.employerNo.split("/");
+    fillTextField(form, aFormMap.employerNo_H.number, employerNo[1]);
+    fillTextField(form, aFormMap.employerNo_H.zone, employerNo[0]);
+  }
+
+  //28.Member’s No
+  fillTextField(form, aFormMap.memberNo_H, parsedDetails.memberNo?.toString());
+
+  //29.employee employer names
+  fillTextField(form, aFormMap.employeeName_H, parsedDetails.fullName);
+  fillTextField(form, aFormMap.employerName_H, parsedDetails.employerName);
+
+  //30. date
+  if (parsedDetails.date) {
+    fillTextField(form, aFormMap.date_H, parsedDetails.date.replace(/-/g, "/"));
+  }
+
+  //35.employee employer names
+  fillTextField(form, aFormMap.employeeName_H_2, parsedDetails.fullName);
+  fillTextField(form, aFormMap.employerName_H_2, parsedDetails.employerName);
+  if (parsedDetails.date) {
+    fillTextField(
+      form,
+      aFormMap.date_H_2,
+      parsedDetails.date.replace(/-/g, "/")
+    );
+  }
+
+  // 36. Name of Witness
+  fillTextField(form, aFormMap.witnessName_H, parsedDetails.employerName);
+
+  // 38. Description and Address of Witness
+  fillTextField(
+    form,
+    aFormMap.witnessDescriptionAddress,
+    `${"Owner"}\n${parsedDetails.employerAddress}`
+  );
 
   const pdfBytesFilled = await pdfDoc.save();
   //return null;

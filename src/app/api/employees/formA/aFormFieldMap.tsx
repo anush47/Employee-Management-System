@@ -52,4 +52,20 @@ export const aFormMap = {
   ),
   email: ["Text Box 9"],
   employerNameAndAddress: ["Text Box 30"],
+  date: ["Date Field 1_3"],
+  employerNo_H: {
+    number: Array.from({ length: 6 }, (_, i) => `Text Box 6_${i + 146}`).concat(
+      [`Text Box 6_160`]
+    ),
+    zone: ["Text Box 6_152"],
+  },
+  memberNo_H: Array.from({ length: 7 }, (_, i) => `Text Box 6_${i + 153}`),
+  employeeName_H: ["Text Box 4"],
+  employerName_H: ["Text Box 4_2"],
+  date_H: ["Date Field 1"],
+  employerName_H_2: ["Text Box 4_3"],
+  employeeName_H_2: ["Text Box 4_4"],
+  date_H_2: ["Date Field 1_2"],
+  witnessName_H: ["Text Box 4_5"],
+  witnessDescriptionAddress: ["Text Box 5"],
 };
