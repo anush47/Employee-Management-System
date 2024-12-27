@@ -95,6 +95,7 @@ const PurchasesDataGrid: React.FC<{
       field: "price",
       headerName: "Price",
       flex: 1,
+      type: "number",
       align: "left",
       headerAlign: "left",
     },
