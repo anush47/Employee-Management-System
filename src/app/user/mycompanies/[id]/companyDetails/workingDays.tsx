@@ -10,7 +10,11 @@ import {
   CardHeader,
   CardContent,
   useTheme,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
+import { ExpandMore } from "@mui/icons-material";
 
 interface WorkingDaysProps {
   workingDays: { [key: string]: "full" | "half" | "off" };
@@ -54,15 +58,15 @@ export const WorkingDays = ({
   };
 
   return (
-    <Card>
-      <CardHeader
-        title={
-          <Typography variant="h5" mb={2}>
-            Working Days
-          </Typography>
-        }
-      />
-      <CardContent>
+    <Accordion>
+      <AccordionSummary
+        expandIcon={<ExpandMore />}
+        aria-controls="panel1-content"
+        id="panel1-header"
+      >
+        <Typography variant="h5">Working Days</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
         <Grid container spacing={3}>
           {daysOfWeek.map((day) => (
             <Grid item xs={12} sm={6} md={4} key={day}>
@@ -86,7 +90,7 @@ export const WorkingDays = ({
             </Grid>
           ))}
         </Grid>
-      </CardContent>
-    </Card>
+      </AccordionDetails>
+    </Accordion>
   );
 };
