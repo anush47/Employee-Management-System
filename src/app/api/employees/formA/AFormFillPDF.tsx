@@ -304,7 +304,7 @@ export const FormAFillPDF = async (details: any) => {
   fillTextField(form, aFormMap.memberNo_H, parsedDetails.memberNo?.toString());
 
   //29.employee employer names
-  fillTextField(form, aFormMap.employeeName_H, parsedDetails.fullName);
+  fillTextField(form, aFormMap.employeeName_H, parsedDetails.nameWithInitials);
   fillTextField(form, aFormMap.employerName_H, parsedDetails.employerName);
 
   //30. date
@@ -313,7 +313,11 @@ export const FormAFillPDF = async (details: any) => {
   }
 
   //35.employee employer names
-  fillTextField(form, aFormMap.employeeName_H_2, parsedDetails.fullName);
+  fillTextField(
+    form,
+    aFormMap.employeeName_H_2,
+    parsedDetails.nameWithInitials
+  );
   fillTextField(form, aFormMap.employerName_H_2, parsedDetails.employerName);
   if (parsedDetails.date) {
     fillTextField(
@@ -350,11 +354,13 @@ export const FormAFillPDF = async (details: any) => {
       );
 
       // Nominee Proportion
-      fillTextField(
-        form,
-        aFormMap.nominees[i].proportion,
-        nominee.proportion?.toString()
-      );
+      if (nominee.proportion !== "" && nominee.proportion !== 0) {
+        fillTextField(
+          form,
+          aFormMap.nominees[i].proportion,
+          nominee.proportion?.toString()
+        );
+      }
     }
   );
 
