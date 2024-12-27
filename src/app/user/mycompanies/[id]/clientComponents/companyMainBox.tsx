@@ -1,18 +1,11 @@
 "use client";
 import React, { Suspense, lazy, useState, useEffect } from "react";
-import {
-  Box,
-  Toolbar,
-  LinearProgress,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
+import { Box, Toolbar, CircularProgress } from "@mui/material";
 import "@fontsource/roboto/400.css";
 import { selected } from "./companySideBar";
-import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "./companySideBar";
 
-// // Lazy load the components
+// Lazy load the components
 const CompanyDetails = lazy(() => import("../companyDetails/companyDetails"));
 const Employees = lazy(() => import("../employees/employees"));
 const QuickTools = lazy(() => import("../quick/quick"));
@@ -26,6 +19,12 @@ const CompanyMainBox = ({
 }: {
   user: { name: string; email: string; id: string; role: string };
 }) => {
+  const [currentSelected, setCurrentSelected] = useState(selected);
+
+  useEffect(() => {
+    setCurrentSelected(selected);
+  }, [selected]);
+
   const fallback = (
     <Box
       display="flex"
@@ -38,72 +37,28 @@ const CompanyMainBox = ({
   );
 
   const RenderComponent = () => {
-    // Simulate a delay
     return (
-      <Suspense
-        fallback={
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100vh", // Full viewport height to center vertically
-            }}
-          >
-            <CircularProgress size={80} /> {/* Adjust size as needed */}
-          </div>
-        }
-      >
-        <div>
-          {(() => {
-            switch (selected) {
-              case "quick":
-                return (
-                  <Suspense fallback={fallback}>
-                    <QuickTools user={user} />
-                  </Suspense>
-                );
-              case "details":
-                return (
-                  <Suspense fallback={fallback}>
-                    <CompanyDetails user={user} />
-                  </Suspense>
-                );
-              case "employees":
-                return (
-                  <Suspense fallback={fallback}>
-                    <Employees user={user} />
-                  </Suspense>
-                );
-              case "payments":
-                return (
-                  <Suspense fallback={fallback}>
-                    <Payments user={user} />
-                  </Suspense>
-                );
-              case "salaries":
-                return (
-                  <Suspense fallback={fallback}>
-                    <Salaries user={user} />
-                  </Suspense>
-                );
-              case "purchases":
-                return (
-                  <Suspense fallback={fallback}>
-                    <Purchases user={user} />
-                  </Suspense>
-                );
-              case "documents":
-                return (
-                  <Suspense fallback={fallback}>
-                    <Documents user={user} />
-                  </Suspense>
-                );
-              default:
-                return <div>Component not found</div>;
-            }
-          })()}
-        </div>
+      <Suspense fallback={fallback}>
+        {(() => {
+          switch (currentSelected) {
+            case "quick":
+              return <QuickTools user={user} />;
+            case "details":
+              return <CompanyDetails user={user} />;
+            case "employees":
+              return <Employees user={user} />;
+            case "payments":
+              return <Payments user={user} />;
+            case "salaries":
+              return <Salaries user={user} />;
+            case "purchases":
+              return <Purchases user={user} />;
+            case "documents":
+              return <Documents user={user} />;
+            default:
+              return <div>Component not found</div>;
+          }
+        })()}
       </Suspense>
     );
   };
@@ -113,6 +68,8 @@ const CompanyMainBox = ({
       component="main"
       sx={{
         flexGrow: 1,
+        minHeight: "100vh",
+        overflowY: "auto",
       }}
     >
       <Toolbar />
