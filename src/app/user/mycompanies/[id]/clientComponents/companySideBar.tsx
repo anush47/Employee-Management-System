@@ -95,7 +95,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
   }
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setMobileOpen((prevState) => !prevState);
   };
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -233,10 +233,13 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
           <ListItem key={menu.name} disablePadding>
             <ListItemButton
               selected={selected === menu.key}
-              onClick={() => handleDrawerToggle()}
+              onClick={() => {
+                if (selected !== menu.key) {
+                  selected = menu.key as Selected;
+                }
+              }}
               component={Link}
-              href={`
-                /user/mycompanies/${companyId}?companyPageSelect=${menu.key}`}
+              href={`/user/mycompanies/${companyId}?companyPageSelect=${menu.key}`}
               sx={{
                 "&.Mui-selected": {
                   backgroundColor: theme.palette.action.selected,

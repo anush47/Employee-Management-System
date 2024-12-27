@@ -64,7 +64,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
 
   //search params to get selected
   const searchParams = useSearchParams();
-  const selectedParam = searchParams.get("userPageSelect");
+  const selectedParam = searchParams?.get("userPageSelect");
   if (selectedParam) {
     selected = selectedParam as Selected;
   }
@@ -84,7 +84,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   }
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setMobileOpen((prevState) => !prevState);
   };
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -193,7 +193,11 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           <ListItem key={menu.name} disablePadding>
             <ListItemButton
               selected={selected === menu.key}
-              onClick={() => handleDrawerToggle()}
+              onClick={() => {
+                if (selected !== menu.key) {
+                  selected = menu.key as Selected;
+                }
+              }}
               component={Link}
               href={`/user/?userPageSelect=${menu.key}`}
               sx={{
