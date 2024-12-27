@@ -823,7 +823,10 @@ const CompanyDetails = ({
                       Mode: {modeTexts[company.mode as keyof typeof modeTexts]}
                     </Typography>
                     <Typography>
-                      Price: LKR {company.monthlyPrice.toLocaleString()}
+                      Price: LKR{" "}
+                      {company.monthlyPrice
+                        ? company.monthlyPrice.toLocaleString()
+                        : "N/A"}
                     </Typography>
                   </>
                 )}
