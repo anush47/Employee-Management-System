@@ -163,6 +163,7 @@ const ABH: React.FC<{
               email: employeeResult.employee.email,
               address: employeeResult.employee.address,
               nationality: "SRI LANKAN",
+              startDate: employeeResult.employee.startedAt,
             };
           }
 
