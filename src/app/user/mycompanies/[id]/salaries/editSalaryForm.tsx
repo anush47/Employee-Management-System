@@ -543,7 +543,7 @@ const EditSalaryForm: React.FC<{
                   aria-controls="panel1-content"
                   id="panel1-header"
                 >
-                  <Typography>In Out Details</Typography>
+                  <Typography variant="h5">In Out Details</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   {" "}
