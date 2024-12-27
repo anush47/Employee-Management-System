@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import User from "@/app/models/User";
 import bcrypt from "bcrypt";
 import dbConnect from "@/app/lib/db";
@@ -30,7 +31,10 @@ export const options: NextAuthOptions = {
         //
         await dbConnect();
         const user = await User.findOne({ email });
-        if (user && bcrypt.compareSync(password, user.password)) {
+        //if password is google then return null
+        if (password === "google") {
+          return null;
+        } else if (user && bcrypt.compareSync(password, user.password)) {
           // Any object returned will be saved in `user` property of the JWT
           return user;
         } else {
@@ -40,10 +44,14 @@ export const options: NextAuthOptions = {
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
   ],
   pages: {
-    signIn: "/auth/signIn",
-    error: "/auth/signIn",
+    // signIn: "/auth/signin",
+    // error: "/auth/signin",
   },
   callbacks: {
     async jwt({ token, trigger, session }) {
@@ -62,6 +70,32 @@ export const options: NextAuthOptions = {
       token.role = user.role;
 
       return token;
+    },
+
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account?.provider === "google") {
+        //if new user, create user
+        //search for user in db
+        await dbConnect();
+        const _user = await User.findOne({ email: user.email });
+        console.log("User", _user);
+        if (!_user) {
+          console.log("Creating new user", user);
+          const newUser = new User({
+            name: user.name,
+            email: user.email,
+            role: "employer",
+            password: "google",
+          });
+          await newUser.save();
+          return true;
+        }
+        user.name = _user.name;
+        user.role = _user.role;
+        return true;
+      }
+
+      return true;
     },
 
     async session({ session, user, token }) {

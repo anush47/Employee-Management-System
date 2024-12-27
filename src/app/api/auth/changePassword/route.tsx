@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const json = await req.json();
     const { oldPassword, newPassword } = json;
 
-    if (!oldPassword || !newPassword) {
+    if (!newPassword) {
       return NextResponse.json(
         { error: "Both old and new passwords are required" },
         { status: 400 }
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     // Check if the old password matches
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) {
+    if (!isMatch && user.password !== "google") {
       return NextResponse.json(
         { error: "Incorrect old password" },
         { status: 400 }
