@@ -167,7 +167,11 @@ const CompaniesCards = ({
           title={
             <Typography
               variant="h6"
-              sx={{ fontWeight: "600", color: "text.primary" }}
+              sx={{
+                fontWeight: "600",
+                color: "text.primary",
+                whiteSpace: "nowrap",
+              }}
             >
               {company.name}
             </Typography>
