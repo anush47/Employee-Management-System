@@ -99,7 +99,6 @@ export default function ChangePasswordDialog({
               <>
                 <TextField
                   autoFocus
-                  required
                   margin="dense"
                   id="oldPassword"
                   name="oldPassword"
