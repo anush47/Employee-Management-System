@@ -12,8 +12,11 @@ import {
   Card,
   CardHeader,
   CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
-import { Add, Remove } from "@mui/icons-material";
+import { Add, ExpandMore, Remove } from "@mui/icons-material";
 
 interface ShiftsProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -73,15 +76,15 @@ export const Shifts = ({
   };
 
   return (
-    <Card>
-      <CardHeader
-        title={
-          <Typography variant="h5" mb={2}>
-            Shifts
-          </Typography>
-        }
-      />
-      <CardContent>
+    <Accordion>
+      <AccordionSummary
+        expandIcon={<ExpandMore />}
+        aria-controls="panel1-content"
+        id="panel1-header"
+      >
+        <Typography variant="h5">Shifts</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             {shifts &&
@@ -154,7 +157,7 @@ export const Shifts = ({
             )}
           </Grid>
         </Grid>
-      </CardContent>
-    </Card>
+      </AccordionDetails>
+    </Accordion>
   );
 };
