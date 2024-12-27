@@ -176,7 +176,7 @@ const ABH: React.FC<{
             ...employeeData,
             employerNo: companyResult.company.employerNo,
             employerName: companyResult.company.employerName,
-            companyAddress: companyResult.company.employerAddress,
+            employerAddress: companyResult.company.employerAddress,
           }));
 
           setSnackbarMessage("Data fetched successfully");
