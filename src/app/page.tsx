@@ -19,7 +19,7 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import GroupIcon from "@mui/icons-material/Group";
 import { ThemeSwitch } from "./theme-provider";
-import { ArrowForward, Logout } from "@mui/icons-material";
+import { ArrowForward, Logout, Phone, WhatsApp } from "@mui/icons-material";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -236,15 +236,48 @@ export default function LandingPage() {
             For inquiries or support, reach out to us at:
           </Typography>
 
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-            <Button
-              variant="text"
-              startIcon={<EmailIcon />}
-              href="mailto:support@salaryapp.com"
-              color="info"
-            >
-              support@salaryapp.com
-            </Button>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Link href="https://wa.me/94717539478">
+              <Button
+                color="primary"
+                size="medium"
+                variant="outlined"
+                startIcon={<WhatsApp />}
+              >
+                +94 71 753 9478
+              </Button>
+            </Link>
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+              {/* phone number */}
+              <Link href="tel:+94717539478">
+                <Button
+                  color="primary"
+                  variant="text"
+                  sx={{ mb: 2 }}
+                  startIcon={<Phone />}
+                >
+                  +94 71 753 9478
+                </Button>
+              </Link>
+              {/* email */}
+              <Link href="mailto:salaryapp2025@gmail.com">
+                <Button
+                  color="primary"
+                  variant="text"
+                  sx={{ mb: 2 }}
+                  startIcon={<EmailIcon />}
+                >
+                  salaryapp2025@gmail.com
+                </Button>
+              </Link>
+            </Box>
           </Box>
         </Box>
       </Container>
