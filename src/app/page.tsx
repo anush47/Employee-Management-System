@@ -103,8 +103,8 @@ export default function LandingPage() {
               }}
             >
               <span style={{ color: theme.palette.text.secondary }}>
-                Welcome to Salary App, Simplify Salary, EPF/ETF, AH Form
-                Management, and Employee Operations for Your Business.
+                Simplify Salary, EPF/ETF, AH Form Management, and Employee
+                Operations for Your Business.
               </span>
             </Typography>
 
