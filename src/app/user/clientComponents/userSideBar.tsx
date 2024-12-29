@@ -35,6 +35,7 @@ import {
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { ThemeSwitch } from "@/app/theme-provider";
 
@@ -52,7 +53,7 @@ export type Selected =
 
 interface Props {
   window?: Window | undefined;
-  user: { name: string; email: string; role: string };
+  user: { name: string; email: string; role: string; image: string };
 }
 export let selected: Selected = "mycompanies";
 
@@ -179,7 +180,11 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           padding: 3,
         }}
       >
-        <Avatar sx={{ width: 80, height: 80, mb: 2 }}></Avatar>
+        <Avatar
+          alt={user.name}
+          src={user.image}
+          sx={{ width: 80, height: 80, mb: 2 }}
+        />
         <Typography color="primary" variant="h6" noWrap component="div">
           {user.name === "" ? "Stranger" : user.name}
         </Typography>
@@ -243,7 +248,10 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           >
             <MenuIcon />
           </IconButton>
-          <div className="flex-grow">
+          <div
+            className="flex-grow"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <Link href={"/"}>
               <Typography
                 variant="h5"
@@ -254,6 +262,18 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
                 Salary App
               </Typography>
             </Link>
+            <Image
+              src="/Logo.png"
+              alt="Logo"
+              width={30}
+              height={30}
+              style={{
+                padding: 0,
+                margin: 0,
+                marginLeft: 2,
+                objectFit: "fill",
+              }}
+            />
           </div>
           <Breadcrumbs
             separator={<NavigateNext fontSize={"small"} />}
@@ -271,7 +291,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
             <ThemeSwitch />
           </div>
           <IconButton onClick={handleMenuClick} color="inherit">
-            <Avatar></Avatar>
+            <Avatar alt={user.name} src={user.image} />
           </IconButton>
           <Menu
             anchorEl={anchorEl}

@@ -18,8 +18,9 @@ const UserPage = async () => {
                 name: user.name ?? "",
                 email: user.email ?? "",
                 role: user.role ?? "",
+                image: user.image ?? "",
               }
-            : { name: "", email: "", role: "" }
+            : { name: "", email: "", role: "", image: "" }
         }
       />
       <UserMainBox
@@ -30,8 +31,9 @@ const UserPage = async () => {
                 email: user.email ?? "",
                 id: user.id ?? "",
                 role: user.role ?? "",
+                image: user.image ?? "",
               }
-            : { name: "", email: "", id: "", role: "" }
+            : { name: "", email: "", id: "", role: "", image: "" }
         }
       />
     </Box>

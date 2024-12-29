@@ -17,7 +17,13 @@ const Documents = lazy(() => import("../documents/documents"));
 const CompanyMainBox = ({
   user,
 }: {
-  user: { name: string; email: string; id: string; role: string };
+  user: {
+    name: string;
+    email: string;
+    id: string;
+    role: string;
+    image: string;
+  };
 }) => {
   const [currentSelected, setCurrentSelected] = useState(selected);
 

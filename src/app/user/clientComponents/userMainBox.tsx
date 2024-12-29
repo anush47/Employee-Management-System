@@ -16,7 +16,13 @@ const Salaries = lazy(() => import("../salaries/salaries"));
 const UserMainBox = ({
   user,
 }: {
-  user: { name: string; email: string; id: string; role: string };
+  user: {
+    name: string;
+    email: string;
+    id: string;
+    role: string;
+    image: string;
+  };
 }) => {
   const fallback = (
     <Box

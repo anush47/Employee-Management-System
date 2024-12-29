@@ -14,8 +14,13 @@ const UserPage = async () => {
       <CompanySideBar
         user={
           user
-            ? { name: user.name ?? "", email: user.email ?? "" }
-            : { name: "", email: "" }
+            ? {
+                name: user.name ?? "",
+                email: user.email ?? "",
+                image: user.image ?? "",
+                role: user.role ?? "",
+              }
+            : { name: "", email: "", image: "", role: "" }
         }
       />
       <MainBox
@@ -26,8 +31,9 @@ const UserPage = async () => {
                 email: user.email ?? "",
                 id: user.id ?? "",
                 role: user.role ?? "",
+                image: user.image ?? "",
               }
-            : { name: "", email: "", id: "", role: "" }
+            : { name: "", email: "", id: "", role: "", image: "" }
         }
       />
     </Box>

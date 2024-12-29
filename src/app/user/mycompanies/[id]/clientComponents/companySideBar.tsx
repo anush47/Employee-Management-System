@@ -36,6 +36,7 @@ import {
   Summarize,
 } from "@mui/icons-material";
 import Link from "next/link";
+import Image from "next/image";
 import { Link as LinkM } from "@mui/material";
 import { useSearchParams, useParams } from "next/navigation";
 import { Company } from "../../clientComponents/companiesDataGrid";
@@ -55,7 +56,7 @@ export type Selected =
 
 interface Props {
   window?: Window | undefined;
-  user: { name: string; email: string };
+  user: { name: string; email: string; role: string; image: string };
 }
 export let selected: Selected = "details";
 export let companyId: string;
@@ -304,7 +305,10 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
           >
             <MenuIcon />
           </IconButton>
-          <div className="flex-grow">
+          <div
+            className="flex-grow"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <Link href={"/"}>
               <Typography
                 variant="h5"
@@ -315,6 +319,18 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
                 Salary App
               </Typography>
             </Link>
+            <Image
+              src="/Logo.png"
+              alt="Logo"
+              width={30}
+              height={30}
+              style={{
+                padding: 0,
+                margin: 0,
+                marginLeft: 2,
+                objectFit: "fill",
+              }}
+            />
           </div>
           <Breadcrumbs
             separator={<NavigateNext fontSize="small" />}
@@ -332,7 +348,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
             <ThemeSwitch />
           </div>
           <IconButton onClick={handleMenuClick} color="inherit">
-            <Avatar></Avatar>
+            <Avatar alt={user.name} src={user.image} />
           </IconButton>
           <Menu
             anchorEl={anchorEl}
