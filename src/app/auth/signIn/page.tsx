@@ -13,6 +13,7 @@ import {
   CardHeader,
   Divider,
   TextField,
+  useTheme,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { signIn } from "next-auth/react";
@@ -77,6 +78,8 @@ const SignInPage: React.FC = () => {
     event.preventDefault();
   };
 
+  const theme = useTheme();
+
   return (
     <Box
       display="flex"
@@ -85,6 +88,13 @@ const SignInPage: React.FC = () => {
       minHeight="100vh"
       bgcolor="background.default"
       padding={3}
+      style={{
+        background:
+          theme.palette.mode === "dark"
+            ? "linear-gradient(to right, #0f2c61, #1a237e, #283593, #303f9f)"
+            : "linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9)",
+        color: theme.palette.text.primary,
+      }}
     >
       <Paper
         elevation={6}

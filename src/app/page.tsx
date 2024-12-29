@@ -70,8 +70,11 @@ export default function LandingPage() {
                   display: "inline-block",
                   overflow: "hidden",
                   whiteSpace: "nowrap",
-                  animation:
-                    "typing 3.5s steps(40, end), blink-caret 0.75s step-end 3.5s forwards",
+                  animation: `typing ${
+                    theme.breakpoints.down("sm")
+                      ? "3s steps(30, end)"
+                      : "6s steps(60, end)"
+                  }`,
                 }}
               >
                 <span style={{ color: theme.palette.primary.main }}>
@@ -87,15 +90,6 @@ export default function LandingPage() {
                   }
                   to {
                     width: 100%;
-                  }
-                }
-                @keyframes blink-caret {
-                  from,
-                  to {
-                    border-color: transparent;
-                  }
-                  50% {
-                    border-color: orange;
                   }
                 }
               `}</style>
@@ -175,7 +169,7 @@ export default function LandingPage() {
                 sx={{ fontSize: 60, color: theme.palette.primary.main }}
               />
               <Typography variant="h6" sx={{ mt: 2 }}>
-                Comprehensive Employee Management
+                Easy Employee Management
               </Typography>
               <Typography variant="body2">
                 Add, edit, and manage employee records efficiently, all in one
@@ -212,34 +206,12 @@ export default function LandingPage() {
 
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
             <Button
-              variant="outlined"
+              variant="text"
               startIcon={<EmailIcon />}
               href="mailto:support@salaryapp.com"
-              sx={{
-                color: theme.palette.primary.main,
-                borderColor: theme.palette.primary.main,
-                ":hover": {
-                  backgroundColor: theme.palette.primary.light,
-                },
-                width: { xs: "100%", sm: "auto" },
-              }}
+              color="info"
             >
               support@salaryapp.com
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<ContactMailIcon />}
-              href="mailto:business@salaryapp.com"
-              sx={{
-                color: theme.palette.primary.main,
-                borderColor: theme.palette.primary.main,
-                ":hover": {
-                  backgroundColor: theme.palette.primary.light,
-                },
-                width: { xs: "100%", sm: "auto" },
-              }}
-            >
-              business@salaryapp.com
             </Button>
           </Box>
         </Box>
