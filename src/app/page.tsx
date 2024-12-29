@@ -255,13 +255,20 @@ export default function LandingPage() {
                 +94 71 753 9478
               </Button>
             </Link>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                justifyContent: "center",
+                gap: 2,
+              }}
+            >
               {/* phone number */}
               <Link href="tel:+94717539478">
                 <Button
                   color="primary"
                   variant="text"
-                  sx={{ mb: 2 }}
+                  sx={{ mb: { xs: 0, sm: 2 } }}
                   startIcon={<Phone />}
                 >
                   +94 71 753 9478
@@ -272,7 +279,7 @@ export default function LandingPage() {
                 <Button
                   color="primary"
                   variant="text"
-                  sx={{ mb: 2 }}
+                  sx={{ mb: { xs: 1, sm: 2 } }}
                   startIcon={<EmailIcon />}
                 >
                   salaryapp2025@gmail.com
