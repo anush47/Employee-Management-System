@@ -121,15 +121,16 @@ const SignInPage: React.FC = () => {
           sx={{ mb: 3 }}
         />
         <Box display="flex" flexDirection="column" gap={3}>
-          <Button
+          <LoadingButton
             variant="contained"
             color="primary"
             onClick={handleLoginGoogle}
             startIcon={<Google />}
+            loading={loading}
             sx={{ textTransform: "none", fontSize: "1rem", py: 1.5 }}
           >
             Continue with Google
-          </Button>
+          </LoadingButton>
           <Divider flexItem>
             <Typography variant="body2" color="text.secondary">
               OR
@@ -140,9 +141,9 @@ const SignInPage: React.FC = () => {
               variant="outlined"
               color="primary"
               onClick={() => setShowEmailLogin(true)}
-              sx={{ textTransform: "none", fontSize: "1rem", py: 1.2 }}
+              sx={{ textTransform: "none", fontSize: "0.6rem", py: 1.2 }}
             >
-              Continue with Email and Password
+              Continue with Email
             </Button>
           )}
           {showEmailLogin && (
