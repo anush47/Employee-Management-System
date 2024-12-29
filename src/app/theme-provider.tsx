@@ -65,10 +65,11 @@ const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
   // Effect to load theme from localStorage (client-side only)
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
-    if (storedTheme === "light") {
-      setTheme(lightTheme);
-    } else {
+    //choose default here
+    if (storedTheme === "dark") {
       setTheme(darkTheme);
+    } else {
+      setTheme(lightTheme);
     }
   }, []); // Only runs once after mount
 
