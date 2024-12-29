@@ -76,19 +76,20 @@ export default function LandingPage() {
         >
           <CardContent>
             <div className="flex justify-center">
-              <Image
-                src="/Logo_Withtext.png"
-                alt="Logo"
-                width={400}
-                height={400}
-                style={{
-                  padding: 0,
-                  margin: 0,
-                  marginRight: 65,
-                  marginBottom: 10,
-                  objectFit: "cover",
-                }}
-              />
+              <div className="me-0 sm:me-10">
+                <Image
+                  src="/Logo_Withtext.png"
+                  alt="Logo"
+                  width={400}
+                  height={400}
+                  style={{
+                    padding: 0,
+                    margin: 0,
+                    marginBottom: 10,
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
             </div>
             <Typography
               variant="body1"
