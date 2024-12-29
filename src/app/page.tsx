@@ -11,6 +11,7 @@ import {
   useTheme,
   IconButton,
   Tooltip,
+  Paper,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
@@ -21,6 +22,7 @@ import { ThemeSwitch } from "./theme-provider";
 import { ArrowForward, Logout } from "@mui/icons-material";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -73,50 +75,27 @@ export default function LandingPage() {
           }}
         >
           <CardContent>
-            <Typography
-              variant="h2"
-              component="h1"
-              sx={{
-                fontWeight: "bold",
-                mb: 2,
-                fontSize: { xs: "2rem", md: "3rem" },
-              }}
-            >
-              <span
+            <div className="flex justify-center">
+              <Image
+                src="/Logo_Withtext.png"
+                alt="Logo"
+                width={400}
+                height={400}
                 style={{
-                  display: "inline-block",
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                  animation: `typing ${
-                    theme.breakpoints.down("sm")
-                      ? "3s steps(30, end)"
-                      : "6s steps(60, end)"
-                  }`,
+                  padding: 0,
+                  margin: 0,
+                  marginRight: 65,
+                  marginBottom: 10,
+                  objectFit: "cover",
                 }}
-              >
-                <span style={{ color: theme.palette.primary.main }}>
-                  Salary
-                </span>
-                App
-                <span style={{ color: theme.palette.primary.main }}>.</span>
-              </span>
-              <style jsx>{`
-                @keyframes typing {
-                  from {
-                    width: 0;
-                  }
-                  to {
-                    width: 100%;
-                  }
-                }
-              `}</style>
-            </Typography>
-
+              />
+            </div>
             <Typography
               variant="body1"
               sx={{
-                mb: 8,
-                fontSize: { xs: "1rem", md: "1.2rem" },
+                mt: 4,
+                mb: 2,
+                fontSize: { xs: "0.8rem", md: "1rem" },
               }}
             >
               <span style={{ color: theme.palette.text.secondary }}>
