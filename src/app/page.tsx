@@ -1,3 +1,4 @@
+"use client";
 import {
   Box,
   Button,
@@ -5,88 +6,244 @@ import {
   CardContent,
   Divider,
   Typography,
-  Avatar,
+  Container,
+  Grid,
+  useTheme,
 } from "@mui/material";
-import { options } from "./api/auth/[...nextauth]/options";
-import { getServerSession } from "next-auth";
-import Link from "next/link";
+import EmailIcon from "@mui/icons-material/Email";
+import ContactMailIcon from "@mui/icons-material/ContactMail";
+import BusinessIcon from "@mui/icons-material/Business";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import GroupIcon from "@mui/icons-material/Group";
+import { ThemeSwitch } from "./theme-provider";
+import { ArrowForward } from "@mui/icons-material";
 
-export default async function Home() {
-  const session = await getServerSession(options);
+export default function LandingPage() {
+  const theme = useTheme();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-500 via-green-500 to-teal-500 p-4 sm:p-8">
-      <Card
-        sx={{
-          width: "100%",
-          maxWidth: { xs: "100%", md: "md" },
-          p: { xs: 3, sm: 5 },
-          borderRadius: 4,
-          boxShadow: 6,
-          textAlign: "center",
-          gap: 3,
-        }}
-      >
-        <CardContent>
-          {session ? (
-            <div>
-              <Avatar
-                alt={session?.user?.name || ""}
-                src={session?.user?.image || ""}
-                sx={{ width: 80, height: 80, margin: "0 auto 16px" }}
-              />
-              <Typography variant="h4" component="h1" className="font-bold">
-                Welcome back, {session?.user?.name}!
-              </Typography>
-              <Typography variant="body1" className="mt-2">
-                We&apos;re glad to see you again. Explore your dashboard to
-                manage your salary details.
-              </Typography>
-              <Divider
-                sx={{
-                  my: 3,
-                }}
-              />
-              <Box
-                className="mt-6"
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  justifyContent: "center",
-                  gap: 2,
+    <main
+      className="flex flex-col items-center justify-center min-h-screen"
+      style={{
+        background:
+          theme.palette.mode === "dark"
+            ? "linear-gradient(to right, #0f2c61, #1a237e, #283593, #303f9f)"
+            : "linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9)",
+        color: theme.palette.text.primary,
+      }}
+    >
+      <Container maxWidth="lg" sx={{ p: { xs: 2, sm: 6 } }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            zIndex: 1000,
+          }}
+        >
+          <ThemeSwitch />
+        </Box>
+
+        <Card
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: 4,
+            boxShadow: 6,
+            textAlign: "center",
+            gap: 3,
+            mb: 6,
+            backgroundColor: theme.palette.background.paper,
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h2"
+              component="h1"
+              sx={{
+                fontWeight: "bold",
+                mb: 2,
+                fontSize: { xs: "2rem", md: "3rem" },
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  animation:
+                    "typing 3.5s steps(40, end), blink-caret 0.75s step-end 3.5s forwards",
                 }}
               >
-                <Link href="/user?userPageSelect=mycompanies">
-                  <Button variant="contained" color="primary" className="mr-4">
-                    Get Started
-                  </Button>
-                </Link>
-                <Link href="/api/auth/signout">
-                  <Button variant="outlined" color="error">
-                    Sign Out
-                  </Button>
-                </Link>
-              </Box>
-            </div>
-          ) : (
-            <div>
-              <Typography variant="h4" component="h1" className="font-bold">
-                Welcome to Salary App!
+                <span style={{ color: theme.palette.primary.main }}>
+                  Salary
+                </span>
+                App
+                <span style={{ color: theme.palette.primary.main }}>.</span>
+              </span>
+              <style jsx>{`
+                @keyframes typing {
+                  from {
+                    width: 0;
+                  }
+                  to {
+                    width: 100%;
+                  }
+                }
+                @keyframes blink-caret {
+                  from,
+                  to {
+                    border-color: transparent;
+                  }
+                  50% {
+                    border-color: orange;
+                  }
+                }
+              `}</style>
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                mb: 4,
+                fontSize: { xs: "1rem", md: "1.2rem" },
+              }}
+            >
+              <span style={{ color: theme.palette.text.secondary }}>
+                Welcome to Salary App, Simplify Salary, EPF/ETF, AH Form
+                Management, and Employee Operations for Your Business.
+              </span>
+            </Typography>
+
+            <Button
+              variant="contained"
+              size="large"
+              sx={{
+                fontSize: "1.2rem",
+                px: 4,
+                py: 2,
+                mt: 2,
+                borderRadius: 8,
+                background: theme.palette.primary.main,
+                boxShadow: "0px 4px 15px rgba(0, 123, 255, 0.5)",
+                transition: "transform 0.3s",
+                ":hover": {
+                  transform: "scale(1.05)",
+                  background: theme.palette.primary.dark,
+                },
+                width: { xs: "100%", sm: "auto" },
+              }}
+              href="/api/auth/signin"
+              endIcon={<ArrowForward />}
+            >
+              Get Started
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Grid container spacing={4} justifyContent="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <Box textAlign="center">
+              <AttachMoneyIcon
+                sx={{ fontSize: 60, color: theme.palette.primary.main }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Effortless Salary Management
               </Typography>
-              <Typography variant="body1" className="mt-2">
-                Please sign in to access your dashboard.
+              <Typography variant="body2">
+                Automate salary calculations, handle adjustments, and generate
+                payslips with ease.
               </Typography>
-              <div className="mt-6">
-                <Link href="/api/auth/signin">
-                  <Button variant="contained" color="primary">
-                    Sign In
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box textAlign="center">
+              <BusinessIcon
+                sx={{ fontSize: 60, color: theme.palette.primary.main }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                EPF/ETF Contributions
+              </Typography>
+              <Typography variant="body2">
+                Easily manage provident fund contributions with compliance-ready
+                reports.
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box textAlign="center">
+              <GroupIcon
+                sx={{ fontSize: 60, color: theme.palette.primary.main }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Comprehensive Employee Management
+              </Typography>
+              <Typography variant="body2">
+                Add, edit, and manage employee records efficiently, all in one
+                place.
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box textAlign="center">
+              <ContactMailIcon
+                sx={{ fontSize: 60, color: theme.palette.primary.main }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                AH Form Management
+              </Typography>
+              <Typography variant="body2">
+                Generate, manage, and download AH forms (successor to B-cards)
+                effortlessly.
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ my: 6 }} />
+
+        <Box textAlign="center">
+          <Typography variant="h4" sx={{ mb: 2 }}>
+            Contact Us
+          </Typography>
+
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            For inquiries or support, reach out to us at:
+          </Typography>
+
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<EmailIcon />}
+              href="mailto:support@salaryapp.com"
+              sx={{
+                color: theme.palette.primary.main,
+                borderColor: theme.palette.primary.main,
+                ":hover": {
+                  backgroundColor: theme.palette.primary.light,
+                },
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
+              support@salaryapp.com
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ContactMailIcon />}
+              href="mailto:business@salaryapp.com"
+              sx={{
+                color: theme.palette.primary.main,
+                borderColor: theme.palette.primary.main,
+                ":hover": {
+                  backgroundColor: theme.palette.primary.light,
+                },
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
+              business@salaryapp.com
+            </Button>
+          </Box>
+        </Box>
+      </Container>
     </main>
   );
 }
