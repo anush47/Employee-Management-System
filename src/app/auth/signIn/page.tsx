@@ -20,6 +20,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -123,8 +124,22 @@ const SignInPage: React.FC = () => {
         }}
       >
         <ErrorAlert />
+        <div className="flex justify-center">
+          <Image
+            src="/Logo_Withtext.png"
+            alt="Logo"
+            width={200}
+            height={200}
+            style={{
+              padding: 0,
+              margin: 0,
+              marginRight: 20,
+              marginBottom: 0,
+              objectFit: "cover",
+            }}
+          />
+        </div>
         <CardHeader
-          title="Welcome to Salary App"
           subheader="Sign in to continue"
           titleTypographyProps={{
             variant: "h4",
@@ -132,7 +147,7 @@ const SignInPage: React.FC = () => {
             color: "primary.main",
           }}
           subheaderTypographyProps={{ align: "center" }}
-          sx={{ mb: 3 }}
+          sx={{ mb: 1 }}
         />
         <Box display="flex" flexDirection="column" gap={3}>
           <LoadingButton
