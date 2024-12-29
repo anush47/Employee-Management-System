@@ -1,9 +1,6 @@
 "use client";
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
   Box,
   Typography,
   Alert,
@@ -12,22 +9,26 @@ import {
   Paper,
   IconButton,
   InputAdornment,
+  Button,
+  CardHeader,
+  Divider,
+  TextField,
 } from "@mui/material";
-import { Button, TextField, Link } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LoadingButton } from "@mui/lab";
-import { Login, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Login, Visibility, VisibilityOff, Google } from "@mui/icons-material";
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl") ?? "/";
   const error = searchParams?.get("error");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const ErrorAlert = () => {
     const [isError, setIsError] = useState(error ? true : false);
@@ -37,6 +38,7 @@ const SignInPage: React.FC = () => {
         setIsError(false);
       }, 5000);
     }
+
     return (
       <Collapse in={isError}>
         <Alert severity="error">
@@ -56,6 +58,14 @@ const SignInPage: React.FC = () => {
       redirect: true,
       email,
       password,
+      callbackUrl,
+    });
+  };
+
+  const handleLoginGoogle = async () => {
+    setLoading(true);
+    signIn("google", {
+      redirect: true,
       callbackUrl,
     });
   };
@@ -81,90 +91,108 @@ const SignInPage: React.FC = () => {
         sx={{
           maxWidth: 450,
           width: "100%",
-          px: 1,
-          py: 3,
-          borderRadius: 2,
-          boxShadow: 3,
+          px: 3,
+          py: 4,
+          borderRadius: 3,
+          boxShadow: 4,
           backgroundColor: "background.paper",
         }}
       >
         <ErrorAlert />
         <CardHeader
-          title="Login"
+          title="Welcome to Salary App"
+          subheader="Sign in to continue"
           titleTypographyProps={{
             variant: "h4",
             align: "center",
             color: "primary.main",
           }}
+          subheaderTypographyProps={{ align: "center" }}
+          sx={{ mb: 3 }}
         />
-        <CardContent>
-          <Box
-            component="form"
-            noValidate
-            autoComplete="off"
-            display="flex"
-            flexDirection="column"
-            gap={2}
-            onSubmit={handleLogin}
+        <Box display="flex" flexDirection="column" gap={3}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleLoginGoogle}
+            startIcon={<Google />}
+            sx={{ textTransform: "none", fontSize: "1rem", py: 1.5 }}
           >
-            <TextField
-              label="Email"
+            Continue with Google
+          </Button>
+          <Divider flexItem>
+            <Typography variant="body2" color="text.secondary">
+              OR
+            </Typography>
+          </Divider>
+          {!showEmailLogin && (
+            <Button
               variant="outlined"
-              autoComplete="email"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              variant="outlined"
-              autoComplete="current-password"
-              type={showPassword ? "text" : "password"}
-              fullWidth
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <LoadingButton
-              variant="contained"
               color="primary"
-              type="submit"
-              loading={loading}
-              endIcon={<Login />}
-              sx={{
-                alignSelf: "center",
-                textTransform: "none",
-                fontSize: "1rem",
-                py: 1.5,
-                px: 5,
-                maxWidth: "max-content",
-              }}
+              onClick={() => setShowEmailLogin(true)}
+              sx={{ textTransform: "none", fontSize: "1rem", py: 1.2 }}
             >
-              <span>Login</span>
-            </LoadingButton>
-          </Box>
-        </CardContent>
-        <Box mt={2} display="flex" justifyContent="center">
-          <Typography variant="body2">
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signUp" color="primary.main" underline="hover">
-              Register
-            </Link>
-          </Typography>
+              Continue with Email and Password
+            </Button>
+          )}
+          {showEmailLogin && (
+            <Box
+              component="form"
+              noValidate
+              autoComplete="off"
+              display="flex"
+              flexDirection="column"
+              gap={2}
+              onSubmit={handleLogin}
+            >
+              <Typography variant="body2" align="center" color="text.secondary">
+                Use your credentials only if already registered with Google and
+                changed your password.
+              </Typography>
+              <TextField
+                label="Email"
+                variant="outlined"
+                autoComplete="email"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                label="Password"
+                variant="outlined"
+                autoComplete="current-password"
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <LoadingButton
+                variant="contained"
+                color="primary"
+                type="submit"
+                loading={loading}
+                endIcon={<Login />}
+                sx={{ textTransform: "none", fontSize: "1rem", py: 1.5 }}
+              >
+                Login
+              </LoadingButton>
+            </Box>
+          )}
         </Box>
       </Paper>
     </Box>
