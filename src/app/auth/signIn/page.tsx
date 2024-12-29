@@ -14,12 +14,17 @@ import {
   Divider,
   TextField,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Login, Visibility, VisibilityOff, Google } from "@mui/icons-material";
+import UserAgreementDialog from "./userAgreementDialog";
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -27,6 +32,7 @@ const SignInPage: React.FC = () => {
   const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [openConsentDialog, setOpenConsentDialog] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl") ?? "/";
   const error = searchParams?.get("error");
@@ -76,6 +82,14 @@ const SignInPage: React.FC = () => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
+  };
+
+  const handleOpenConsentDialog = () => {
+    setOpenConsentDialog(true);
+  };
+
+  const handleCloseConsentDialog = () => {
+    setOpenConsentDialog(false);
   };
 
   const theme = useTheme();
@@ -141,7 +155,7 @@ const SignInPage: React.FC = () => {
               variant="outlined"
               color="primary"
               onClick={() => setShowEmailLogin(true)}
-              sx={{ textTransform: "none", fontSize: "0.6rem", py: 1.2 }}
+              sx={{ textTransform: "none", fontSize: "1rem", py: 1.2 }}
             >
               Continue with Email
             </Button>
@@ -204,8 +218,19 @@ const SignInPage: React.FC = () => {
               </LoadingButton>
             </Box>
           )}
+          <Typography variant="body2" align="center" color="text.secondary">
+            By signing in, you agree to our{" "}
+            <Button color="primary" onClick={handleOpenConsentDialog}>
+              User Agreement
+            </Button>
+            .
+          </Typography>
         </Box>
       </Paper>
+      <UserAgreementDialog
+        openConsentDialog={openConsentDialog}
+        handleCloseConsentDialog={handleCloseConsentDialog}
+      />
     </Box>
   );
 };

@@ -9,6 +9,8 @@ import {
   Container,
   Grid,
   useTheme,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
@@ -16,10 +18,13 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import GroupIcon from "@mui/icons-material/Group";
 import { ThemeSwitch } from "./theme-provider";
-import { ArrowForward } from "@mui/icons-material";
+import { ArrowForward, Logout } from "@mui/icons-material";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function LandingPage() {
   const theme = useTheme();
+  const { data: session, status } = useSession();
 
   return (
     <main
@@ -39,9 +44,21 @@ export default function LandingPage() {
             top: 16,
             right: 16,
             zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
           }}
         >
           <ThemeSwitch />
+          {session && (
+            <Tooltip title="Sign Out">
+              <Link href="/api/auth/signout">
+                <IconButton color="inherit">
+                  <Logout />
+                </IconButton>
+              </Link>
+            </Tooltip>
+          )}
         </Box>
 
         <Card
@@ -98,7 +115,7 @@ export default function LandingPage() {
             <Typography
               variant="body1"
               sx={{
-                mb: 4,
+                mb: 8,
                 fontSize: { xs: "1rem", md: "1.2rem" },
               }}
             >
@@ -107,30 +124,66 @@ export default function LandingPage() {
                 Operations for Your Business.
               </span>
             </Typography>
-
-            <Button
-              variant="contained"
-              size="large"
-              sx={{
-                fontSize: "1.2rem",
-                px: 4,
-                py: 2,
-                mt: 2,
-                borderRadius: 8,
-                background: theme.palette.primary.main,
-                boxShadow: "0px 4px 15px rgba(0, 123, 255, 0.5)",
-                transition: "transform 0.3s",
-                ":hover": {
-                  transform: "scale(1.05)",
-                  background: theme.palette.primary.dark,
-                },
-                width: { xs: "100%", sm: "auto" },
-              }}
-              href="/api/auth/signin"
-              endIcon={<ArrowForward />}
-            >
-              Get Started
-            </Button>
+            {session ? (
+              <>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    mb: 2,
+                    fontSize: { xs: "1.5rem", md: "1.8rem" },
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  Welcome, {session.user.name}!
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    fontSize: "1.2rem",
+                    px: 4,
+                    py: 2,
+                    mt: 2,
+                    borderRadius: 8,
+                    boxShadow: "0px 4px 15px rgba(0, 123, 255, 0.5)",
+                    transition: "transform 0.3s",
+                    ":hover": {
+                      transform: "scale(1.05)",
+                      background: theme.palette.primary.dark,
+                    },
+                    width: { xs: "100%", sm: "auto" },
+                  }}
+                  href={"/user?userPageSelect=mycompanies"}
+                  endIcon={<ArrowForward />}
+                >
+                  My Companies
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="contained"
+                size="large"
+                sx={{
+                  fontSize: "1.2rem",
+                  px: 4,
+                  py: 2,
+                  mt: 2,
+                  borderRadius: 8,
+                  background: theme.palette.primary.main,
+                  boxShadow: "0px 4px 15px rgba(0, 123, 255, 0.5)",
+                  transition: "transform 0.3s",
+                  ":hover": {
+                    transform: "scale(1.05)",
+                    background: theme.palette.primary.dark,
+                  },
+                  width: { xs: "100%", sm: "auto" },
+                }}
+                href={"/api/auth/signin"}
+                endIcon={<ArrowForward />}
+              >
+                Get Started
+              </Button>
+            )}
           </CardContent>
         </Card>
 
