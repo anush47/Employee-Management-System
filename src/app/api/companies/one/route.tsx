@@ -191,6 +191,10 @@ export async function DELETE(req: NextRequest) {
     // Create filter
     const filter = { user: userId, _id: companyId };
 
+    if (user?.role === "admin") {
+      delete filter.user;
+    }
+
     // Connect to the database
     await dbConnect();
 
