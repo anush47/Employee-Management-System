@@ -31,10 +31,10 @@ const Agreement = () => {
           </Typography>
           <Divider sx={{ mb: 3 }} />
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
-            Welcome to SalaryApp! This User Agreement ("Agreement") sets forth
-            the terms and conditions under which you are allowed to use the
-            SalaryApp platform and services. By registering or using SalaryApp,
-            you agree to be bound by the terms outlined below.
+            Welcome to SalaryApp! This User Agreement (&quot;Agreement&quot;)
+            sets forth the terms and conditions under which you are allowed to
+            use the SalaryApp platform and services. By registering or using
+            SalaryApp, you agree to be bound by the terms outlined below.
           </Typography>
 
           <Typography
@@ -60,9 +60,9 @@ const Agreement = () => {
           </Typography>
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
             To use SalaryApp, you must be an authorized representative of a
-            company or an employer who is responsible for managing the company's
-            employee records. When registering for the platform, you agree to
-            provide accurate, complete, and up-to-date information.
+            company or an employer who is responsible for managing the
+            company&apos;s employee records. When registering for the platform,
+            you agree to provide accurate, complete, and up-to-date information.
           </Typography>
 
           <Typography
@@ -182,7 +182,7 @@ const Agreement = () => {
             8. Liability and Disclaimers
           </Typography>
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
-            SalaryApp is provided "as is" without any warranties or
+            SalaryApp is provided &quot;as is&quot; without any warranties or
             representations, either express or implied. We do not guarantee the
             availability, accuracy, or reliability of the platform. In no event
             will SalaryApp or its affiliates be liable for any direct, indirect,

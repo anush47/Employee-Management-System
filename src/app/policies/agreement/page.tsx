@@ -7,7 +7,6 @@ import {
   Divider,
   Button,
 } from "@mui/material";
-import Image from "next/image";
 import Agreement from "./agreement";
 import Link from "next/link";
 
