@@ -5,8 +5,11 @@ import {
   Card,
   CardContent,
   Divider,
+  Button,
 } from "@mui/material";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function PrivacyPolicy() {
   return (
@@ -158,6 +161,13 @@ export default function PrivacyPolicy() {
             </Typography>
           </CardContent>
         </Card>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Link href="/">
+            <Button variant="contained" color="primary" sx={{ my: 1 }}>
+              Go Back to Home
+            </Button>
+          </Link>
+        </Box>
       </Container>
     </main>
   );

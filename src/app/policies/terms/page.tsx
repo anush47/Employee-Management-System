@@ -5,8 +5,10 @@ import {
   Card,
   CardContent,
   Divider,
+  Button,
 } from "@mui/material";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function TermsOfService() {
   return (
@@ -239,6 +241,13 @@ export default function TermsOfService() {
             </Typography>
           </CardContent>
         </Card>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Link href="/">
+            <Button variant="contained" color="primary" sx={{ my: 1 }}>
+              Go Back to Home
+            </Button>
+          </Link>
+        </Box>
       </Container>
     </main>
   );

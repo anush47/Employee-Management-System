@@ -301,6 +301,11 @@ export default function LandingPage() {
                 Read our Terms of Service
               </Button>
             </Link>
+            <Link href="/policies/agreement" passHref>
+              <Button color="primary" variant="text" sx={{ mx: 2 }}>
+                View our Agreement
+              </Button>
+            </Link>
           </Typography>
         </Box>
       </Container>

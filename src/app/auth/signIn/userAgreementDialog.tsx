@@ -1,3 +1,4 @@
+import Agreement from "@/app/policies/agreement/agreement";
 import {
   Dialog,
   DialogTitle,
@@ -18,13 +19,13 @@ const userAgreementDialog: React.FC<UserAgreementDialogProps> = ({
   handleCloseConsentDialog,
 }) => {
   return (
-    <Dialog open={openConsentDialog} onClose={handleCloseConsentDialog}>
-      <DialogTitle>User Agreement</DialogTitle>
+    <Dialog
+      fullWidth
+      open={openConsentDialog}
+      onClose={handleCloseConsentDialog}
+    >
       <DialogContent>
-        <Typography variant="body2">
-          {/* Add the user agreement content here */}
-          This is the user agreement content.
-        </Typography>
+        <Agreement />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseConsentDialog} color="primary">
