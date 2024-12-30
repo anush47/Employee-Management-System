@@ -288,6 +288,21 @@ export default function LandingPage() {
             </Box>
           </Box>
         </Box>
+
+        <Box textAlign="center" sx={{ mt: 4 }}>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <Link href="/policies/privacy" passHref>
+              <Button color="primary" variant="text" sx={{ mx: 2 }}>
+                View our Privacy Policy
+              </Button>
+            </Link>
+            <Link href="/policies/terms" passHref>
+              <Button color="primary" variant="text" sx={{ mx: 2 }}>
+                Read our Terms of Service
+              </Button>
+            </Link>
+          </Typography>
+        </Box>
       </Container>
     </main>
   );
