@@ -11,7 +11,7 @@ import React from "react";
 
 const Agreement = () => {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <>
       <Box display="flex" justifyContent="center" mb={4}>
         <Image
           src="/Logo_Withtext.png"
@@ -210,7 +210,7 @@ const Agreement = () => {
           </Typography>
         </CardContent>
       </Card>
-    </Container>
+    </>
   );
 };
 

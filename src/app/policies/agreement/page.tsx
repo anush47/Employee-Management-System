@@ -18,7 +18,9 @@ export default function UserAgreement() {
         paddingBottom: "2rem",
       }}
     >
-      <Agreement />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Agreement />
+      </Container>
       <Box display="flex" justifyContent="center" mt={4}>
         <Link href="/">
           <Button variant="contained" color="primary" sx={{ my: 1 }}>
