@@ -224,7 +224,7 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
         <Typography color="primary" variant="h6" noWrap component="div">
           {company?.name}
         </Typography>
-        <Typography color="secondary" variant="body2">
+        <Typography color="text.secondary" variant="body2">
           {user.name === "" ? "No email" : user.name}
         </Typography>
       </Box>

@@ -188,9 +188,6 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
         <Typography color="primary" variant="h6" noWrap component="div">
           {user.name === "" ? "Stranger" : user.name}
         </Typography>
-        <Typography color="secondary" variant="body2">
-          {user.email === "" ? "No email" : user.email}
-        </Typography>
       </Box>
       <Divider />
       <List>
