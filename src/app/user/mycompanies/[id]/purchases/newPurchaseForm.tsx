@@ -468,7 +468,11 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
                   </Box>
                 ) : (
                   <>
-                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      color="text.secondary"
+                      sx={{ mb: 2 }}
+                    >
                       Monthly Fee: {formatPrice(oneMonthPrice)}
                     </Typography>
                     <Typography variant="h5" color="primary" fontWeight="bold">

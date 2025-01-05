@@ -225,8 +225,8 @@ function calculateSalaryDetails(
         }
       );
 
-      console.log(valuesToAdjust, "valuesToAdjust");
-      console.log(adjustmentRequired, "adjustmentRequired");
+      // console.log(valuesToAdjust, "valuesToAdjust");
+      // console.log(adjustmentRequired, "adjustmentRequired");
 
       // Adjust additions with null values
       additionsWithNull.forEach((addition) => {
@@ -259,9 +259,9 @@ function calculateSalaryDetails(
       });
 
       // Final debugging logs
-      console.log(adjustmentRequired, "remaining adjustmentRequired");
-      console.log(parsedAdditions);
-      console.log(parsedDeductions);
+      // console.log(adjustmentRequired, "remaining adjustmentRequired");
+      // console.log(parsedAdditions);
+      // console.log(parsedDeductions);
     }
   }
 
