@@ -93,6 +93,9 @@ export default function ChangePasswordDialog({
             <DialogContentText>
               To change your password, please enter your current password and
               your new password below.
+              <br />
+              If you have not changed your password after the google
+              registration, Leave the current password field empty.
             </DialogContentText>
             <Box mb={2}>{error && <Alert severity="error">{error}</Alert>}</Box>
             {formVisible && (
