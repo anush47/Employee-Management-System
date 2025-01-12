@@ -262,36 +262,40 @@ export const PaymentStructure = ({
                         )
                       }
                       InputProps={{
-                        readOnly: !isEditing,
+                        readOnly: !isEditing || deduction.name === "EPF 8%",
                       }}
                     />
                   </FormControl>
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <FormControl fullWidth>
-                    <TextField
-                      label="Amount"
-                      type="text"
-                      variant="filled"
-                      value={deduction.amount || ""}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          "deductions",
-                          index,
-                          "amount",
-                          e.target.value
-                        )
-                      }
-                      helperText={errors.deductions[index]}
-                      error={!!errors.deductions[index]}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">LKR</InputAdornment>
-                        ),
-                        readOnly: !isEditing,
-                      }}
-                    />
-                  </FormControl>
+                  {deduction.name !== "EPF 8%" && (
+                    <FormControl fullWidth>
+                      <TextField
+                        label="Amount"
+                        type="text"
+                        variant="filled"
+                        value={deduction.amount || ""}
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "deductions",
+                            index,
+                            "amount",
+                            e.target.value
+                          )
+                        }
+                        helperText={errors.deductions[index]}
+                        error={!!errors.deductions[index]}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              LKR
+                            </InputAdornment>
+                          ),
+                          readOnly: !isEditing,
+                        }}
+                      />
+                    </FormControl>
+                  )}
                 </Grid>
                 <Grid item xs={2}>
                   {isEditing && !isSalary && deduction.name !== "EPF 8%" && (
