@@ -428,7 +428,7 @@ const CompanyDetails = ({
                 </Tooltip>
                 <Tooltip title="Save changes" arrow>
                   <Button
-                    variant="text"
+                    variant="outlined"
                     color="success"
                     startIcon={<Save />}
                     onClick={handleSaveClick}

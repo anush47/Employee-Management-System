@@ -165,7 +165,7 @@ export const PaymentStructure = ({
                 alignItems="center"
                 key={index}
               >
-                <Grid item xs={6}>
+                <Grid item xs={6} sm={5}>
                   <FormControl fullWidth>
                     <TextField
                       label="Name"
@@ -211,7 +211,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={1}>
                   {isEditing && !isSalary && (
                     <Tooltip title="Remove" arrow>
                       <IconButton

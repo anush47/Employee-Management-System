@@ -107,7 +107,7 @@ function calculateSalaryDetails(
     } = getFilteredAdditionsAndDeductions();
 
     const amountNeeded =
-      Number(source.totalSalary) - ot - source.basic - source.basic * 0.08;
+      Number(source.totalSalary) - ot - source.basic + source.basic * 0.08;
     console.log(source.totalSalary, amountNeeded);
 
     //change the  parsedAdditions and parsedDeductions in additions with range, null to 0
@@ -148,67 +148,73 @@ function calculateSalaryDetails(
     let adjustmentRequired = amountNeeded - (totalAdditions - totalDeductions);
     console.log(adjustmentRequired, "adjustmentRequired");
 
-    // if amountNeeded > 0
-    if (adjustmentRequired > 0) {
-      // Add adjustment to additions with specified ranges
-      additionsWithRanges.forEach((addition) => {
-        const [min, max] = addition.amount.split("-").map(Number);
+    if (adjustmentRequired !== 0) {
+      // Helper to calculate optimal value within range
+      const calculateOptimalValue = (
+        currentAmount: number,
+        adjustment: number,
+        min: number,
+        max: number
+      ) => {
+        let newAmount = currentAmount + adjustment;
+        return Math.min(max, Math.max(min, newAmount));
+      };
 
-        parsedAdditions.forEach((parsedAddition) => {
-          if (parsedAddition.name === addition.name) {
-            // Skip if adjustment is below 100
-            if (Math.abs(adjustmentRequired) < 100) {
-              return;
-            }
-
-            // Calculate new amount within range and adjust
-            let newAmount = Math.min(
-              max,
-              Math.round((min + adjustmentRequired) / 100) * 100
-            );
-            let difference = newAmount - parsedAddition.amount;
-
-            // Apply only if adjustmentRequired allows it
-            if (difference <= adjustmentRequired) {
-              adjustmentRequired -= difference;
-              parsedAddition.amount = newAmount;
-            }
-          }
-        });
-      });
-
-      // Add adjustment to deductions with specified ranges
+      // Adjust deductions with specified ranges
       deductionsWithRanges.forEach((deduction) => {
         const [min, max] = deduction.amount.split("-").map(Number);
 
         parsedDeductions.forEach((parsedDeduction) => {
           if (parsedDeduction.name === deduction.name) {
-            if (Math.abs(adjustmentRequired) < 100) {
-              return;
-            }
+            if (Math.abs(adjustmentRequired) < 100) return;
 
-            let newAmount = Math.max(
-              min,
-              Math.round((max - adjustmentRequired) / 100) * 100
+            const optimalAdjustment = Math.max(
+              min - parsedDeduction.amount,
+              Math.round(-adjustmentRequired / 100) * 100
             );
-            let difference = parsedDeduction.amount - newAmount;
+            const newAmount = calculateOptimalValue(
+              parsedDeduction.amount,
+              optimalAdjustment,
+              min,
+              max
+            );
 
-            // Apply only if adjustmentRequired allows it
-            if (difference <= adjustmentRequired) {
-              adjustmentRequired -= difference;
-              parsedDeduction.amount = newAmount;
-            }
+            adjustmentRequired -= parsedDeduction.amount - newAmount;
+            parsedDeduction.amount = newAmount;
           }
         });
       });
 
-      console.log(adjustmentRequired, "adjustmentRequired after");
+      // Adjust additions with specified ranges
+      additionsWithRanges.forEach((addition) => {
+        const [min, max] = addition.amount.split("-").map(Number);
+
+        parsedAdditions.forEach((parsedAddition) => {
+          if (parsedAddition.name === addition.name) {
+            if (Math.abs(adjustmentRequired) < 100) return;
+
+            const optimalAdjustment = Math.min(
+              max - parsedAddition.amount,
+              Math.round(adjustmentRequired / 100) * 100
+            );
+            const newAmount = calculateOptimalValue(
+              parsedAddition.amount,
+              optimalAdjustment,
+              min,
+              max
+            );
+
+            adjustmentRequired -= newAmount - parsedAddition.amount;
+            parsedAddition.amount = newAmount;
+          }
+        });
+      });
 
       // Calculate total number of null additions/deductions to adjust
       const totalNullToAdjust =
         additionsWithNull.length + deductionsWithNull.length;
 
-      // Generate values for adjustment with slight variation
+      // Generate values for adjustment
       const baseValue = adjustmentRequired / totalNullToAdjust;
       const generateCenteredSequence = (total: number) =>
         Array.from(
@@ -218,6 +224,7 @@ function calculateSalaryDetails(
             Math.floor(total / 2) +
             (total % 2 === 0 && i >= total / 2 ? 1 : 0)
         );
+
       const valuesToAdjust = generateCenteredSequence(totalNullToAdjust).map(
         (i) => {
           const variation = i * (baseValue * 0.1); // 10% variation
@@ -225,22 +232,15 @@ function calculateSalaryDetails(
         }
       );
 
-      // console.log(valuesToAdjust, "valuesToAdjust");
-      // console.log(adjustmentRequired, "adjustmentRequired");
-
       // Adjust additions with null values
       additionsWithNull.forEach((addition) => {
         parsedAdditions.forEach((parsedAddition) => {
           if (parsedAddition.name === addition.name) {
-            if (Math.abs(adjustmentRequired) < 100) {
-              return;
-            }
+            if (Math.abs(adjustmentRequired) < 100) return;
 
-            let newAmount = valuesToAdjust.shift();
-            if (newAmount !== undefined) {
-              adjustmentRequired -= newAmount - Number(parsedAddition.amount);
-              parsedAddition.amount = newAmount;
-            }
+            const newAmount = valuesToAdjust.shift() || 0;
+            adjustmentRequired -= newAmount - Number(parsedAddition.amount);
+            parsedAddition.amount = newAmount;
           }
         });
       });
@@ -249,19 +249,24 @@ function calculateSalaryDetails(
       deductionsWithNull.forEach((deduction) => {
         parsedDeductions.forEach((parsedDeduction) => {
           if (parsedDeduction.name === deduction.name) {
-            let newAmount = valuesToAdjust.shift();
-            if (newAmount !== undefined) {
-              adjustmentRequired += newAmount - Number(parsedDeduction.amount);
-              parsedDeduction.amount = newAmount;
-            }
+            const [min, max] = deduction.amount.split("-").map(Number);
+            const newAmount = calculateOptimalValue(
+              parsedDeduction.amount,
+              valuesToAdjust.shift() || 0,
+              min,
+              max
+            );
+
+            adjustmentRequired += parsedDeduction.amount - newAmount;
+            parsedDeduction.amount = newAmount;
           }
         });
       });
 
       // Final debugging logs
-      // console.log(adjustmentRequired, "remaining adjustmentRequired");
-      // console.log(parsedAdditions);
-      // console.log(parsedDeductions);
+      console.log("Remaining adjustmentRequired:", adjustmentRequired);
+      console.log("Final parsedAdditions:", parsedAdditions);
+      console.log("Final parsedDeductions:", parsedDeductions);
     }
   }
 
