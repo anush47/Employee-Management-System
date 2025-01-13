@@ -31,6 +31,7 @@ import {
 import { ArrowBack, ArrowForward, HideImage } from "@mui/icons-material";
 import Link from "next/link";
 import { LoadingButton } from "@mui/lab";
+import Image from "next/image";
 
 interface ChipData {
   key: number;
@@ -361,20 +362,31 @@ const UpdatePurchaseForm: React.FC<UpdatePurchaseFormProps> = ({
           {image && (
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                {typeof imagePreview === "string" &&
-                imagePreview.startsWith("data:application/pdf") ? (
-                  <iframe
-                    src={imagePreview}
-                    title="Uploaded PDF Preview"
-                    height={400 * (29.7 / 21)}
-                    width="400"
-                  />
-                ) : (
-                  <img
-                    src={imagePreview as string}
-                    alt="Uploaded Preview"
-                    style={{ maxWidth: "400px", height: "auto" }}
-                  />
+                {imagePreview && (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      bgcolor: "background.default",
+                    }}
+                  >
+                    {image?.type === "application/pdf" ? (
+                      <embed
+                        src={imagePreview as string}
+                        type="application/pdf"
+                        width="100%"
+                        height="400px"
+                      />
+                    ) : (
+                      <Image
+                        src={imagePreview as string}
+                        alt="Uploaded Preview"
+                        width={400}
+                        height={400}
+                      />
+                    )}
+                  </Box>
                 )}
               </FormControl>
             </Grid>

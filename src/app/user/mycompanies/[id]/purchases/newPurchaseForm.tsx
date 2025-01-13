@@ -26,6 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import Image from "next/image";
 
 interface ChipData {
   key: number;
@@ -527,7 +528,7 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
                   Upload Payment Slip
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf"
                     hidden
                     onChange={handleImageChange}
                   />
@@ -542,15 +543,21 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
                       bgcolor: "background.default",
                     }}
                   >
-                    <img
-                      src={imagePreview as string}
-                      alt="Payment Slip"
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        objectFit: "contain",
-                      }}
-                    />
+                    {image?.type === "application/pdf" ? (
+                      <embed
+                        src={imagePreview as string}
+                        type="application/pdf"
+                        width="100%"
+                        height="400px"
+                      />
+                    ) : (
+                      <Image
+                        src={imagePreview as string}
+                        alt="Payment Slip"
+                        width={400}
+                        height={400}
+                      />
+                    )}
                   </Box>
                 )}
 
