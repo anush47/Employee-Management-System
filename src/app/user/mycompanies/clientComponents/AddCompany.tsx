@@ -22,7 +22,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { ArrowBack, Cancel, Save, Search } from "@mui/icons-material";
+import { ArrowBack, Save, Search } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -31,9 +31,6 @@ import { Company } from "./companiesDataGrid";
 import { CompanyValidation } from "./companyValidation";
 import dayjs from "dayjs";
 import { ddmmyyyy_to_mmddyyyy } from "../[id]/employees/clientComponents/employeesDataGrid";
-import { start } from "repl";
-
-const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const AddCompanyForm: React.FC<{
   user: { id: string; name: string; email: string };
