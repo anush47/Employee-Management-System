@@ -92,11 +92,13 @@ const EmployeesDataGrid: React.FC<{
       headerAlign: "left",
       flex: 1,
       display: "text",
+      maxWidth: 150,
     },
     {
       field: "name",
       headerName: "Name",
       flex: 1,
+      minWidth: 200,
       editable: isEditingEmployeeInHome,
     },
     {
@@ -113,6 +115,7 @@ const EmployeesDataGrid: React.FC<{
       type: "number",
       align: "left",
       headerAlign: "left",
+      maxWidth: 250,
     },
     {
       field: "totalSalary",
@@ -284,6 +287,7 @@ const EmployeesDataGrid: React.FC<{
       flex: 1,
       editable: isEditingEmployeeInHome,
       type: "boolean",
+      maxWidth: 100,
     },
     {
       field: "email",
@@ -307,6 +311,7 @@ const EmployeesDataGrid: React.FC<{
       field: "actions",
       headerName: "Actions",
       flex: 1,
+      maxWidth: 150,
       renderCell: (params) => (
         <Link
           href={`/user/mycompanies/${companyId}?companyPageSelect=employees&employeeId=${params.id}`}

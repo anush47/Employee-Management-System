@@ -646,8 +646,9 @@ const AddEmployeeForm: React.FC<{
 };
 
 export const categories = [
-  { value: 240, label: "240" },
-  { value: 200, label: "200" },
+  { value: 240, label: "Shop & Office Act" },
+  { value: 200, label: "Wages Board (Common)" },
+  { value: 240, label: "Wages Board - 240" },
 ].map((category) => (
   <MenuItem key={category.label} value={category.value}>
     {category.label}
@@ -655,12 +656,12 @@ export const categories = [
 ));
 
 export const otMethods = [
-  { value: "random", label: "Random" },
-  { value: "noOt", label: "No OT" },
-  { value: "calc", label: "Calculate" },
-].map((category) => (
-  <MenuItem key={category.label} value={category.value}>
-    {category.label}
+  { value: "random", label: "Randomly Generated" },
+  { value: "noOt", label: "No Overtime" },
+  { value: "calc", label: "Calculate from In-Out" },
+].map((method) => (
+  <MenuItem key={method.label} value={method.value}>
+    {method.label}
   </MenuItem>
 ));
 

@@ -120,7 +120,7 @@ const AddCompanyForm: React.FC<{
       const result = await response.json();
 
       if (response.ok) {
-        setSnackbarMessage("Company saved successfully!");
+        setSnackbarMessage("Company Added successfully!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
 
@@ -256,7 +256,7 @@ const AddCompanyForm: React.FC<{
                   onClick={onSaveClick}
                   disabled={loading} // Disable button while loading
                 >
-                  {loading ? <CircularProgress size={24} /> : "Save"}
+                  {loading ? <CircularProgress size={24} /> : "Add"}
                 </Button>
               </Tooltip>
             </Box>

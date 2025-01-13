@@ -60,8 +60,6 @@ import { Shifts } from "../../companyDetails/shifts";
 import { WorkingDays } from "../../companyDetails/workingDays";
 import Link from "next/link";
 
-const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
-
 const EditEmployeeForm: React.FC<{
   user: { id: string; name: string; email: string };
   handleBackClick: () => void;
