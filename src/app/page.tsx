@@ -245,7 +245,7 @@ export default function LandingPage() {
               gap: 2,
             }}
           >
-            <Link href="https://wa.me/94717539478">
+            {/* <Link href="https://wa.me/94717539478">
               <Button
                 color="primary"
                 size="medium"
@@ -254,7 +254,7 @@ export default function LandingPage() {
               >
                 +94 71 753 9478
               </Button>
-            </Link>
+            </Link> */}
             <Box
               sx={{
                 display: "flex",
@@ -264,7 +264,7 @@ export default function LandingPage() {
               }}
             >
               {/* phone number */}
-              <Link href="tel:+94717539478">
+              {/* <Link href="tel:+94717539478">
                 <Button
                   color="primary"
                   variant="text"
@@ -273,7 +273,7 @@ export default function LandingPage() {
                 >
                   +94 71 753 9478
                 </Button>
-              </Link>
+              </Link> */}
               {/* email */}
               <Link href="mailto:salaryapp2025@gmail.com">
                 <Button
