@@ -26,6 +26,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Login, Visibility, VisibilityOff, Google } from "@mui/icons-material";
 import UserAgreementDialog from "./userAgreementDialog";
+import Link from "next/link";
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -125,19 +126,21 @@ const SignInPage: React.FC = () => {
       >
         <ErrorAlert />
         <div className="flex justify-center">
-          <Image
-            src="/Logo_Withtext.png"
-            alt="Logo"
-            width={200}
-            height={200}
-            style={{
-              padding: 0,
-              margin: 0,
-              marginRight: 20,
-              marginBottom: 0,
-              objectFit: "cover",
-            }}
-          />
+          <Link href="/">
+            <Image
+              src="/Logo_Withtext.png"
+              alt="Logo"
+              width={200}
+              height={200}
+              style={{
+                padding: 0,
+                margin: 0,
+                marginRight: 20,
+                marginBottom: 0,
+                objectFit: "cover",
+              }}
+            />
+          </Link>
         </div>
         <CardHeader
           subheader="Sign in to continue"
