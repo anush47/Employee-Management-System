@@ -481,6 +481,14 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
+    // Check if mode is visit or aided and user is not admin
+    if (
+      user.role !== "admin" &&
+      (company.mode === "visit" || company.mode === "aided")
+    ) {
+      return NextResponse.json({ message: "Access denied." }, { status: 403 });
+    }
+
     const existingSalary = await Salary.findById(parsedBody.id);
     if (!existingSalary) {
       return NextResponse.json(

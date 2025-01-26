@@ -123,6 +123,15 @@ export async function PUT(req: NextRequest) {
     if (user?.role === "admin") {
       delete filter.user;
     } else {
+      //if mode is aided or visit dont allow modification
+      if (companyData.mode === "aided" || companyData.mode === "visit") {
+        return NextResponse.json(
+          {
+            message: "You are not allowed to modify this company",
+          },
+          { status: 403 }
+        );
+      }
       //delete mode
       delete companyData.mode;
       //delete monthlyPrice

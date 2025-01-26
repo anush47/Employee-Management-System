@@ -199,6 +199,19 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    // Check if the company is in visit mode or aided mode if not an admin
+    if (
+      user?.role !== "admin" &&
+      (company.mode === "aided" || company.mode === "visit")
+    ) {
+      return NextResponse.json(
+        {
+          message: "You are not allowed to update employees in this company",
+        },
+        { status: 403 }
+      );
+    }
+
     // Find the existing employee
     const existingEmployee = await Employee.findById(parsedBody._id);
     if (!existingEmployee) {

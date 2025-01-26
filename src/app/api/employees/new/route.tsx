@@ -122,6 +122,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if the company is in visit mode or aided mode if not an admin
+    if (
+      user?.role !== "admin" &&
+      (company.mode === "aided" || company.mode === "visit")
+    ) {
+      return NextResponse.json(
+        {
+          message: "You are not allowed to add employees to this company",
+        },
+        { status: 403 }
+      );
+    }
+
     // Check if the memberNo already exists within the company
     const employees = await Employee.find({ company: parsedBody.company });
     for (let i = 0; i < employees.length; i++) {
