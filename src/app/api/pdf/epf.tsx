@@ -30,7 +30,7 @@ export const getEPFDoc = (
   doc.text("EMPLOYEE'S PROVIDENT FUND", x + 5, y);
   y += 3;
   const secondYStart = y;
-  doc.rect(x, secondYStart, leftTopBoxWidth, 30);
+  doc.rect(x, secondYStart, leftTopBoxWidth, 40);
   y += 8;
   // Company name
   doc.setFont("Helvetica", "bold");
@@ -63,7 +63,7 @@ export const getEPFDoc = (
   });
 
   //reference number
-  y = secondYStart + 30;
+  y = secondYStart + 40;
   doc.rect(x, y, leftTopBoxWidth, 10);
   y += 6;
   doc.setFont("Helvetica", "normal");
