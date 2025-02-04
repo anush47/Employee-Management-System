@@ -413,7 +413,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     //check
-    const companies = await Company.find(filter).select("_id name").lean();
+    const companies = await Company.find(filter).select("_id name mode").lean();
     //if no company
     if (companies.length === 0) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
@@ -422,11 +422,43 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
     //delete
-    await Payment.deleteMany({ _id: { $in: paymentIds } });
-    return NextResponse.json(
-      { message: "Payments deleted successfully" },
-      { status: 200 }
-    );
+
+    //if user is admin
+    if (user.role === "admin") {
+      await Payment.deleteMany({ _id: { $in: paymentIds } });
+      return NextResponse.json(
+        { message: "Payments deleted successfully" },
+        { status: 200 }
+      );
+    } else {
+      //if user is not admin
+      //dont delete payments with company mode visit or aided
+      const companies = await Company.find({ _id: { $in: companyIds } })
+        .select("mode name")
+        .lean();
+      const visitAidedCompanies = companies.filter(
+        (company) => company.mode === "visit" || company.mode === "aided"
+      );
+      await Payment.deleteMany({
+        _id: { $in: paymentIds },
+        company: { $nin: visitAidedCompanies.map((company) => company._id) },
+      });
+      if (visitAidedCompanies.length > 0) {
+        return NextResponse.json(
+          {
+            message: `You are not allowed to delete Payments for ${visitAidedCompanies
+              .map((company) => company.name)
+              .join(", ")}.`,
+          },
+          { status: 403 }
+        );
+      } else {
+        return NextResponse.json(
+          { message: "Payments deleted successfully" },
+          { status: 200 }
+        );
+      }
+    }
   } catch (error: any) {
     console.error("Error deleting salaries:", error);
     return NextResponse.json(

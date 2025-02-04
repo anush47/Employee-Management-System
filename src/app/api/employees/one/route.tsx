@@ -328,6 +328,18 @@ export async function DELETE(req: NextRequest) {
         { status: 403 }
       );
     }
+    //if company is in visit mode or aided mode
+    if (
+      user?.role !== "admin" &&
+      (company.mode === "aided" || company.mode === "visit")
+    ) {
+      return NextResponse.json(
+        {
+          message: "You are not allowed to delete employees in this company",
+        },
+        { status: 403 }
+      );
+    }
 
     // Delete the employee from the database
     await Employee.findByIdAndDelete(employeeId);

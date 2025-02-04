@@ -216,6 +216,19 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    //if mode is aided or visit dont allow modification
+    if (
+      user?.role !== "admin" &&
+      (company.mode === "aided" || company.mode === "visit")
+    ) {
+      return NextResponse.json(
+        {
+          message: "You are not allowed to delete this company",
+        },
+        { status: 403 }
+      );
+    }
+
     // Delete the company from the database
     await Company.findByIdAndDelete(companyId);
 

@@ -3,6 +3,7 @@ import {
   DataGrid,
   GridColDef,
   GridColumnVisibilityModel,
+  GridRowSelectionModel,
   GridToolbar,
 } from "@mui/x-data-grid";
 import {
@@ -13,6 +14,11 @@ import {
   Snackbar,
   Slide,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContentText,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
@@ -20,6 +26,7 @@ import "dayjs/locale/en-gb";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Link from "next/link";
 import { request } from "http";
+import { LoadingButton } from "@mui/lab";
 
 // Set dayjs format for consistency
 dayjs.locale("en-gb");
@@ -66,6 +73,8 @@ const PaymentsDataGrid: React.FC<{
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+  const [rowSelectionModel, setRowSelectionModel] =
+    React.useState<GridRowSelectionModel>([]);
 
   const columns: GridColDef[] = [
     {
@@ -331,6 +340,102 @@ const PaymentsDataGrid: React.FC<{
     setSnackbarOpen(true); // Open Snackbar
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [salaryIds, setSalaryIds] = useState<string[]>([]);
+
+  const onDeleteClick = async (paymentIds: string[]) => {
+    try {
+      setLoading(true);
+      // Perform DELETE request to delete the salary record
+      const response = await fetch(`/api/payments/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          paymentIds: paymentIds,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete payments");
+      }
+      setSnackbarMessage("Payments deleted successfully");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setPayments(
+        payments.filter((payment) => !paymentIds.includes(payment.id))
+      );
+    } catch (error) {
+      console.error("Delete error:", error);
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSelected = async () => {
+    setSalaryIds(rowSelectionModel as string[]);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = async (confirmed: boolean) => {
+    if (confirmed) {
+      // Perform the delete action here
+      console.log(`Deleting salary record`);
+      await onDeleteClick(salaryIds);
+    }
+    setDialogOpen(false);
+  };
+
+  interface ConfirmationDialogProps {
+    open: boolean;
+    onClose: (confirmed: boolean) => void;
+    title: string;
+    message: string;
+  }
+
+  const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+    open,
+    onClose,
+    title,
+    message,
+  }) => {
+    const handleConfirm = () => {
+      onClose(true);
+    };
+
+    const handleCancel = () => {
+      onClose(false);
+    };
+
+    return (
+      <Dialog open={open} onClose={() => onClose(false)}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <LoadingButton
+            onClick={handleConfirm}
+            color="primary"
+            loading={loading}
+          >
+            Confirm
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
@@ -364,48 +469,73 @@ const PaymentsDataGrid: React.FC<{
         </Alert>
       )}
       {!loading && !error && (
-        <DataGrid
-          rows={payments}
-          columns={columns}
-          editMode="row"
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
+        <div>
+          {isEditing && rowSelectionModel.length > 0 && (
+            <Button
+              sx={{
+                mb: 1,
+              }}
+              variant="outlined"
+              color="error"
+              onClick={deleteSelected}
+            >
+              Delete Selected
+            </Button>
+          )}
+          <DataGrid
+            rows={payments}
+            columns={columns}
+            editMode="row"
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 5,
+                },
               },
-            },
-            filter: {
-              filterModel: {
-                items: [],
-                quickFilterExcludeHiddenColumns: false,
+              filter: {
+                filterModel: {
+                  items: [],
+                  quickFilterExcludeHiddenColumns: false,
+                },
               },
-            },
-          }}
-          pageSizeOptions={[5]}
-          slots={{
-            toolbar: (props) => (
-              <GridToolbar
-                {...props}
-                csvOptions={{ disableToolbarButton: true }}
-                printOptions={{ disableToolbarButton: true }}
-              />
-            ),
-          }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-            },
-          }}
-          disableRowSelectionOnClick
-          disableDensitySelector
-          columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={(newModel) =>
-            setColumnVisibilityModel(newModel)
-          }
-          processRowUpdate={handleRowUpdate}
-          onProcessRowUpdateError={handleRowUpdateError}
-        />
+            }}
+            pageSizeOptions={[5]}
+            slots={{
+              toolbar: (props) => (
+                <GridToolbar
+                  {...props}
+                  csvOptions={{ disableToolbarButton: true }}
+                  printOptions={{ disableToolbarButton: true }}
+                />
+              ),
+            }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+              },
+            }}
+            disableRowSelectionOnClick
+            disableDensitySelector
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={(newModel) =>
+              setColumnVisibilityModel(newModel)
+            }
+            onRowSelectionModelChange={(newModel) =>
+              setRowSelectionModel(newModel)
+            }
+            checkboxSelection={isEditing}
+            processRowUpdate={handleRowUpdate}
+            onProcessRowUpdateError={handleRowUpdateError}
+          />
+        </div>
       )}
+
+      <ConfirmationDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete the payment record(s) ?`}
+      />
 
       <Snackbar
         open={snackbarOpen}

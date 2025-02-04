@@ -370,8 +370,10 @@ const PaymentsDataGrid: React.FC<{
           paymentIds: [deleteId],
         }),
       });
+
+      const result = await response.json();
       if (!response.ok) {
-        throw new Error("Failed to delete payments");
+        throw new Error(result.message || "Failed to delete payments");
       }
       setSnackbarMessage("Payments deleted successfully");
       setSnackbarSeverity("success");

@@ -556,7 +556,6 @@ export async function DELETE(req: NextRequest) {
 
     // Local cache for companies and employees
     const companyCache = new Map();
-    const employeeCache = new Map();
 
     // Fetch all employees related to the salaries
     const salaries = await Salary.find({ _id: { $in: salaryIds } }).select(
@@ -605,20 +604,54 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
 
-    // Delete all salaries in one operation
-    const deleteResult = await Salary.deleteMany({ _id: { $in: salaryIds } });
+    //if admin
+    if (user.role === "admin") {
+      // Delete all salaries in one operation
+      const deleteResult = await Salary.deleteMany({ _id: { $in: salaryIds } });
 
-    if (deleteResult.deletedCount === 0) {
+      if (deleteResult.deletedCount === 0) {
+        return NextResponse.json(
+          { message: "No salaries were deleted" },
+          { status: 404 }
+        );
+      }
+
       return NextResponse.json(
-        { message: "No salaries were deleted" },
-        { status: 404 }
+        { message: "Salaries deleted successfully" },
+        { status: 200 }
       );
+    } else {
+      // dont delete salaries with company mode visit or aided
+      const companiesAidedOrVisit = companies.filter(
+        (company) => company.mode === "visit" || company.mode === "aided"
+      );
+      const employeesAidedOrVisit = employees.filter((employee) =>
+        companiesAidedOrVisit.some(
+          (company) => String(company._id) === String(employee.company)
+        )
+      );
+      await Salary.deleteMany({
+        _id: { $in: salaryIds },
+        employee: {
+          $nin: employeesAidedOrVisit.map((employee) => employee._id),
+        },
+      });
+      if (employeesAidedOrVisit.length > 0) {
+        return NextResponse.json(
+          {
+            message: `You are not allowed to delete Salaries for employees in ${companiesAidedOrVisit
+              .map((company) => company.name)
+              .join(", ")}.`,
+          },
+          { status: 403 }
+        );
+      } else {
+        return NextResponse.json(
+          { message: "Salaries deleted successfully" },
+          { status: 200 }
+        );
+      }
     }
-
-    return NextResponse.json(
-      { message: "Salaries deleted successfully" },
-      { status: 200 }
-    );
   } catch (error: any) {
     console.error("Error deleting salaries:", error);
     return NextResponse.json(
