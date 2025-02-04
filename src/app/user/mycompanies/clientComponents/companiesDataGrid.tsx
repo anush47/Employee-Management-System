@@ -99,34 +99,44 @@ const CompaniesDataGrid = ({
           throw new Error("Failed to fetch companies");
         }
         const companiesData = await companiesResponse.json();
-        //console.log(companiesData);
 
-        // Fetch user details for each company
-        const companiesWithUserNames = await Promise.all(
-          companiesData.companies.map(async (company: any) => {
-            // Fetch the user for each company
+        // Create a map to store user details to avoid fetching the same user multiple times
+        const userCache: { [key: string]: { name: string; email: string } } =
+          {};
+
+        // Fetch user details for each company in parallel
+        const userFetchPromises = companiesData.companies.map(
+          (company: any) => {
             if (company.user && user.role === "admin") {
-              const userResponse = await fetch(
-                `/api/auth/users?user=${company.user}`
-              );
-              if (!userResponse.ok) {
-                throw new Error("Failed to fetch user details");
+              if (userCache[company.user]) {
+                return Promise.resolve(userCache[company.user]);
+              } else {
+                return fetch(`/api/auth/users?user=${company.user}`)
+                  .then((res) => {
+                    if (!res.ok) {
+                      throw new Error("Failed to fetch user details");
+                    }
+                    return res.json();
+                  })
+                  .then((userData) => {
+                    userCache[company.user] = userData.user;
+                    return userData.user;
+                  });
               }
-              const userData = await userResponse.json();
-              return {
-                ...company,
-                id: company._id,
-                userName: userData.user.name || "Unknown", // Include the user name
-                userEmail: userData.user.email || "Unknown", // Include the user email
-              };
             } else {
-              return {
-                ...company,
-                id: company._id,
-                userName: "Unknown", // Default for companies without a user
-                userEmail: "Unknown", // Default for companies without a user
-              };
+              return Promise.resolve({ name: "Unknown", email: "Unknown" });
             }
+          }
+        );
+
+        const usersData = await Promise.all(userFetchPromises);
+
+        const companiesWithUserNames = companiesData.companies.map(
+          (company: any, index: number) => ({
+            ...company,
+            id: company._id,
+            userName: usersData[index].name,
+            userEmail: usersData[index].email,
           })
         );
 
@@ -179,7 +189,7 @@ const CompaniesDataGrid = ({
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 5,
+                pageSize: 10,
               },
             },
             filter: {
@@ -189,7 +199,7 @@ const CompaniesDataGrid = ({
               },
             },
           }}
-          pageSizeOptions={[5]}
+          pageSizeOptions={[5, 10, 20]}
           slots={{
             toolbar: (props) => (
               <GridToolbar

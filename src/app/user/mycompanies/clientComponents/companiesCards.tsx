@@ -43,10 +43,10 @@ export interface Company {
     | undefined;
   paymentMethod: String;
   monthlyPrice: String;
-  employerName: String;
-  employerAddress: String;
-  startedAt: Date | String;
-  endedAt: Date | String;
+  employerName: string;
+  employerAddress: string;
+  startedAt: Date | string;
+  endedAt: Date | string;
   workingDays: {
     [key: string]: "full" | "half" | "off";
   };
@@ -78,11 +78,17 @@ const CompaniesCards = ({
 
   const filteredCompanies = companies.filter(
     (company) =>
-      (normalizeString(company.name).includes(normalizeString(searchQuery)) ||
-        normalizeString(company.employerNo).includes(
-          normalizeString(searchQuery)
-        )) &&
-      (!showActiveOnly || company.active)
+      normalizeString(company.name).includes(normalizeString(searchQuery)) ||
+      normalizeString(company.employerNo).includes(
+        normalizeString(searchQuery)
+      ) ||
+      normalizeString(company.employerName).includes(
+        normalizeString(searchQuery)
+      ) ||
+      (normalizeString(company.address).includes(
+        normalizeString(searchQuery)
+      ) &&
+        (!showActiveOnly || company.active))
   );
 
   const totalCompanies = companies.length;
@@ -99,38 +105,8 @@ const CompaniesCards = ({
           throw new Error("Failed to fetch companies");
         }
         const companiesData = await companiesResponse.json();
-        console.log(companiesData);
 
-        // Fetch user details for each company
-        const companiesWithUserNames = await Promise.all(
-          companiesData.companies.map(async (company: any) => {
-            // Fetch the user for each company
-            if (company.user && user.role === "admin") {
-              const userResponse = await fetch(
-                `/api/auth/users?user=${company.user}`
-              );
-              if (!userResponse.ok) {
-                throw new Error("Failed to fetch user details");
-              }
-              const userData = await userResponse.json();
-              return {
-                ...company,
-                id: company._id,
-                userName: userData.user.name || "Unknown", // Include the user name
-                userEmail: userData.user.email || "Unknown", // Include the user email
-              };
-            } else {
-              return {
-                ...company,
-                id: company._id,
-                userName: "Unknown", // Default for companies without a user
-                userEmail: "Unknown", // Default for companies without a user
-              };
-            }
-          })
-        );
-
-        setCompanies(companiesWithUserNames);
+        setCompanies(companiesData.companies);
       } catch (error) {
         setError(
           error instanceof Error
