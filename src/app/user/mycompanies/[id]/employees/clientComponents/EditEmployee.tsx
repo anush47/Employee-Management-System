@@ -186,7 +186,6 @@ const EditEmployeeForm: React.FC<{
     }
     if (name === "totalSalary") {
       // Validate
-      console.log(value);
       if (!validateAmountNumberString(value)) {
         setErrors((prevErrors) => ({
           ...prevErrors,

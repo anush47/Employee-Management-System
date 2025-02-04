@@ -177,7 +177,6 @@ const AddEmployeeForm: React.FC<{
     }
     if (name === "totalSalary") {
       // Validate
-      console.log(value);
       if (!validateAmountNumberString(value)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -190,7 +189,6 @@ const AddEmployeeForm: React.FC<{
         }));
       }
     }
-    console.log(name, value); // Debugging
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -603,7 +601,7 @@ const AddEmployeeForm: React.FC<{
                 ...prev,
                 workingDays,
               }));
-              console.log("Setting working days:", formFields); // Debugging
+              //console.log("Setting working days:", formFields); // Debugging
             }}
           />
         </Grid>
@@ -615,7 +613,7 @@ const AddEmployeeForm: React.FC<{
             handleChange={handleChange}
             shifts={formFields.shifts}
             setShifts={(shifts) => {
-              console.log("Setting shifts:", shifts); // Debugging
+              //console.log("Setting shifts:", shifts); // Debugging
               setFormFields((prev) => ({
                 ...prev,
                 shifts,

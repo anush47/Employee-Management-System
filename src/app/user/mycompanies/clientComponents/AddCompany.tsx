@@ -242,12 +242,12 @@ const AddCompanyForm: React.FC<{
                   <ArrowBack />
                 </IconButton>
               </Tooltip>
-              <Typography variant={isSmallScreen ? "h5" : "h4"}>
+              <Typography variant={isSmallScreen ? "h5" : "h4"} mr={3}>
                 Add Company
               </Typography>
               <Tooltip title="Save new company" arrow>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="success"
                   startIcon={<Save />}
                   onClick={onSaveClick}
