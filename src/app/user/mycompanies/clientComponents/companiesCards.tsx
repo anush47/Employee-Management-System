@@ -26,7 +26,7 @@ import { Business, Cancel, CheckCircle, People } from "@mui/icons-material";
 
 export interface Company {
   shifts: any;
-  id: string;
+  _id: string;
   name: string;
   employerNo: string;
   address: string;
