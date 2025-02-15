@@ -71,25 +71,33 @@ const CompaniesCards = ({
   user: { id: string; name: string; email: string; role: string };
 }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showActiveOnly, setShowActiveOnly] = useState(true);
 
-  const filteredCompanies = companies.filter(
-    (company) =>
-      normalizeString(company.name).includes(normalizeString(searchQuery)) ||
-      normalizeString(company.employerNo).includes(
-        normalizeString(searchQuery)
-      ) ||
-      normalizeString(company.employerName).includes(
-        normalizeString(searchQuery)
-      ) ||
-      (normalizeString(company.address).includes(
-        normalizeString(searchQuery)
-      ) &&
-        (!showActiveOnly || company.active))
-  );
+  useEffect(() => {
+    setFilteredCompanies(
+      companies.filter((company) => {
+        return (
+          (normalizeString(company.name).includes(
+            normalizeString(searchQuery)
+          ) ||
+            normalizeString(company.employerNo).includes(
+              normalizeString(searchQuery)
+            ) ||
+            normalizeString(company.employerName).includes(
+              normalizeString(searchQuery)
+            ) ||
+            normalizeString(company.address).includes(
+              normalizeString(searchQuery)
+            )) &&
+          (!showActiveOnly || company.active)
+        );
+      })
+    );
+  }, [companies, searchQuery, showActiveOnly]);
 
   const totalCompanies = companies.length;
   const activeCompanies = companies.filter((company) => company.active).length;
@@ -120,6 +128,7 @@ const CompaniesCards = ({
 
     fetchCompaniesAndUsers();
   }, [user]);
+
   const CompanyCard = ({ company }: { company: Company }) => {
     return (
       <Card
@@ -242,9 +251,9 @@ const CompaniesCards = ({
           </Box>
           <Grid container spacing={3}>
             {filteredCompanies.map((company) => (
-              <Grid item xs={12} sm={6} md={4} key={company.id}>
+              <Grid item xs={12} sm={6} md={4} key={company._id}>
                 <Link
-                  href={`/user/mycompanies/${company.id}?companyPageSelect=quick`}
+                  href={`/user/mycompanies/${company._id}?companyPageSelect=quick`}
                 >
                   <CompanyCard company={company} />
                 </Link>
