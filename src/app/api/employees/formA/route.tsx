@@ -60,12 +60,15 @@ export async function POST(req: NextRequest) {
         (company.mode === "visit" || company.mode === "aided")
       )
     ) {
-      //check if atleast 1 purchase have been made
-      const purchase = await Purchase.findOne({ company: company._id });
-      if (!purchase) {
+      // Check if at least 2 purchases have been made (including free trial)
+      const purchaseCount = await Purchase.countDocuments({
+        company: company._id,
+      });
+      if (purchaseCount < 2) {
         return NextResponse.json(
           {
-            message: "You must make at least one purchase before filling abh",
+            message:
+              "You must make at least one purchase other than the free trial to fill AH.",
           },
           { status: 403 }
         );
