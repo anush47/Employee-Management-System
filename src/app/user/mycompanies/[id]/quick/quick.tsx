@@ -300,6 +300,8 @@ const QuickTools = ({
         period,
         company: companyId,
         epfReferenceNo: referenceNo,
+        epfPaymentMethod: company?.paymentMethod,
+        etfPaymentMethod: company?.paymentMethod,
       };
 
       // Save payments
