@@ -60,6 +60,7 @@ const CompanyDetails = ({
     employerNo: "",
     address: "",
     monthlyPrice: "",
+    monthlyPriceOverride: false,
     paymentMethod: "",
     startedAt: "",
     employerName: "",
@@ -175,7 +176,7 @@ const CompanyDetails = ({
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any> | any
   ) => {
     let { name, value } = event.target;
-    if (name === "active") {
+    if (name === "active" || name === "monthlyPriceOverride") {
       value = event.target.checked;
     }
     if (name.startsWith("requiredDocs")) {
@@ -205,6 +206,7 @@ const CompanyDetails = ({
         name: "",
         employerNo: "",
         monthlyPrice: "",
+        monthlyPriceOverride: false,
         address: "",
         mode: "",
         paymentMethod: "",
@@ -729,101 +731,123 @@ const CompanyDetails = ({
                   </>
                 )}
 
-                {user.role === "admin" ? ( //for admin make it a select
+                {user.role === "admin" ? (
                   <>
-                    <div className="mt-5" />
-                    <FormControl fullWidth>
-                      <InputLabel id="mode-label">Mode</InputLabel>
-                      <Select
-                        labelId="mode-label"
-                        label="Mode"
-                        name="mode"
-                        value={formFields.mode}
-                        onChange={handleChange}
-                        variant="outlined"
-                        readOnly={!isEditing}
-                      >
-                        {modes}
-                      </Select>
-                    </FormControl>
-                    {/* monthly price */}
-                    <div className="mt-3" />
-                    <FormControl fullWidth>
-                      <TextField
-                        label="Monthly Price"
-                        name="monthlyPrice"
-                        type="number"
-                        value={formFields.monthlyPrice}
-                        onChange={handleChange}
-                        variant="filled"
-                        InputProps={{
-                          readOnly: !isEditing,
-                        }}
-                      />
-                    </FormControl>
-                    {/* required Documents */}
-                    <div className="mt-3" />
-                    <Typography>Required Documents</Typography>
-                    <FormControl>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={formFields.requiredDocs?.epf || false}
-                            name="requiredDocs.epf"
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                          />
-                        }
-                        label="EPF"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={formFields.requiredDocs?.etf || false}
-                            name="requiredDocs.etf"
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                          />
-                        }
-                        label="ETF"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={formFields.requiredDocs?.salary || false}
-                            name="requiredDocs.salary"
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                          />
-                        }
-                        label="Salary"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={formFields.requiredDocs?.paySlip || false}
-                            name="requiredDocs.paySlip"
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                          />
-                        }
-                        label="Pay Slip"
-                      />
-                    </FormControl>
+                    <Box mt={5}>
+                      <FormControl fullWidth>
+                        <InputLabel id="mode-label">Mode</InputLabel>
+                        <Select
+                          labelId="mode-label"
+                          label="Mode"
+                          name="mode"
+                          value={formFields.mode}
+                          onChange={handleChange}
+                          variant="outlined"
+                          readOnly={!isEditing}
+                        >
+                          {modes}
+                        </Select>
+                      </FormControl>
+                    </Box>
+
+                    <Box mt={3}>
+                      <FormControl fullWidth>
+                        <TextField
+                          label="Monthly Price"
+                          name="monthlyPrice"
+                          type="number"
+                          value={formFields.monthlyPrice}
+                          onChange={handleChange}
+                          variant="filled"
+                          InputProps={{
+                            readOnly:
+                              !isEditing || !formFields.monthlyPriceOverride,
+                          }}
+                        />
+                      </FormControl>
+                    </Box>
+
+                    <Box mt={3}>
+                      <FormControl>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formFields.monthlyPriceOverride}
+                              name="monthlyPriceOverride"
+                              onChange={handleChange}
+                              disabled={!isEditing}
+                            />
+                          }
+                          label="Monthly Price Override"
+                        />
+                      </FormControl>
+                    </Box>
+
+                    <Box mt={3}>
+                      <Typography variant="h6">Required Documents</Typography>
+                      <FormControl>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formFields.requiredDocs?.epf || false}
+                              name="requiredDocs.epf"
+                              onChange={handleChange}
+                              disabled={!isEditing}
+                            />
+                          }
+                          label="EPF"
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formFields.requiredDocs?.etf || false}
+                              name="requiredDocs.etf"
+                              onChange={handleChange}
+                              disabled={!isEditing}
+                            />
+                          }
+                          label="ETF"
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formFields.requiredDocs?.salary || false}
+                              name="requiredDocs.salary"
+                              onChange={handleChange}
+                              disabled={!isEditing}
+                            />
+                          }
+                          label="Salary"
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={
+                                formFields.requiredDocs?.paySlip || false
+                              }
+                              name="requiredDocs.paySlip"
+                              onChange={handleChange}
+                              disabled={!isEditing}
+                            />
+                          }
+                          label="Pay Slip"
+                        />
+                      </FormControl>
+                    </Box>
                   </>
                 ) : (
                   <>
-                    <Typography>
+                    <Typography mt={5}>
                       Mode: {modeTexts[company.mode as keyof typeof modeTexts]}
                     </Typography>
-                    <Typography>
-                      Price: LKR{" "}
+                    <Typography variant="h6" mt={3}>
+                      Monthly Price: LKR{" "}
                       {company.monthlyPrice
                         ? company.monthlyPrice.toLocaleString()
                         : "N/A"}

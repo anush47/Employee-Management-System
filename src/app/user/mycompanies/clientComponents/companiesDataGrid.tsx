@@ -26,6 +26,7 @@ export interface Company {
     | undefined;
   paymentMethod: String;
   monthlyPrice: String;
+  monthlyPriceOverride: boolean;
   employerName: String;
   employerAddress: String;
   startedAt: Date | String;
@@ -73,7 +74,13 @@ const CompaniesDataGrid = ({
   if (user.role === "admin") {
     columns.push(
       { field: "userName", headerName: "User Name", flex: 1 },
-      { field: "userEmail", headerName: "User Email", flex: 1 }
+      { field: "userEmail", headerName: "User Email", flex: 1 },
+      {
+        field: "monthlyPriceOverride",
+        headerName: "Monthly Price Override",
+        flex: 1,
+        type: "boolean",
+      }
     );
   }
 
@@ -165,6 +172,7 @@ const CompaniesDataGrid = ({
       paymentMethod: false,
       mode: false,
       monthlyPrice: false,
+      monthlyPriceOverride: false,
     });
 
   return (

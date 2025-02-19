@@ -94,7 +94,9 @@ const AddSalaryForm: React.FC<{
     }[]
   >([]);
   const [employeeSelection, setEmployeeSelection] = useState<string>("all");
-  const [period, setPeriod] = useState<string>(dayjs().format("YYYY-MM"));
+  const [period, setPeriod] = useState<string>(
+    dayjs().subtract(1, "month").format("YYYY-MM")
+  );
   const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");

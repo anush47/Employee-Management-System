@@ -5,6 +5,7 @@ import Company from "@/app/models/Company";
 import Employee from "@/app/models/Employee"; // Assuming you have an Employee model
 import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
+import { calculateMonthlyPrice } from "../../purchases/price/priceUtils";
 
 // Define the schema for employee validation
 const employeeSchema = z.object({
@@ -154,20 +155,23 @@ export async function POST(req: NextRequest) {
     await newEmployee.save();
 
     // Count the number of employees in the company
-    const employeeCount = await Employee.countDocuments({
-      company: parsedBody.company,
-    });
-
-    // Update the company's monthlyPrice based on employee count ranges
-    if (employeeCount <= 5) {
-      company.monthlyPrice = 3000; // Price for 0-5 employees
-    } else if (employeeCount > 5 && employeeCount <= 10) {
-      company.monthlyPrice = 5000; // Price for 6-10 employees
-    } else {
-      company.monthlyPrice = 7000; // Price for 11+ employees
+    // Count the total and active employees in the company
+    if (!company?.monthlyPriceOverride) {
+      const [employeeCount, activeEmployeeCount] = await Promise.all([
+        Employee.countDocuments({ company: parsedBody.company }),
+        Employee.countDocuments({ company: parsedBody.company, active: true }),
+      ]);
+      const price = calculateMonthlyPrice(
+        company,
+        employeeCount,
+        activeEmployeeCount
+      );
+      if (price !== company.monthlyPrice) {
+        // Update the company's monthly price if it has changed
+        company.monthlyPrice = price;
+        await company.save();
+      }
     }
-    // Save the updated company data
-    await company.save();
 
     // Return success response
     return NextResponse.json({ message: "Employee added successfully" });

@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import Company from "@/app/models/Company";
 import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
+import Employee from "@/app/models/Employee";
+import { calculateMonthlyPrice } from "../../purchases/price/priceUtils";
 
 // Define schema for validation
 const userIdSchema = z.string().min(1, "User ID is required");
@@ -68,6 +70,7 @@ const companyUpdateSchema = z.object({
   startedAt: z.string().optional(),
   endedAt: z.string().optional(),
   monthlyPrice: z.number().optional(),
+  monthlyPriceOverride: z.boolean().optional(),
   active: z.boolean().optional(),
   employerName: z.string().optional(),
   employerAddress: z.string().optional(),
@@ -138,20 +141,48 @@ export async function PUT(req: NextRequest) {
       delete companyData.monthlyPrice;
       //delete requiredDocs
       delete companyData.requiredDocs;
+      //delete priceOverride
+      delete companyData.monthlyPriceOverride;
     }
 
     // Connect to the database
     await dbConnect();
 
+    // Find the company to update
+    const company = await Company.findOne(filter);
+
+    if (!company) {
+      return NextResponse.json(
+        { message: "Company not found" },
+        { status: 404 }
+      );
+    }
+
+    // Count the number of employees in the company
+    // Count the total and active employees in the company
+    if (!companyData?.monthlyPriceOverride) {
+      const [employeeCount, activeEmployeeCount] = await Promise.all([
+        Employee.countDocuments({ company: companyId }),
+        Employee.countDocuments({ company: companyId, active: true }),
+      ]);
+      const price = calculateMonthlyPrice(
+        company,
+        employeeCount,
+        activeEmployeeCount
+      );
+      if (price !== company.monthlyPrice) {
+        // Update the company's monthly price if it has changed
+        companyData.monthlyPrice = price;
+        await company.save();
+      }
+    }
+
     // Update the company in the database
-    const updatedCompany = await Company.findOneAndUpdate(filter, companyData, {
-      new: true,
-      runValidators: true,
-    }).lean(); // Use .lean() for better performance
+    const updatedCompany = await company.updateOne(companyData);
 
     if (!updatedCompany) {
       return NextResponse.json(
-        { message: "Company not found" },
+        { message: "Company Update Error" },
         { status: 404 }
       );
     }

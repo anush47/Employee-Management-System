@@ -7,7 +7,7 @@ import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
 import { request } from "http";
 import Employee from "@/app/models/Employee";
-import { calculateTotalPrice } from "./price/calculateTotalPrice";
+import { calculateTotalPrice } from "./price/priceUtils";
 
 // Define schema for purchase validation
 const purchaseSchema = z.object({
@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Access denied." }, { status: 403 });
     }
     parsedBody.totalPrice = calculateTotalPrice(
-      company.monthlyPrice,
+      company,
       body.periods
     ).finalTotalPrice;
     parsedBody = purchaseSchema.parse(parsedBody);

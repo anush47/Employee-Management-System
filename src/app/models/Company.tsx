@@ -11,6 +11,7 @@ interface ICompany extends Document {
   paymentMethod: String;
   active: boolean;
   monthlyPrice: number;
+  monthlyPriceOverride: boolean;
   employerName: string;
   employerAddress: string;
   requiredDocs: {
@@ -63,6 +64,10 @@ const companySchema = new Schema<ICompany>(
       type: Number,
       required: true,
       default: 3000,
+    },
+    monthlyPriceOverride: {
+      type: Boolean,
+      default: false,
     },
     startedAt: {
       type: String,

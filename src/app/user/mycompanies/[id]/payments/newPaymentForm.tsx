@@ -56,7 +56,7 @@ const NewPaymentForm = ({
   const [company, setCompany] = useState<any>();
   const [purchased, setPurchased] = useState<boolean>(true);
   const [period, setPeriod] = useState<string>(
-    dayjs().format("YYYY-MM") // Default to current month
+    dayjs().subtract(1, "month").format("YYYY-MM")
   );
   const [loading, setLoading] = useState(false);
   const [ReferenceLoading, setReferenceLoading] = useState(false);

@@ -51,7 +51,9 @@ const QuickTools = ({
 }: {
   user: { name: string; email: string; id: string };
 }) => {
-  const [period, setPeriod] = useState<string>(dayjs().format("YYYY-MM"));
+  const [period, setPeriod] = useState<string>(
+    dayjs().subtract(1, "month").format("YYYY-MM")
+  );
   const [purchased, setPurchased] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [editable, setEditable] = useState<boolean>(false);

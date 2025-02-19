@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { options } from "../../auth/[...nextauth]/options";
 import Company from "@/app/models/Company";
 import { z } from "zod";
-import { calculateTotalPrice } from "./calculateTotalPrice";
+import { calculateTotalPrice } from "./priceUtils";
 
 // GET: Fetch price based on months and company ID
 export async function GET(req: NextRequest) {
@@ -55,9 +55,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Calculate the price
-    const pricePerMonth = company.monthlyPrice;
     const { totalPrice, finalTotalPrice } = calculateTotalPrice(
-      pricePerMonth,
+      company,
       monthsArray
     );
 

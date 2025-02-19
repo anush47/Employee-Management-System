@@ -5,6 +5,7 @@ import dbConnect from "@/app/lib/db";
 import Employee from "@/app/models/Employee";
 import { options } from "../../auth/[...nextauth]/options";
 import Company from "@/app/models/Company";
+import { calculateMonthlyPrice } from "../../purchases/price/priceUtils";
 
 // Define schema for validation
 const userIdSchema = z.string().min(1, "User ID is required");
@@ -343,6 +344,24 @@ export async function DELETE(req: NextRequest) {
 
     // Delete the employee from the database
     await Employee.findByIdAndDelete(employeeId);
+
+    // Update the company's monthly price if needed
+    if (!company?.monthlyPriceOverride) {
+      const [employeeCount, activeEmployeeCount] = await Promise.all([
+        Employee.countDocuments({ company: company._id }),
+        Employee.countDocuments({ company: company._id, active: true }),
+      ]);
+      const price = calculateMonthlyPrice(
+        company,
+        employeeCount,
+        activeEmployeeCount
+      );
+      if (price !== company.monthlyPrice) {
+        // Update the company's monthly price if it has changed
+        company.monthlyPrice = price;
+        await company.save();
+      }
+    }
 
     // Return success response
     return NextResponse.json({ message: "Employee deleted successfully" });

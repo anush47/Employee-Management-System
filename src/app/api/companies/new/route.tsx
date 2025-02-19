@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import Company from "@/app/models/Company";
 import { options } from "../../auth/[...nextauth]/options";
 import { z } from "zod";
+import { calculateMonthlyPrice } from "../../purchases/price/priceUtils";
 
 // Define schema for validation
 const companySchema = z.object({
@@ -16,6 +17,7 @@ const companySchema = z.object({
   startedAt: z.string().optional(),
   paymentMethod: z.string().optional(),
   monthlyPrice: z.number(),
+  monthlyPriceOverride: z.boolean(),
   requiredDocs: z.object({
     epf: z.boolean(),
     etf: z.boolean(),
@@ -53,7 +55,8 @@ export async function POST(req: NextRequest) {
     // Parse and validate the request body
     const body = await req.json();
     //setMonthlyPrice
-    body.monthlyPrice = 3000;
+    body.monthlyPrice = calculateMonthlyPrice(null, 0, 0);
+    body.monthlyPriceOverride = false;
     body.workingDays = {
       mon: "full",
       tue: "full",
