@@ -39,7 +39,7 @@ export const getETFDoc = (
     maxWidth: leftTopBoxWidth - 8,
   });
   //increment y by the space occupied
-  y += 5 * (Math.floor(doc.getTextWidth(company.name) / 83) + 1);
+  y += 5 * (Math.floor(doc.getTextWidth(company.name) / 80) + 1);
 
   // Company address
   // split into  lines
