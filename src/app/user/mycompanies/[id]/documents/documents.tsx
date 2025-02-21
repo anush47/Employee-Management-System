@@ -45,7 +45,9 @@ const Documents = ({
 }: {
   user: { name: string; email: string; id: string };
 }) => {
-  const [period, setPeriod] = useState<string>(dayjs().format("YYYY-MM"));
+  const [period, setPeriod] = useState<string>(
+    dayjs().subtract(1, "month").format("YYYY-MM")
+  );
   const [purchased, setPurchased] = useState<boolean>(false);
   const [company, setCompany] = useState<Company>();
   const [loading, setLoading] = useState<boolean>(false);
