@@ -204,9 +204,12 @@ export const setupData = (salaries: SalarySchema[]) => {
     // Add dynamic deductions
     salary.paymentStructure.deductions.forEach(
       (deduction: { name: string; amount: string | number }) => {
-        const nameText = `${deduction.name.toUpperCase()} (-)`;
-        deductions.add(nameText); // Collect dynamic deduction columns
-        modifiedSalary[nameText] = deduction.amount || 0;
+        const excludedDeductions = ["EPF 8%"]; //exclude EPF 8% from deductions because it is already included
+        if (!excludedDeductions.includes(deduction.name.toUpperCase())) {
+          const nameText = `${deduction.name.toUpperCase()} (-)`;
+          deductions.add(nameText); // Collect dynamic deduction columns
+          modifiedSalary[nameText] = deduction.amount || 0;
+        }
       }
     );
 
