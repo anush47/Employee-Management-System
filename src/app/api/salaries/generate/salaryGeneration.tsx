@@ -32,31 +32,60 @@ function isProcessed(
 function calculateSalaryDetails(
   source: {
     paymentStructure: {
-      additions: { name: string; amount: string }[];
-      deductions: { name: string; amount: string }[];
+      additions: {
+        name: string;
+        amount: string;
+        affectTotalEarnings: boolean;
+      }[];
+      deductions: {
+        name: string;
+        amount: string;
+        affectTotalEarnings: boolean;
+      }[];
     };
     basic: number;
     totalSalary: number;
   },
-  salary: { noPay: { amount: number } },
-  ot: number
+  salary: {
+    paymentStructure: {
+      additions: {
+        name: string;
+        amount: string;
+        affectTotalEarnings: boolean;
+      }[];
+      deductions: {
+        name: string;
+        amount: string;
+        affectTotalEarnings: boolean;
+      }[];
+    };
+    noPay: { amount: number };
+  },
+  ot: number,
+  holidayPay: number
 ) {
   let parsedAdditions = source.paymentStructure.additions.map(
-    (addition: { name: string; amount: string }) => ({
+    (addition: {
+      name: string;
+      amount: string;
+      affectTotalEarnings: boolean;
+    }) => ({
       name: addition.name,
       amount: parseValue(addition.name, addition.amount, source.basic),
+      affectTotalEarnings: addition.affectTotalEarnings,
     })
   );
 
   let parsedDeductions = source.paymentStructure.deductions.reduce(
     (
-      acc: { name: string; amount: number }[],
-      deduction: { name: string; amount: string }
+      acc: { name: string; amount: number; affectTotalEarnings: boolean }[],
+      deduction: { name: string; amount: string; affectTotalEarnings: boolean }
     ) => {
       if (deduction && deduction.name !== "EPF 8%") {
         acc.push({
           name: deduction.name,
           amount: parseValue(deduction.name, deduction.amount, source.basic),
+          affectTotalEarnings: deduction.affectTotalEarnings,
         });
       }
       return acc;
@@ -271,15 +300,45 @@ function calculateSalaryDetails(
   }
 
   let basicForSalary = 0;
-  if (salary && salary.noPay) {
-    basicForSalary = source.basic - salary.noPay.amount;
+  if (salary) {
+    basicForSalary =
+      source.basic +
+      salary.noPay.amount +
+      holidayPay +
+      parsedAdditions.reduce((acc, curr) => {
+        if (curr.affectTotalEarnings) {
+          return acc + curr.amount;
+        }
+        return acc;
+      }, 0) -
+      parsedDeductions.reduce((acc, curr) => {
+        if (curr.affectTotalEarnings) {
+          return acc + curr.amount;
+        }
+        return acc;
+      }, 0);
   } else {
-    basicForSalary = source.basic;
+    basicForSalary =
+      source.basic +
+      holidayPay +
+      parsedAdditions.reduce((acc, curr) => {
+        if (curr.affectTotalEarnings) {
+          return acc + curr.amount;
+        }
+        return acc;
+      }, 0) -
+      parsedDeductions.reduce((acc, curr) => {
+        if (curr.affectTotalEarnings) {
+          return acc + curr.amount;
+        }
+        return acc;
+      }, 0);
   }
 
   parsedDeductions.push({
     name: "EPF 8%",
     amount: basicForSalary * 0.08,
+    affectTotalEarnings: false,
   });
 
   //remove undefined
@@ -403,7 +462,7 @@ export async function generateSalaryForOneEmployee(
       parsedDeductions,
       totalAdditions,
       totalDeductions,
-    } = calculateSalaryDetails(source, salary, ot);
+    } = calculateSalaryDetails(source, salary, ot, holidayPay);
 
     const finalSalary =
       employee.basic +

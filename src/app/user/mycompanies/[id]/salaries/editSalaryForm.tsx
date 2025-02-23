@@ -190,6 +190,7 @@ const EditSalaryForm: React.FC<{
         period: data.salaries[0].period,
         inOut: data.salaries[0].inOut,
         basic: data.salaries[0].basic,
+        holidayPay: data.salaries[0].holidayPay,
         noPay: data.salaries[0].noPay,
         ot: data.salaries[0].ot,
         paymentStructure: data.salaries[0].paymentStructure,
@@ -220,6 +221,47 @@ const EditSalaryForm: React.FC<{
   const calculateFinalSalary = () => {
     const basic = Number(formFields.basic);
     const otAmount = Number(formFields.ot.amount);
+
+    const additionsForEarnings = formFields.paymentStructure.additions.reduce(
+      (acc, addition) => {
+        if (addition.affectTotalEarnings) {
+          return acc + Number(addition.amount);
+        }
+        return acc;
+      },
+      0
+    );
+
+    const deductionsForEarnings = formFields.paymentStructure.deductions.reduce(
+      (acc, deduction) => {
+        if (deduction.affectTotalEarnings) {
+          return acc + Number(deduction.amount);
+        }
+        return acc;
+      },
+      0
+    );
+
+    const noPayAmount = Number(formFields.noPay.amount);
+    const holidayPay = Number(formFields.holidayPay);
+
+    //set epf
+    const epfAmount =
+      (basic +
+        holidayPay +
+        additionsForEarnings -
+        deductionsForEarnings -
+        noPayAmount) *
+      0.08;
+
+    console.log("EPF Amount:", epfAmount);
+    const epfDeduction = formFields.paymentStructure.deductions.find(
+      (deduction) => deduction.name === "EPF 8%"
+    );
+    if (epfDeduction) {
+      epfDeduction.amount = epfAmount.toString();
+    }
+
     const additions = formFields.paymentStructure.additions.reduce(
       (acc, curr) => acc + Number(curr.amount),
       0
@@ -228,9 +270,8 @@ const EditSalaryForm: React.FC<{
       (acc, curr) => acc + Number(curr.amount),
       0
     );
-    const noPayAmount = Number(formFields.noPay.amount);
+
     const advanceAmount = Number(formFields.advanceAmount);
-    const holidayPay = Number(formFields.holidayPay);
 
     const finalSalary =
       basic + holidayPay + otAmount + additions - deductions - noPayAmount;

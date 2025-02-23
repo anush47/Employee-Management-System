@@ -495,6 +495,9 @@ export const generateSalaryWithInOut = async (
     return new Date(a.in).getTime() - new Date(b.in).getTime();
   });
 
+  //set updated data
+  employee.basic = existingSalary ? existingSalary.basic : employee.basic;
+
   //reprocress all inouts
   const reprocessed = await processSalaryWithInOut(
     employee,

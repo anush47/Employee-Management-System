@@ -45,14 +45,14 @@ const employeeSchema = z.object({
       z.object({
         name: z.string(),
         amount: z.union([z.string(), z.number(), z.null()]),
-        affectTotalEarnings: z.boolean(),
+        affectTotalEarnings: z.boolean().optional(),
       })
     ),
     deductions: z.array(
       z.object({
         name: z.string(),
         amount: z.union([z.string(), z.number(), z.null()]),
-        affectTotalEarnings: z.boolean(),
+        affectTotalEarnings: z.boolean().optional(),
       })
     ),
   }),

@@ -19,11 +19,20 @@ export type SalarySchema = {
   };
   period: string;
   basic: number;
+  holidayPay: number;
   noPay: { amount: number };
   ot: { amount: number };
   paymentStructure: {
-    additions: { name: string; amount: string | number }[];
-    deductions: { name: string; amount: string | number }[];
+    additions: {
+      name: string;
+      amount: string | number;
+      affectTotalEarnings: boolean;
+    }[];
+    deductions: {
+      name: string;
+      amount: string | number;
+      affectTotalEarnings: boolean;
+    }[];
   };
   advanceAmount: number;
   finalSalary: number;
@@ -149,6 +158,10 @@ export const setupData = (salaries: SalarySchema[]) => {
       header: "BASIC (WITH B.A.)",
     },
     {
+      dataKey: "holidayPay",
+      header: "HOLIDAY PAY (+)",
+    },
+    {
       dataKey: "noPay",
       header: "NO PAY (-)",
     },
@@ -176,18 +189,45 @@ export const setupData = (salaries: SalarySchema[]) => {
 
   // Iterate over salaries and build records
   salaries.forEach((salary) => {
+    const basicWithBA = salary.basic;
+    const budgetaryAllowance = 3500; // Example static value
+    let affectTotalEarnings = 0;
+    //loop through additions and deductions
+    salary.paymentStructure.additions.forEach((addition) => {
+      if (addition.affectTotalEarnings) {
+        affectTotalEarnings +=
+          typeof addition.amount === "number"
+            ? addition.amount
+            : parseFloat(addition.amount);
+      }
+    });
+    salary.paymentStructure.deductions.forEach((deduction) => {
+      if (deduction.affectTotalEarnings) {
+        affectTotalEarnings -=
+          typeof deduction.amount === "number"
+            ? deduction.amount
+            : parseFloat(deduction.amount);
+      }
+    });
+
+    const salaryForEPF =
+      basicWithBA +
+      (salary.holidayPay || 0) -
+      (salary.noPay.amount || 0) +
+      affectTotalEarnings;
     const modifiedSalary: { [key: string]: any } = {
       memberNo: salary.employee.memberNo,
       name: salary.employee.name,
       nic: salary.employee.nic,
-      basic: salary.basic - 3500,
-      budgetaryAllowance: 3500, // Example static value
-      basicWithBA: salary.basic, // Adjust to actual logic
+      basic: salary.basic - budgetaryAllowance,
+      budgetaryAllowance, // Example static value
+      basicWithBA,
+      holidayPay: salary.holidayPay,
       noPay: salary.noPay.amount || 0,
-      salaryForEPF: salary.basic || 0,
-      epf12: salary.basic * 0.12,
-      etf3: salary.basic * 0.03,
-      epf8: salary.basic * 0.08,
+      salaryForEPF,
+      epf12: salaryForEPF * 0.12,
+      etf3: salaryForEPF * 0.03,
+      epf8: salaryForEPF * 0.08,
       advanceAmount: salary.advanceAmount,
       finalSalary: salary.finalSalary,
     };
@@ -230,8 +270,12 @@ export const setupData = (salaries: SalarySchema[]) => {
     columns.push({ dataKey: deduction, header: deduction });
   });
 
+  //if atleast one has advance then add advance column
+  if (records.some((record) => record.advanceAmount !== 0)) {
+    columns.push({ dataKey: "advanceAmount", header: "ADVANCE (-)" });
+  }
+
   // Finalize columns by adding static columns like "FINAL SALARY"
-  columns.push({ dataKey: "advanceAmount", header: "ADVANCE AMOUNT" });
   columns.push({ dataKey: "finalSalary", header: "FINAL SALARY" });
 
   // Prepare data based on columns
