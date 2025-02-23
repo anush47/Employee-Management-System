@@ -334,7 +334,18 @@ export const PaymentStructure = ({
                 <Grid item xs={2}>
                   {deduction.name !== "EPF 8%" && (
                     <Tooltip title="Include To Total Earnings" arrow>
-                      <Checkbox disabled={!isEditing} />
+                      <Checkbox
+                        disabled={!isEditing}
+                        checked={deduction.affectTotalEarnings || false}
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "deductions",
+                            index,
+                            "affectTotalEarnings",
+                            e.target.checked
+                          )
+                        }
+                      />
                     </Tooltip>
                   )}
                 </Grid>
