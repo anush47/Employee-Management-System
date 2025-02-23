@@ -29,10 +29,12 @@ interface IEmployee extends Document {
     additions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
     deductions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
   };
 }
@@ -171,6 +173,10 @@ const employeeSchema = new Schema<IEmployee>(
             amount: {
               type: String,
             },
+            affectTotalEarnings: {
+              type: Boolean,
+              default: false,
+            },
           },
         ],
       },
@@ -182,6 +188,10 @@ const employeeSchema = new Schema<IEmployee>(
             },
             amount: {
               type: String,
+            },
+            affectTotalEarnings: {
+              type: Boolean,
+              default: false,
             },
           },
         ],

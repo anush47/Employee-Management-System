@@ -32,10 +32,12 @@ interface ICompany extends Document {
     additions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
     deductions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
   };
 }
@@ -162,11 +164,18 @@ const companySchema = new Schema<ICompany>(
             amount: {
               type: String,
             },
+            affectTotalEarnings: {
+              type: Boolean,
+            },
           },
         ],
         default: [
-          { name: "Incentive", amount: null },
-          { name: "Performance Allowance", amount: null },
+          { name: "Incentive", amount: null, affectTotalEarnings: false },
+          {
+            name: "Performance Allowance",
+            amount: null,
+            affectTotalEarnings: false,
+          },
         ],
       },
       deductions: {
@@ -179,9 +188,12 @@ const companySchema = new Schema<ICompany>(
             amount: {
               type: String,
             },
+            affectTotalEarnings: {
+              type: Boolean,
+            },
           },
         ],
-        default: [{ name: "EPF 8%", amount: null }],
+        default: [{ name: "EPF 8%", amount: null, affectTotalEarnings: false }],
       },
     },
     requiredDocs: {

@@ -16,18 +16,27 @@ import {
   AccordionSummary,
   Accordion,
   AccordionDetails,
+  Checkbox,
 } from "@mui/material";
 import { Add, ExpandMore, Remove } from "@mui/icons-material";
 
 interface PaymentStructureProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   paymentStructure: {
-    additions: { name: string; amount: string }[];
-    deductions: { name: string; amount: string }[];
+    additions: { name: string; amount: string; affectTotalEarnings: boolean }[];
+    deductions: {
+      name: string;
+      amount: string;
+      affectTotalEarnings: boolean;
+    }[];
   };
   setPaymentStructure: (paymentStructure: {
-    additions: { name: string; amount: string }[];
-    deductions: { name: string; amount: string }[];
+    additions: { name: string; amount: string; affectTotalEarnings: boolean }[];
+    deductions: {
+      name: string;
+      amount: string;
+      affectTotalEarnings: boolean;
+    }[];
   }) => void;
   isEditing: boolean;
   isSalary?: boolean;
@@ -65,8 +74,8 @@ export const PaymentStructure = ({
   }, [paymentStructure]);
   const [additions, setAdditions] = React.useState(
     paymentStructure?.additions || [
-      { name: "Incentive", amount: "" },
-      { name: "Performance Allowance", amount: "" },
+      { name: "Incentive", amount: "", affectTotalEarnings: false },
+      { name: "Performance Allowance", amount: "", affectTotalEarnings: false },
     ]
   );
   const [deductions, setDeductions] = React.useState(
@@ -79,10 +88,16 @@ export const PaymentStructure = ({
 
   const handleAddField = (type: "additions" | "deductions") => {
     if (type === "additions") {
-      setAdditions([...additions, { name: "", amount: "" }]);
+      setAdditions([
+        ...additions,
+        { name: "", amount: "", affectTotalEarnings: false },
+      ]);
       setErrors((prev) => ({ ...prev, additions: [...prev.additions, ""] }));
     } else {
-      setDeductions([...deductions, { name: "", amount: "" }]);
+      setDeductions([
+        ...deductions,
+        { name: "", amount: "", affectTotalEarnings: false },
+      ]);
       setErrors((prev) => ({ ...prev, deductions: [...prev.deductions, ""] }));
     }
   };
@@ -113,8 +128,8 @@ export const PaymentStructure = ({
   const handleFieldChange = (
     type: "additions" | "deductions",
     index: number,
-    field: "name" | "amount",
-    value: string
+    field: "name" | "amount" | "affectTotalEarnings",
+    value: string | boolean
   ) => {
     let newAdditions = [...additions];
     let newDeductions = [...deductions];
@@ -124,8 +139,10 @@ export const PaymentStructure = ({
       newAdditions[index] = { ...newAdditions[index], [field]: value };
       setAdditions(newAdditions);
       newErrors.additions[index] =
-        (field === "amount" && validateAmountNumberString(value, isSalary)) ||
-        (field === "name" && value !== "")
+        (field === "amount" &&
+          validateAmountNumberString(value as string, isSalary)) ||
+        (field === "name" && value !== "") ||
+        field === "affectTotalEarnings"
           ? ""
           : "Invalid format";
       setErrors(newErrors);
@@ -134,7 +151,8 @@ export const PaymentStructure = ({
       newDeductions[index] = { ...newDeductions[index], [field]: value };
       setDeductions(newDeductions);
       newErrors.deductions[index] =
-        (field === "amount" && validateAmountNumberString(value, isSalary)) ||
+        (field === "amount" &&
+          validateAmountNumberString(value as string, isSalary)) ||
         (field === "name" && value !== "")
           ? ""
           : "Invalid format";
@@ -210,6 +228,22 @@ export const PaymentStructure = ({
                       }}
                     />
                   </FormControl>
+                </Grid>
+                <Grid item xs={2}>
+                  <Tooltip title="Include To Total Earnings" arrow>
+                    <Checkbox
+                      checked={addition.affectTotalEarnings || false}
+                      disabled={!isEditing}
+                      onChange={(e) =>
+                        handleFieldChange(
+                          "additions",
+                          index,
+                          "affectTotalEarnings",
+                          e.target.checked
+                        )
+                      }
+                    />
+                  </Tooltip>
                 </Grid>
                 <Grid item xs={1}>
                   {isEditing && !isSalary && (
@@ -295,6 +329,13 @@ export const PaymentStructure = ({
                         }}
                       />
                     </FormControl>
+                  )}
+                </Grid>
+                <Grid item xs={2}>
+                  {deduction.name !== "EPF 8%" && (
+                    <Tooltip title="Include To Total Earnings" arrow>
+                      <Checkbox disabled={!isEditing} />
+                    </Tooltip>
                   )}
                 </Grid>
                 <Grid item xs={2}>

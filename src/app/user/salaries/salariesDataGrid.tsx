@@ -40,8 +40,12 @@ export interface Salary {
     reason: string;
   };
   paymentStructure: {
-    additions: { name: string; amount: string }[];
-    deductions: { name: string; amount: string }[];
+    additions: { name: string; amount: string; affectTotalEarnings: boolean }[];
+    deductions: {
+      name: string;
+      amount: string;
+      affectTotalEarnings: boolean;
+    }[];
   };
   advanceAmount: number;
   finalSalary: number;

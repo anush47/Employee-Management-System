@@ -23,12 +23,14 @@ const paymentStructureSchema = z.object({
     z.object({
       name: z.string().min(1, "Addition name is required"),
       amount: z.number().min(0, "Addition amount must be a positive number"),
+      affectTotalEarnings: z.boolean().optional(),
     })
   ),
   deductions: z.array(
     z.object({
       name: z.string().min(1, "Deduction name is required"),
       amount: z.number().min(0, "Deduction amount must be a positive number"),
+      affectTotalEarnings: z.boolean().optional(),
     })
   ),
 });

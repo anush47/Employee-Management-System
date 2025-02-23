@@ -7,6 +7,18 @@ type Company = {
 type Salary = {
   basic: number;
   holidayPay: number;
+  paymentStructure: {
+    additions: {
+      name: string;
+      amount: number;
+      affectTotalEarnings: boolean;
+    }[];
+    deductions: {
+      name: string;
+      amount: number;
+      affectTotalEarnings: boolean;
+    }[];
+  };
 };
 
 type Payment = {
@@ -41,6 +53,17 @@ export function calculateTotalEarnings(salary: Salary) {
   try {
     totalEarnings += salary.basic;
     totalEarnings += salary.holidayPay ?? 0;
+    //payment structure affect
+    for (let addition of salary.paymentStructure.additions) {
+      if (addition.affectTotalEarnings) {
+        totalEarnings += addition.amount;
+      }
+    }
+    for (let deduction of salary.paymentStructure.deductions) {
+      if (deduction.affectTotalEarnings) {
+        totalEarnings -= deduction.amount;
+      }
+    }
   } catch {
     console.log("Error in salary", salary);
   }

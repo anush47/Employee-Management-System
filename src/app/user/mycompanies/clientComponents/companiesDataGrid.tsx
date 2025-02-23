@@ -38,10 +38,12 @@ export interface Company {
     additions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
     deductions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
   };
 }

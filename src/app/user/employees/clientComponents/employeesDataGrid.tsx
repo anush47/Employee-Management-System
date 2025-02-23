@@ -46,10 +46,12 @@ export interface Employee {
     additions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
     deductions: {
       name: string;
       amount: string;
+      affectTotalEarnings: boolean;
     }[];
   };
   startedAt: Date | string;

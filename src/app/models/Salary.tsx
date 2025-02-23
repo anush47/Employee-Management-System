@@ -18,10 +18,12 @@ interface ISalary extends Document {
     additions: {
       name: string;
       amount: number;
+      affectTotalEarnings: boolean;
     }[];
     deductions: {
       name: string;
       amount: number;
+      affectTotalEarnings: boolean;
     }[];
   };
   inOut: {
@@ -88,6 +90,10 @@ const salarySchema = new Schema<ISalary>(
             type: Number,
             required: true,
           },
+          affectTotalEarnings: {
+            type: Boolean,
+            default: false,
+          },
         },
       ],
       deductions: [
@@ -99,6 +105,10 @@ const salarySchema = new Schema<ISalary>(
           amount: {
             type: Number,
             required: true,
+          },
+          affectTotalEarnings: {
+            type: Boolean,
+            default: false,
           },
         },
       ],
