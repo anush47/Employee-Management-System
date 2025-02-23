@@ -17,6 +17,7 @@ import {
   Accordion,
   AccordionDetails,
   Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { Add, ExpandMore, Remove } from "@mui/icons-material";
 
@@ -229,21 +230,26 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={2}>
-                  <Tooltip title="Include To Total Earnings" arrow>
-                    <Checkbox
-                      checked={addition.affectTotalEarnings || false}
-                      disabled={!isEditing}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          "additions",
-                          index,
-                          "affectTotalEarnings",
-                          e.target.checked
-                        )
+                <Grid item xs={5} sm={2}>
+                  <FormControl fullWidth>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          disabled={!isEditing}
+                          checked={addition.affectTotalEarnings || false}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "additions",
+                              index,
+                              "affectTotalEarnings",
+                              e.target.checked
+                            )
+                          }
+                        />
                       }
+                      label="Total Earnings"
                     />
-                  </Tooltip>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={1}>
                   {isEditing && !isSalary && (
@@ -331,25 +337,32 @@ export const PaymentStructure = ({
                     </FormControl>
                   )}
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={5} sm={2}>
                   {deduction.name !== "EPF 8%" && (
                     <Tooltip title="Include To Total Earnings" arrow>
-                      <Checkbox
-                        disabled={!isEditing}
-                        checked={deduction.affectTotalEarnings || false}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            "deductions",
-                            index,
-                            "affectTotalEarnings",
-                            e.target.checked
-                          )
-                        }
-                      />
+                      <FormControl fullWidth>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              disabled={!isEditing}
+                              checked={deduction.affectTotalEarnings || false}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  "deductions",
+                                  index,
+                                  "affectTotalEarnings",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          }
+                          label="Total Earnings"
+                        />
+                      </FormControl>
                     </Tooltip>
                   )}
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={1}>
                   {isEditing && !isSalary && deduction.name !== "EPF 8%" && (
                     <Tooltip title="Remove" arrow>
                       <IconButton
