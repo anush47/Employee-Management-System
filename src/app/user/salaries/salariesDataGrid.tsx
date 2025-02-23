@@ -29,6 +29,7 @@ export interface Salary {
   employee: string; // Will hold employee ID initially
   period: string;
   basic: number;
+  holidayPay: number;
   inOut: string;
   noPay: {
     amount: number;
@@ -119,6 +120,14 @@ const SalariesDataGrid: React.FC<{
       align: "left",
       headerAlign: "left",
       editable: isEditing,
+    },
+    {
+      field: "holidayPay",
+      headerName: "Holiday Pay",
+      flex: 1,
+      align: "left",
+      type: "number",
+      headerAlign: "left",
     },
     {
       field: "ot",

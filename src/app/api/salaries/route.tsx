@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import dbConnect from "@/app/lib/db";
-import Purchase from "@/app/models/Purchase";
 import Company from "@/app/models/Company";
 import { options } from "../auth/[...nextauth]/options";
-import { request } from "http";
 import Employee from "@/app/models/Employee";
 import Salary from "@/app/models/Salary";
 import { checkPurchased } from "../purchases/check/checkPurchased";
@@ -40,6 +38,7 @@ const salarySchema = z.object({
   employee: z.string().min(1, "Employee ID is required"),
   period: z.string().min(1, "Period is required"),
   basic: z.number().min(1, "Basic salary is required"),
+  holidayPay: z.number().optional(),
   noPay: noPaySchema,
   ot: otSchema,
   paymentStructure: paymentStructureSchema,
@@ -289,6 +288,7 @@ export async function POST(req: NextRequest) {
       salary.finalSalary = Number(salary.finalSalary);
       salary.noPay.amount = Number(salary.noPay.amount);
       salary.ot.amount = Number(salary.ot.amount);
+      salary.holidayPay = Number(salary.holidayPay);
 
       // Convert amounts in payment structure
       salary.paymentStructure.additions.forEach((addition: any) => {
@@ -375,6 +375,7 @@ export async function POST(req: NextRequest) {
       // Calculate final salary
       const finalSalary =
         parsedSalary.basic +
+        (parsedSalary.holidayPay ?? 0) +
         totalAdditions +
         (parsedSalary.ot.amount || 0) -
         totalDeductions -
@@ -425,6 +426,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     //convert to numbers
     body.basic = Number(body.basic);
+    body.holidayPay = Number(body.holidayPay);
     body.advanceAmount = Number(body.advanceAmount);
     body.finalSalary = Number(body.finalSalary);
     body.noPay.amount = Number(body.noPay.amount);
@@ -453,6 +455,7 @@ export async function PUT(req: NextRequest) {
     // Calculate final salary
     const finalSalary =
       parsedBody.basic +
+      (parsedBody.holidayPay ?? 0) +
       totalAdditions +
       (parsedBody.ot.amount || 0) -
       totalDeductions -

@@ -101,11 +101,11 @@ export const processSalaryWithInOut = async (
           workingDayStatus === "off" &&
           (holiday.categories.public || holiday.categories.mercantile)
         ) {
-          texts.push("Worked on Off Day and Holiday");
+          texts.push("Worked on Off Day and Holiday (Holiday Pay)");
         } else if (workingDayStatus === "off") {
-          texts.push("Worked on Off Day");
+          texts.push("Worked on Off Day (Holiday Pay)");
         } else if (holiday.categories.public || holiday.categories.mercantile) {
-          texts.push("Worked on Holiday");
+          texts.push("Worked on Holiday (Holiday Pay)");
         } else if (workingDayStatus === "full" && workingHours < 9) {
           texts.push(
             `Left ${(9 - workingHours).toFixed(2)} h early on a Full Day`
@@ -115,8 +115,6 @@ export const processSalaryWithInOut = async (
             `Left ${(6 - workingHours).toFixed(2)} h early on a Half Day`
           );
         }
-      } else if (workingDayStatus === "off") {
-        texts.push("Off");
       }
 
       const shiftStart = new Date(inDate);
@@ -134,9 +132,15 @@ export const processSalaryWithInOut = async (
     })();
     const newDescription = [holiday.summary.trim(), workingText].join(" ");
 
-    const holidayText = `${holiday.categories.public ? "Public" : ""} ${
-      holiday.categories.mercantile ? "Mercantile" : ""
-    } ${holiday.categories.bank ? "Bank" : ""}`.trim();
+    const holidayTexts: String[] = [];
+    if (holiday.categories.public) holidayTexts.push("Public");
+    if (holiday.categories.mercantile) holidayTexts.push("Mercantile");
+    if (holiday.categories.bank) holidayTexts.push("Bank");
+    if (workingDayStatus === "off") holidayTexts.push("Off");
+    else if (workingDayStatus === "half") holidayTexts.push("Half");
+
+    const holidayText =
+      holidayTexts.length > 0 ? holidayTexts.join(", ").trim() : "";
 
     records.push({
       in: inDate.toISOString(),
@@ -274,25 +278,50 @@ export const processSalaryWithInOut = async (
     }
   }
 
-  const ot = records.reduce((acc, cur) => acc + cur.ot, 0);
-  const noPay = records.reduce((acc, cur) => acc + cur.noPay, 0);
+  let holidayPay = 0,
+    ot = 0,
+    noPay = 0,
+    otNormalHours = 0,
+    otDoubleHours = 0,
+    leftEarlyHours = 0,
+    absentDays = 0,
+    lateDayHours = 0;
 
-  // Descriptive analysis for OT and No Pay reasons
-  const otNormalHours = records.reduce((acc, cur) => {
-    const holiday = getHoliday(new Date(cur.in), holidays);
+  records.forEach((record) => {
+    noPay += record.noPay;
+    const recordHolidays = record.holiday
+      .split(/[\s,]+/)
+      .map((h) => h.trim().toLowerCase());
+    if (
+      ["public", "mercantile", "off"].some((holiday) =>
+        recordHolidays.includes(holiday)
+      )
+    ) {
+      holidayPay += record.ot;
+    } else {
+      ot += record.ot;
+    }
+
+    const holiday = getHoliday(new Date(record.in), holidays);
     if (!holiday.categories.mercantile) {
-      return acc + cur.otHours;
+      otNormalHours += record.otHours;
+    } else {
+      otDoubleHours += record.otHours;
     }
-    return acc;
-  }, 0);
 
-  const otDoubleHours = records.reduce((acc, cur) => {
-    const holiday = getHoliday(new Date(cur.in), holidays);
-    if (holiday.categories.mercantile) {
-      return acc + cur.otHours;
+    if (record.description.includes("Left")) {
+      leftEarlyHours += 9 - record.workingHours;
     }
-    return acc;
-  }, 0);
+    if (record.workingHours === 0 && record.description.includes("Absent")) {
+      absentDays += 1;
+    }
+    if (record.description.includes("Came")) {
+      const lateHours = parseFloat(
+        record.description.match(/Came ([\d.]+) h late/)?.[1] || "0"
+      );
+      lateDayHours += lateHours;
+    }
+  });
 
   const otReason = [
     otNormalHours > 0 ? `${otNormalHours.toFixed(2)} normal OT h` : "",
@@ -301,43 +330,13 @@ export const processSalaryWithInOut = async (
     .filter(Boolean)
     .join(", ");
 
-  const noPayReason = (() => {
-    const leftEarlyHours = records.reduce((acc, cur) => {
-      if (cur.description.includes("Left")) {
-        return acc + (9 - cur.workingHours);
-      }
-      return acc;
-    }, 0);
-
-    const absentDays = records.reduce((acc, cur) => {
-      if (cur.workingHours === 0 && cur.description.includes("Absent")) {
-        return acc + 1;
-      }
-      return acc;
-    }, 0);
-
-    const lateDayHours = records.reduce((acc, cur) => {
-      if (cur.description.includes("Came")) {
-        const lateHours = parseFloat(
-          cur.description.match(/Came ([\d.]+) h late/)?.[1] || "0"
-        );
-        return acc + lateHours;
-      }
-      return acc;
-    }, 0);
-
-    const reasons = [];
-    if (absentDays > 0) {
-      reasons.push(`${absentDays} absent days`);
-    }
-    if (leftEarlyHours > 0) {
-      reasons.push(`${leftEarlyHours.toFixed(2)}h left early`);
-    }
-    if (lateDayHours > 0) {
-      reasons.push(`${lateDayHours.toFixed(2)}h came late`);
-    }
-    return reasons.join(", ");
-  })();
+  const noPayReason = [
+    absentDays > 0 ? `${absentDays} absent days` : "",
+    leftEarlyHours > 0 ? `${leftEarlyHours.toFixed(2)}h left early` : "",
+    lateDayHours > 0 ? `${lateDayHours.toFixed(2)}h came late` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return {
     inOutProcessed: records,
@@ -345,6 +344,7 @@ export const processSalaryWithInOut = async (
     otReason,
     noPay,
     noPayReason: existingSalary ? existingSalary.noPayReason : noPayReason,
+    holidayPay,
   };
 };
 

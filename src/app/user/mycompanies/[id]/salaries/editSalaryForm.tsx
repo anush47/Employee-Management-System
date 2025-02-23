@@ -68,6 +68,7 @@ const EditSalaryForm: React.FC<{
     employee: "",
     period: "",
     basic: 0,
+    holidayPay: 0,
     inOut: [],
     noPay: {
       amount: 0,
@@ -105,6 +106,7 @@ const EditSalaryForm: React.FC<{
           period: data.salary.period,
           inOut: data.salary.inOut,
           basic: data.salary.basic,
+          holidayPay: data.salary.holidayPay,
           noPay: data.salary.noPay,
           ot: data.salary.ot,
           paymentStructure: data.salary.paymentStructure,
@@ -228,8 +230,10 @@ const EditSalaryForm: React.FC<{
     );
     const noPayAmount = Number(formFields.noPay.amount);
     const advanceAmount = Number(formFields.advanceAmount);
+    const holidayPay = Number(formFields.holidayPay);
 
-    const finalSalary = basic + otAmount + additions - deductions - noPayAmount;
+    const finalSalary =
+      basic + holidayPay + otAmount + additions - deductions - noPayAmount;
     setFormFields((prevFields) => ({
       ...prevFields,
       finalSalary,
@@ -631,6 +635,22 @@ const EditSalaryForm: React.FC<{
                   multiline
                   InputProps={{
                     readOnly: loading || !isEditing,
+                  }}
+                />
+                {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth error={!!errors.ot}>
+                <TextField
+                  label="Holiday Pay"
+                  name="holidayPay"
+                  value={formFields.holidayPay}
+                  //onChange={handleChange}
+                  variant="filled"
+                  multiline
+                  InputProps={{
+                    readOnly: true,
                   }}
                 />
                 {errors.ot && <FormHelperText>{errors.ot}</FormHelperText>}

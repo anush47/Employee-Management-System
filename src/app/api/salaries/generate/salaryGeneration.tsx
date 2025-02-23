@@ -371,6 +371,7 @@ export async function generateSalaryForOneEmployee(
     let otReason = "";
     let noPayReason = "";
     let inOutProcessed: ProcessedInOut | RawInOut = [];
+    let holidayPay = 0;
 
     // Only sort if the data is unprocessed (RawInOut)
     if (inOut && !isProcessed(inOut)) {
@@ -384,23 +385,15 @@ export async function generateSalaryForOneEmployee(
     // Choose the appropriate overtime calculation method
     switch (employee.otMethod) {
       case "noOt":
-        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = await noOtCalc(
-          employee,
-          period,
-          inOutProcessed,
-          salary
-        ));
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed, holidayPay } =
+          await noOtCalc(employee, period, inOutProcessed, salary));
         break;
       case "calc":
-        ({ ot, otReason, noPay, noPayReason, inOutProcessed } = await OtCalc(
-          employee,
-          period,
-          inOutProcessed,
-          salary
-        ));
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed, holidayPay } =
+          await OtCalc(employee, period, inOutProcessed, salary));
         break;
       default:
-        ({ ot, otReason, noPay, noPayReason, inOutProcessed } =
+        ({ ot, otReason, noPay, noPayReason, inOutProcessed, holidayPay } =
           await randomCalc(employee, period, inOutProcessed, salary));
         break;
     }
@@ -413,7 +406,12 @@ export async function generateSalaryForOneEmployee(
     } = calculateSalaryDetails(source, salary, ot);
 
     const finalSalary =
-      employee.basic + totalAdditions + ot - totalDeductions - noPay;
+      employee.basic +
+      holidayPay +
+      totalAdditions +
+      ot -
+      totalDeductions -
+      noPay;
 
     const salaryData = {
       _id: salary ? salary._id : generateObjectId(),
@@ -421,6 +419,7 @@ export async function generateSalaryForOneEmployee(
       employee: employee._id,
       period,
       basic: source.basic, // Employee's basic salary
+      holidayPay,
       noPay: {
         amount: noPay, // No Pay deduction amount
         reason: noPayReason, // Reason for no pay
@@ -437,8 +436,6 @@ export async function generateSalaryForOneEmployee(
       finalSalary,
       remark: "",
     };
-
-    //console.log(salaryData.paymentStructure.additions);
 
     return salaryData;
   } catch (error) {
@@ -462,6 +459,7 @@ const randomCalc = async (
     noPay,
     otReason,
     noPayReason,
+    holidayPay,
   } = await generateSalaryWithInOut(employee, period, inOutProcessed, salary);
 
   return {
@@ -470,6 +468,7 @@ const randomCalc = async (
     noPay,
     noPayReason,
     inOutProcessed: processedInOut,
+    holidayPay,
   };
 };
 
@@ -486,6 +485,7 @@ const noOtCalc = async (
     noPay,
     otReason,
     noPayReason,
+    holidayPay,
   } = await processSalaryWithInOut(employee, period, inOutProcessed, salary);
 
   return {
@@ -494,6 +494,7 @@ const noOtCalc = async (
     noPay,
     noPayReason,
     inOutProcessed: processedInOut,
+    holidayPay,
   };
 };
 
@@ -510,6 +511,7 @@ const OtCalc = async (
     noPay,
     otReason,
     noPayReason,
+    holidayPay,
   } = await processSalaryWithInOut(employee, period, inOutProcessed, salary);
   return {
     ot,
@@ -517,5 +519,6 @@ const OtCalc = async (
     noPay,
     noPayReason,
     inOutProcessed: processedInOut,
+    holidayPay,
   };
 };

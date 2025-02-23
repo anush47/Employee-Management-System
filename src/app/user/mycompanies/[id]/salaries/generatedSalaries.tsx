@@ -69,6 +69,14 @@ const GeneratedSalaries: React.FC<GeneratedSalariesProps> = ({
       headerAlign: "left",
     },
     {
+      field: "holidayPay",
+      headerName: "Holiday Pay",
+      type: "number",
+      flex: 1,
+      align: "left",
+      headerAlign: "left",
+    },
+    {
       field: "ot",
       headerName: "OT",
       type: "number",

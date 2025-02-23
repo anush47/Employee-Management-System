@@ -5,6 +5,7 @@ interface ISalary extends Document {
   employee: Schema.Types.ObjectId;
   period: string;
   basic: number;
+  holidayPay: number;
   noPay: {
     amount: number;
     reason: string;
@@ -54,6 +55,9 @@ const salarySchema = new Schema<ISalary>(
     basic: {
       type: Number,
       required: true,
+    },
+    holidayPay: {
+      type: Number,
     },
     noPay: {
       amount: {
