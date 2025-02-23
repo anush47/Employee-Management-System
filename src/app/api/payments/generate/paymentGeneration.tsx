@@ -6,6 +6,7 @@ type Company = {
 
 type Salary = {
   basic: number;
+  holidayPay: number;
 };
 
 type Payment = {
@@ -39,6 +40,7 @@ export function calculateTotalEarnings(salary: Salary) {
   let totalEarnings = 0;
   try {
     totalEarnings += salary.basic;
+    totalEarnings += salary.holidayPay ?? 0;
   } catch {
     console.log("Error in salary", salary);
   }
