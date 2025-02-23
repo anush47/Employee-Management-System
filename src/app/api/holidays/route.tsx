@@ -9,6 +9,8 @@ const daySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
   message: "Day must be in the format yyyy-mm-dd",
 });
 
+export const dynamic = "force-dynamic";
+
 // GET: Holiday
 export async function GET(req: NextRequest) {
   try {
