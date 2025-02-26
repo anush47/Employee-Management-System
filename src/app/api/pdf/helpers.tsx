@@ -157,14 +157,18 @@ export const setupData = (salaries: SalarySchema[]) => {
       dataKey: "basicWithBA",
       header: "BASIC (WITH B.A.)",
     },
-    {
-      dataKey: "holidayPay",
-      header: "HOLIDAY PAY (+)",
-    },
-    {
-      dataKey: "noPay",
-      header: "NO PAY (-)",
-    },
+  ];
+
+  //if atleast one has holidayPay or noPay then add columns
+  if (salaries.some((salary) => salary.holidayPay !== 0)) {
+    columns.push({ dataKey: "holidayPay", header: "HOLIDAY PAY (+)" });
+  }
+
+  if (salaries.some((salary) => salary.noPay.amount !== 0)) {
+    columns.push({ dataKey: "noPay", header: "NO PAY (-)" });
+  }
+
+  columns.push(
     {
       dataKey: "salaryForEPF",
       header: "SALARY FOR EPF",
@@ -180,8 +184,8 @@ export const setupData = (salaries: SalarySchema[]) => {
     {
       dataKey: "etf3",
       header: "ETF (EMPLOYER 3%)",
-    },
-  ];
+    }
+  );
 
   const records: { [key: string]: string | number }[] = [];
   const additions = new Set<string>();

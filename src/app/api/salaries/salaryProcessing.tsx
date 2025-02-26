@@ -364,6 +364,8 @@ export const generateSalaryWithInOut = async (
     let present = Math.random() < 0.95 ? true : false; // 98% chance to be present
     const workOnOff = Math.random() < 0.01 ? true : false; // 1% chance to work on off
 
+    const lateProb = 0.02; // 2% chance to come late
+
     let inDate = new Date(day);
     let outDate = new Date(day);
 
@@ -400,14 +402,14 @@ export const generateSalaryWithInOut = async (
         const inVaryEarlyMax = 30; // maximum early time in minutes
         const inVaryLateMax = 60 * 4; // maximum late time in minutes
         randomInOffset =
-          Math.random() < 0.98
+          Math.random() < 1 - lateProb
             ? -Math.random() * inVaryEarlyMax
             : Math.random() * inVaryLateMax; // 95% chance to be earlier
 
         const outVaryEarlyMax = 60 * 4; // maximum early time in minutes
         const outVaryLateMax = 60 * 4; // maximum late time in minutes
         randomOutOffset =
-          Math.random() < 0.02
+          Math.random() < lateProb
             ? -Math.random() * outVaryEarlyMax
             : Math.random() * outVaryLateMax; // 2% chance to go earlier
       }
