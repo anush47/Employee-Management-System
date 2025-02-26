@@ -159,7 +159,9 @@ export const setupData = (salaries: SalarySchema[]) => {
     },
   ];
 
-  //if atleast one has holidayPay or noPay then add columns
+  //if neither holidayPay nor noPay then remove basicwithba
+  let basicChanged = false;
+
   if (salaries.some((salary) => salary.holidayPay !== 0)) {
     columns.push({ dataKey: "holidayPay", header: "HOLIDAY PAY (+)" });
   }

@@ -537,7 +537,7 @@ const EmployeesDataGrid: React.FC<{
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 10,
+                pageSize: 20,
               },
             },
             filter: {
@@ -547,7 +547,7 @@ const EmployeesDataGrid: React.FC<{
               },
             },
           }}
-          pageSizeOptions={[5, 10]}
+          pageSizeOptions={[5, 10, 20, 50]}
           slots={{
             toolbar: (props) => (
               <GridToolbar
