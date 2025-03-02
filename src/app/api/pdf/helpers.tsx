@@ -99,8 +99,19 @@ export const getData = async (
     period,
   })
     .populate("employee", "memberNo name nic")
-    .select("-inOut") // Exclude the 'inOut' field
-    .sort({ "employee.memberNo": 1 }); // Sort salaries by employee memberNo
+    .select("-inOut"); // Exclude the 'inOut' field
+
+  // Ensure salaries are fetched correctly
+  if (!salaries || salaries.length === 0) {
+    throw new Error("No salaries found for the given criteria.");
+  }
+
+  // sort salaries by memberNo after parsing int
+  salaries.sort((a, b) => {
+    return parseInt(a.employee.memberNo) - parseInt(b.employee.memberNo);
+  });
+
+  console.log("salaries", salaries);
 
   let payment = undefined;
   if (needPayment) {
