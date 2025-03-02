@@ -99,7 +99,8 @@ export const getData = async (
     period,
   })
     .populate("employee", "memberNo name nic")
-    .select("-inOut"); // Exclude the 'inOut' field
+    .select("-inOut") // Exclude the 'inOut' field
+    .sort({ "employee.memberNo": 1 }); // Sort salaries by employee memberNo
 
   let payment = undefined;
   if (needPayment) {
@@ -153,21 +154,24 @@ export const setupData = (salaries: SalarySchema[]) => {
       dataKey: "budgetaryAllowance",
       header: "BUDGETARY ALLOWANCE (+)",
     },
-    {
-      dataKey: "basicWithBA",
-      header: "BASIC (WITH B.A.)",
-    },
   ];
 
-  //if neither holidayPay nor noPay then remove basicwithba
-  let basicChanged = false;
-
+  const toPush = [];
   if (salaries.some((salary) => salary.holidayPay !== 0)) {
-    columns.push({ dataKey: "holidayPay", header: "HOLIDAY PAY (+)" });
+    toPush.push({ dataKey: "holidayPay", header: "HOLIDAY PAY (+)" });
   }
 
   if (salaries.some((salary) => salary.noPay.amount !== 0)) {
-    columns.push({ dataKey: "noPay", header: "NO PAY (-)" });
+    toPush.push({ dataKey: "noPay", header: "NO PAY (-)" });
+  }
+
+  // if atleast one has nopay or holiday pay then add basic with BA column
+  if (toPush.length > 0) {
+    columns.push({
+      dataKey: "basicWithBA",
+      header: "BASIC (WITH B.A.)",
+    });
+    columns.push(...toPush);
   }
 
   columns.push(
