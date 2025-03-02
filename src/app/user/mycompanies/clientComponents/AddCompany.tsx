@@ -61,7 +61,14 @@ const AddCompanyForm: React.FC<{
       salary: true,
       paySlip: true,
     },
-    shifts: [], // Add the shifts property
+    probabilities: {
+      workOnOff: 1,
+      workOnHoliday: 1,
+      absent: 5,
+      late: 2,
+      ot: 75,
+    },
+    shifts: [],
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [nameLoading, setNameLoading] = useState<boolean>(false);
@@ -141,6 +148,13 @@ const AddCompanyForm: React.FC<{
           workingDays: {},
           employerName: "",
           employerAddress: "",
+          probabilities: {
+            workOnOff: 1,
+            workOnHoliday: 1,
+            absent: 5,
+            late: 2,
+            ot: 75,
+          },
           shifts: [],
           paymentStructure: {
             additions: [],
