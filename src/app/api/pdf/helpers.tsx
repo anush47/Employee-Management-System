@@ -111,8 +111,6 @@ export const getData = async (
     return parseInt(a.employee.memberNo) - parseInt(b.employee.memberNo);
   });
 
-  console.log("salaries", salaries);
-
   let payment = undefined;
   if (needPayment) {
     // Fetch payments
