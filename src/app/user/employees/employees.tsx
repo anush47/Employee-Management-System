@@ -27,7 +27,7 @@ export let employeeId: string | null;
 const MyCompanies = ({
   user,
 }: {
-  user: { name: string; email: string; id: string };
+  user: { name: string; email: string; id: string; role: string };
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingEmployeeInHome, setIsEditingEmployeeInHome] = useState(false);

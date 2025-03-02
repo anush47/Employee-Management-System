@@ -25,6 +25,13 @@ interface IEmployee extends Document {
     start: string;
     end: string;
   }[];
+  probabilities: {
+    workOnOff: number;
+    workOnHoliday: number;
+    absent: number;
+    late: number;
+    ot: number;
+  };
   paymentStructure: {
     additions: {
       name: string;
@@ -161,6 +168,30 @@ const employeeSchema = new Schema<IEmployee>(
     },
     address: {
       type: String, // Add this block
+    },
+    probabilities: {
+      type: {
+        workOnOff: {
+          type: Number,
+          default: 1,
+        },
+        workOnHoliday: {
+          type: Number,
+          default: 1,
+        },
+        absent: {
+          type: Number,
+          default: 5,
+        },
+        late: {
+          type: Number,
+          default: 2,
+        },
+        ot: {
+          type: Number,
+          default: 75,
+        },
+      },
     },
     paymentStructure: {
       additions: {

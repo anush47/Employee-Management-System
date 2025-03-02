@@ -40,6 +40,15 @@ const employeeSchema = z.object({
       end: z.string().min(1, "End time is required"),
     })
   ),
+  probabilities: z
+    .object({
+      workOnOff: z.number().optional(),
+      workOnHoliday: z.number().optional(),
+      absent: z.number().optional(),
+      late: z.number().optional(),
+      ot: z.number().optional(),
+    })
+    .optional(),
   paymentStructure: z.object({
     additions: z.array(
       z.object({
@@ -101,6 +110,7 @@ export async function POST(req: NextRequest) {
     if (body.address === "") {
       delete body.address;
     }
+
     const parsedBody = employeeSchema.parse(body);
 
     // Connect to the database
@@ -114,6 +124,16 @@ export async function POST(req: NextRequest) {
     if (user?.role === "admin") {
       // Remove user from filter
       delete filter.user;
+    } else {
+      //delete probabilities
+      delete parsedBody.probabilities;
+      // if ot method is random show error
+      if (parsedBody.otMethod === "random") {
+        return NextResponse.json(
+          { message: "OT method cannot be random" },
+          { status: 400 }
+        );
+      }
     }
 
     // Find the company by ID to ensure it exists and belongs to the user

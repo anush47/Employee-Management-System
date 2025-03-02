@@ -34,6 +34,13 @@ export interface Company {
   workingDays: {
     [key: string]: "full" | "half" | "off";
   };
+  probabilities: {
+    workOnHoliday: number;
+    workOnOff: number;
+    absent: number;
+    late: number;
+    ot: number;
+  };
   paymentStructure: {
     additions: {
       name: string;

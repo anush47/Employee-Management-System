@@ -80,6 +80,15 @@ const companyUpdateSchema = z.object({
     salary: z.boolean().optional(),
     paySlip: z.boolean().optional(),
   }),
+  probabilities: z
+    .object({
+      workOnOff: z.number().optional(),
+      workOnHoliday: z.number().optional(),
+      absent: z.number().optional(),
+      late: z.number().optional(),
+      ot: z.number().optional(),
+    })
+    .optional(),
   mode: z.string().optional(),
   workingDays: z
     .object({
@@ -143,6 +152,8 @@ export async function PUT(req: NextRequest) {
       delete companyData.requiredDocs;
       //delete priceOverride
       delete companyData.monthlyPriceOverride;
+      //delete probabilities
+      delete companyData.probabilities;
     }
 
     // Connect to the database

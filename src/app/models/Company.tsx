@@ -40,6 +40,13 @@ interface ICompany extends Document {
       affectTotalEarnings: boolean;
     }[];
   };
+  probabilities: {
+    workOnOff: number;
+    workOnHoliday: number;
+    absent: number;
+    late: number;
+    ot: number;
+  };
 }
 
 // Define the schema for the Company model
@@ -217,6 +224,30 @@ const companySchema = new Schema<ICompany>(
           type: Boolean,
           required: true,
           default: true,
+        },
+      },
+    },
+    probabilities: {
+      type: {
+        workOnOff: {
+          type: Number,
+          default: 1,
+        },
+        workOnHoliday: {
+          type: Number,
+          default: 1,
+        },
+        absent: {
+          type: Number,
+          default: 5,
+        },
+        late: {
+          type: Number,
+          default: 2,
+        },
+        ot: {
+          type: Number,
+          default: 75,
         },
       },
     },

@@ -23,12 +23,16 @@ import {
   InputLabel,
   FormControlLabel,
   Checkbox,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from "@mui/material";
 import {
   ArrowBack,
   Cancel,
   Delete,
   Edit,
+  ExpandMore,
   FormatAlignJustify,
   Save,
   Search,
@@ -61,7 +65,7 @@ import { WorkingDays } from "../../companyDetails/workingDays";
 import Link from "next/link";
 
 const EditEmployeeForm: React.FC<{
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; role: string };
   handleBackClick: () => void;
   employeeId: string | null;
 }> = ({ user, handleBackClick, employeeId }) => {
@@ -81,6 +85,13 @@ const EditEmployeeForm: React.FC<{
     resignedAt: "",
     otMethod: "",
     shifts: [],
+    probabilities: {
+      workOnOff: 1,
+      workOnHoliday: 1,
+      absent: 5,
+      late: 2,
+      ot: 80,
+    },
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -198,6 +209,17 @@ const EditEmployeeForm: React.FC<{
         }));
       }
     }
+
+    if (name.startsWith("probabilities")) {
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        probabilities: {
+          ...prevFields.probabilities,
+          [name.split(".")[1]]: parseInt(value),
+        },
+      }));
+      return;
+    }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -252,6 +274,13 @@ const EditEmployeeForm: React.FC<{
           remark: "",
           resignedAt: "",
           shifts: [],
+          probabilities: {
+            workOnHoliday: 0,
+            workOnOff: 0,
+            absent: 0,
+            late: 0,
+            ot: 0,
+          },
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -330,6 +359,13 @@ const EditEmployeeForm: React.FC<{
           workingDays: {},
           otMethod: "",
           shifts: [],
+          probabilities: {
+            workOnHoliday: 0,
+            workOnOff: 0,
+            absent: 0,
+            late: 0,
+            ot: 0,
+          },
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -808,6 +844,93 @@ const EditEmployeeForm: React.FC<{
             }}
           />
         </Grid>
+
+        {
+          //if admin
+          user.role === "admin" && formFields.otMethod === "random" && (
+            <>
+              <div className="my-5" />
+              <Grid item xs={12}>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography variant="h5">Probabilities</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={3} mt={2}>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Work on Off Days (%)"
+                            name="probabilities.workOnOff"
+                            type="number"
+                            value={formFields.probabilities?.workOnOff}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{
+                              readOnly: !isEditing,
+                            }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Work on Holidays (%)"
+                            name="probabilities.workOnHoliday"
+                            type="number"
+                            value={formFields.probabilities?.workOnHoliday}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{ readOnly: !isEditing }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Absent (%)"
+                            name="probabilities.absent"
+                            type="number"
+                            value={formFields.probabilities?.absent}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{ readOnly: !isEditing }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Late (%)"
+                            name="probabilities.late"
+                            type="number"
+                            value={formFields.probabilities?.late}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{ readOnly: !isEditing }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="OT (%)"
+                            name="probabilities.ot"
+                            type="number"
+                            value={formFields.probabilities?.ot}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{ readOnly: !isEditing }}
+                          />
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </Grid>
+            </>
+          )
+        }
 
         <Grid mt={3} item xs={12}>
           <Link

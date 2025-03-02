@@ -42,6 +42,13 @@ export interface Employee {
     start: string;
     end: string;
   }[];
+  probabilities: {
+    workOnOff: number;
+    workOnHoliday: number;
+    absent: number;
+    late: number;
+    ot: number;
+  };
   paymentStructure: {
     additions: {
       name: string;
@@ -72,7 +79,7 @@ export const ddmmyyyy_to_mmddyyyy = (ddmmyyyy: string) => {
 };
 
 const EmployeesDataGrid: React.FC<{
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; role: string };
   isEditingEmployeeInHome: boolean;
 }> = ({ user, isEditingEmployeeInHome }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -223,6 +230,29 @@ const EmployeesDataGrid: React.FC<{
         return value;
       },
     },
+  ];
+
+  if (user.role === "admin") {
+    columns.push({
+      field: "probabilities",
+      headerName: "Probabilities",
+      flex: 1,
+      renderCell: (params) => {
+        const value = params.value;
+        if (typeof value === "object" && value !== null) {
+          return `
+              Off: ${value.workOnOff}%,
+              Holiday: ${value.workOnHoliday}%,
+              Absent: ${value.absent}%,
+              Late: ${value.late}%,
+              OT: ${value.ot}%`;
+        }
+        return value;
+      },
+    });
+  }
+
+  columns.push(
     {
       field: "startedAt",
       headerName: "Started At",
@@ -321,8 +351,8 @@ const EmployeesDataGrid: React.FC<{
           <Button variant="text">View</Button>
         </Link>
       ),
-    },
-  ];
+    }
+  );
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -512,6 +542,7 @@ const EmployeesDataGrid: React.FC<{
       email: false,
       phoneNumber: false,
       address: false,
+      probabilities: false,
     });
 
   return (

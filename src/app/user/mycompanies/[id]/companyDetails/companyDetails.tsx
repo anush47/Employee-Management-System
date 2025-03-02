@@ -28,8 +28,18 @@ import {
   Select,
   MenuItem,
   InputAdornment,
+  AccordionDetails,
+  Accordion,
+  AccordionSummary,
 } from "@mui/material";
-import { Save, Cancel, Edit, Delete, Search } from "@mui/icons-material";
+import {
+  Save,
+  Cancel,
+  Edit,
+  Delete,
+  Search,
+  ExpandMore,
+} from "@mui/icons-material";
 import { Company } from "../../clientComponents/companiesDataGrid";
 import { companyId } from "../clientComponents/companySideBar";
 import { CompanyValidation } from "../../clientComponents/companyValidation";
@@ -65,6 +75,13 @@ const CompanyDetails = ({
     startedAt: "",
     employerName: "",
     employerAddress: "",
+    probabilities: {
+      workOnHoliday: 1,
+      workOnOff: 1,
+      absent: 5,
+      late: 2,
+      ot: 80,
+    },
     workingDays: {},
     requiredDocs:
       user.role === "admin"
@@ -190,6 +207,16 @@ const CompanyDetails = ({
       }));
       return;
     }
+    if (name.startsWith("probabilities")) {
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        probabilities: {
+          ...prevFields.probabilities,
+          [name.split(".")[1]]: parseInt(value),
+        },
+      }));
+      return;
+    }
 
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
@@ -216,6 +243,13 @@ const CompanyDetails = ({
         requiredDocs: undefined,
         endedAt: "",
         active: true,
+        probabilities: {
+          workOnOff: 0,
+          workOnHoliday: 0,
+          absent: 0,
+          late: 0,
+          ot: 0,
+        },
         workingDays: {
           mon: "full",
           tue: "full",
@@ -731,116 +765,235 @@ const CompanyDetails = ({
                   </>
                 )}
 
+                <div className="my-5" />
+
                 {user.role === "admin" ? (
-                  <>
-                    <Box mt={5}>
-                      <FormControl fullWidth>
-                        <InputLabel id="mode-label">Mode</InputLabel>
-                        <Select
-                          labelId="mode-label"
-                          label="Mode"
-                          name="mode"
-                          value={formFields.mode}
-                          onChange={handleChange}
-                          variant="outlined"
-                          readOnly={!isEditing}
-                        >
-                          {modes}
-                        </Select>
-                      </FormControl>
-                    </Box>
+                  <Grid item xs={12}>
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography>Mode</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box mt={2}>
+                          <FormControl fullWidth>
+                            <InputLabel id="mode-label">Mode</InputLabel>
+                            <Select
+                              labelId="mode-label"
+                              label="Mode"
+                              name="mode"
+                              value={formFields.mode}
+                              onChange={handleChange}
+                              variant="outlined"
+                              readOnly={!isEditing}
+                            >
+                              {modes}
+                            </Select>
+                          </FormControl>
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
 
-                    <Box mt={3}>
-                      <FormControl fullWidth>
-                        <TextField
-                          label="Monthly Price"
-                          name="monthlyPrice"
-                          type="number"
-                          value={formFields.monthlyPrice}
-                          onChange={handleChange}
-                          variant="filled"
-                          InputProps={{
-                            readOnly:
-                              !isEditing || !formFields.monthlyPriceOverride,
-                          }}
-                        />
-                      </FormControl>
-                    </Box>
+                    <div className="my-5" />
 
-                    <Box mt={3}>
-                      <FormControl>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={formFields.monthlyPriceOverride}
-                              name="monthlyPriceOverride"
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography>Monthly Price</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box mt={2}>
+                          <FormControl fullWidth>
+                            <TextField
+                              label="Monthly Price"
+                              name="monthlyPrice"
+                              type="number"
+                              value={formFields.monthlyPrice}
                               onChange={handleChange}
-                              disabled={!isEditing}
+                              variant="filled"
+                              InputProps={{
+                                readOnly:
+                                  !isEditing ||
+                                  !formFields.monthlyPriceOverride,
+                              }}
                             />
-                          }
-                          label="Monthly Price Override"
-                        />
-                      </FormControl>
-                    </Box>
-
-                    <Box mt={3}>
-                      <Typography variant="h6">Required Documents</Typography>
-                      <FormControl>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={formFields.requiredDocs?.epf || false}
-                              name="requiredDocs.epf"
-                              onChange={handleChange}
-                              disabled={!isEditing}
-                            />
-                          }
-                          label="EPF"
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={formFields.requiredDocs?.etf || false}
-                              name="requiredDocs.etf"
-                              onChange={handleChange}
-                              disabled={!isEditing}
-                            />
-                          }
-                          label="ETF"
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={formFields.requiredDocs?.salary || false}
-                              name="requiredDocs.salary"
-                              onChange={handleChange}
-                              disabled={!isEditing}
-                            />
-                          }
-                          label="Salary"
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={
-                                formFields.requiredDocs?.paySlip || false
+                          </FormControl>
+                        </Box>
+                        <Box mt={2}>
+                          <FormControl>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={formFields.monthlyPriceOverride}
+                                  name="monthlyPriceOverride"
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                />
                               }
-                              name="requiredDocs.paySlip"
-                              onChange={handleChange}
-                              disabled={!isEditing}
+                              label="Monthly Price Override"
                             />
-                          }
-                          label="Pay Slip"
-                        />
-                      </FormControl>
-                    </Box>
-                  </>
+                          </FormControl>
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+
+                    <div className="my-5" />
+
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography>Probabilities</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Grid container spacing={3} mt={2}>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth>
+                              <TextField
+                                label="Work on Off Days (%)"
+                                name="probabilities.workOnOff"
+                                type="number"
+                                value={formFields.probabilities?.workOnOff}
+                                onChange={handleChange}
+                                variant="filled"
+                                InputProps={{
+                                  readOnly: !isEditing,
+                                }}
+                              />
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth>
+                              <TextField
+                                label="Work on Holidays (%)"
+                                name="probabilities.workOnHoliday"
+                                type="number"
+                                value={formFields.probabilities?.workOnHoliday}
+                                onChange={handleChange}
+                                variant="filled"
+                                InputProps={{
+                                  readOnly: !isEditing,
+                                }}
+                              />
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth>
+                              <TextField
+                                label="Absent (%)"
+                                name="probabilities.absent"
+                                type="number"
+                                value={formFields.probabilities?.absent}
+                                onChange={handleChange}
+                                variant="filled"
+                                InputProps={{
+                                  readOnly: !isEditing,
+                                }}
+                              />
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth>
+                              <TextField
+                                label="Late (%)"
+                                name="probabilities.late"
+                                type="number"
+                                value={formFields.probabilities?.late}
+                                onChange={handleChange}
+                                variant="filled"
+                                InputProps={{
+                                  readOnly: !isEditing,
+                                }}
+                              />
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth>
+                              <TextField
+                                label="OT (%)"
+                                name="probabilities.ot"
+                                type="number"
+                                value={formFields.probabilities?.ot}
+                                onChange={handleChange}
+                                variant="filled"
+                                InputProps={{
+                                  readOnly: !isEditing,
+                                }}
+                              />
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+                      </AccordionDetails>
+                    </Accordion>
+
+                    <div className="my-5" />
+
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography>Required Documents</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box mt={2}>
+                          <FormControl>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={
+                                    formFields.requiredDocs?.epf || false
+                                  }
+                                  name="requiredDocs.epf"
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                />
+                              }
+                              label="EPF"
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={
+                                    formFields.requiredDocs?.etf || false
+                                  }
+                                  name="requiredDocs.etf"
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                />
+                              }
+                              label="ETF"
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={
+                                    formFields.requiredDocs?.salary || false
+                                  }
+                                  name="requiredDocs.salary"
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                />
+                              }
+                              label="Salary"
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={
+                                    formFields.requiredDocs?.paySlip || false
+                                  }
+                                  name="requiredDocs.paySlip"
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                />
+                              }
+                              label="Pay Slip"
+                            />
+                          </FormControl>
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Grid>
                 ) : (
                   <>
                     <Typography mt={5}>

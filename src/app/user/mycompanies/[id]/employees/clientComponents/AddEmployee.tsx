@@ -24,8 +24,18 @@ import {
   InputLabel,
   Checkbox,
   FormControlLabel,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from "@mui/material";
-import { ArrowBack, Cancel, CheckBox, Save, Search } from "@mui/icons-material";
+import {
+  ArrowBack,
+  Cancel,
+  CheckBox,
+  ExpandMore,
+  Save,
+  Search,
+} from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -46,7 +56,7 @@ import { WorkingDays } from "../../companyDetails/workingDays";
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const AddEmployeeForm: React.FC<{
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; role: string };
   handleBackClick: () => void;
 }> = ({ user, handleBackClick }) => {
   const [formFields, setFormFields] = useState<Employee>({
@@ -60,7 +70,7 @@ const AddEmployeeForm: React.FC<{
     remark: "",
     divideBy: 240,
     designation: "",
-    otMethod: "random",
+    otMethod: user.role === "admin" ? "random" : "calc",
     startedAt: "",
     resignedAt: "",
     workingDays: {},
@@ -68,6 +78,13 @@ const AddEmployeeForm: React.FC<{
     paymentStructure: {
       additions: [],
       deductions: [],
+    },
+    probabilities: {
+      workOnOff: 0,
+      workOnHoliday: 0,
+      absent: 0,
+      late: 0,
+      ot: 0,
     },
     company: companyId || "",
     phoneNumber: "",
@@ -140,6 +157,15 @@ const AddEmployeeForm: React.FC<{
                   ],
                   deductions: [],
                 },
+          probabilities: data.company.probabilities
+            ? data.company.probabilities
+            : {
+                workOnOff: 1,
+                workOnHoliday: 1,
+                absent: 5,
+                late: 2,
+                ot: 75,
+              },
         }));
       } catch (error) {
         setSnackbarMessage(
@@ -189,6 +215,16 @@ const AddEmployeeForm: React.FC<{
         }));
       }
     }
+    if (name.startsWith("probabilities")) {
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        probabilities: {
+          ...prevFields.probabilities,
+          [name.split(".")[1]]: parseInt(value),
+        },
+      }));
+      return;
+    }
     setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
@@ -227,7 +263,7 @@ const AddEmployeeForm: React.FC<{
           id: "",
           name: "",
           memberNo: 0,
-          basic: 16000,
+          basic: 21000,
           totalSalary: "",
           designation: "",
           divideBy: 240,
@@ -239,6 +275,13 @@ const AddEmployeeForm: React.FC<{
           resignedAt: "",
           otMethod: "",
           shifts: [],
+          probabilities: {
+            workOnOff: 0,
+            workOnHoliday: 0,
+            absent: 0,
+            late: 0,
+            ot: 0,
+          },
           paymentStructure: {
             additions: [],
             deductions: [],
@@ -621,6 +664,91 @@ const AddEmployeeForm: React.FC<{
             }}
           />
         </Grid>
+
+        {
+          //if admin
+          user.role === "admin" && formFields.otMethod === "random" && (
+            <>
+              <div className="my-5" />
+              <Grid item xs={12}>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography variant="h5">Probabilities</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={3} mt={2}>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Work on Off Days (%)"
+                            name="probabilities.workOnOff"
+                            type="number"
+                            value={formFields.probabilities?.workOnOff}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{}}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Work on Holidays (%)"
+                            name="probabilities.workOnHoliday"
+                            type="number"
+                            value={formFields.probabilities?.workOnHoliday}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{}}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Absent (%)"
+                            name="probabilities.absent"
+                            type="number"
+                            value={formFields.probabilities?.absent}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{}}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Late (%)"
+                            name="probabilities.late"
+                            type="number"
+                            value={formFields.probabilities?.late}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{}}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="OT (%)"
+                            name="probabilities.ot"
+                            type="number"
+                            value={formFields.probabilities?.ot}
+                            onChange={handleChange}
+                            variant="filled"
+                            InputProps={{}}
+                          />
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </Grid>
+            </>
+          )
+        }
       </CardContent>
 
       <Snackbar

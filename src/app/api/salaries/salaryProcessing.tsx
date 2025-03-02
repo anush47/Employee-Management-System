@@ -358,32 +358,61 @@ export const generateSalaryWithInOut = async (
 
   const generateRandomRecord = (day: Date) => {
     const workingDayStatus = getWorkingDayStatus(day, employee);
-    const shift = shifts[Math.floor(Math.random() * shifts.length)];
     const holidayStatus = getHoliday(day, holidays);
 
-    let present = Math.random() < 0.95 ? true : false; // 98% chance to be present
-    const workOnOff = Math.random() < 0.01 ? true : false; // 1% chance to work on off
+    const shift = shifts[Math.floor(Math.random() * shifts.length)]; // Random shift
+    const probabilities = employee.probabilities || {};
+    const absentProb =
+      probabilities.absent !== undefined ? probabilities.absent / 100 : 0.05; // 5% chance to be absent
+    const workOnOffProb =
+      probabilities.workOnOff !== undefined
+        ? probabilities.workOnOff / 100
+        : 0.01; // 1% chance to work on off
+    const workOnHolidayProb =
+      probabilities.workOnHoliday !== undefined
+        ? probabilities.workOnHoliday / 100
+        : 0.01; // 1% chance to work on holiday
+    const lateProb =
+      probabilities.late !== undefined ? probabilities.late / 100 : 0.02; // 2% chance to come late
+    const otProb =
+      probabilities.ot !== undefined ? probabilities.ot / 100 : 0.8; // 80% chance to do OT
 
-    const lateProb = 0.02; // 2% chance to come late
+    const determinePresence = (
+      workingDayStatus: string,
+      holidayStatus: { categories: { mercantile: boolean; public: boolean } },
+      absentProb: number,
+      workOnOffProb: number,
+      workOnHolidayProb: number
+    ) => {
+      let present = Math.random() < 1 - absentProb;
+      const workOnOff = Math.random() < workOnOffProb;
+      const workOnHoliday = Math.random() < workOnHolidayProb;
 
-    let inDate = new Date(day);
-    let outDate = new Date(day);
+      // Determine presence based on working day status and holiday status
+      if (
+        (workingDayStatus === "off" && !workOnOff) ||
+        ((holidayStatus.categories.mercantile ||
+          holidayStatus.categories.public) &&
+          !workOnHoliday)
+      ) {
+        present = false;
+      }
+
+      return present;
+    };
+
+    const present = determinePresence(
+      workingDayStatus,
+      holidayStatus,
+      absentProb,
+      workOnOffProb,
+      workOnHolidayProb
+    );
 
     let randomInOffset = 0;
     let randomOutOffset = 0;
-
-    //if holiday or off
-    if (
-      workingDayStatus === "off" ||
-      holidayStatus.categories.mercantile ||
-      holidayStatus.categories.public
-    ) {
-      if (workOnOff)
-        //worked on off
-        present = true;
-      //did not work on off
-      else present = false;
-    }
+    let inDate = new Date(day);
+    let outDate = new Date(day);
 
     if (!present) {
       //absent
@@ -399,19 +428,21 @@ export const generateSalaryWithInOut = async (
     else {
       //if otmethod random
       if (employee.otMethod === "random") {
-        const inVaryEarlyMax = 30; // maximum early time in minutes
+        const inVaryEarlyMax = 60 * 0.5; // maximum early time in minutes
         const inVaryLateMax = 60 * 4; // maximum late time in minutes
         randomInOffset =
-          Math.random() < 1 - lateProb
-            ? -Math.random() * inVaryEarlyMax
-            : Math.random() * inVaryLateMax; // 95% chance to be earlier
+          Math.random() < lateProb
+            ? Math.random() * inVaryLateMax // 2% chance to be late
+            : -Math.random() * inVaryEarlyMax;
 
         const outVaryEarlyMax = 60 * 4; // maximum early time in minutes
         const outVaryLateMax = 60 * 4; // maximum late time in minutes
         randomOutOffset =
-          Math.random() < lateProb
+          Math.random() < otProb
+            ? Math.random() * outVaryLateMax // 80% chance to do OT
+            : Math.random() < lateProb
             ? -Math.random() * outVaryEarlyMax
-            : Math.random() * outVaryLateMax; // 2% chance to go earlier
+            : 0;
       }
 
       //set in time to shift start + offset

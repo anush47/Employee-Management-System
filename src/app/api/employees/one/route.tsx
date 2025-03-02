@@ -94,6 +94,15 @@ const employeeSchema = z.object({
   designation: z.string().optional(),
   remark: z.string().optional(),
   otMethod: z.string(),
+  probabilities: z
+    .object({
+      workOnOff: z.number().optional(),
+      workOnHoliday: z.number().optional(),
+      absent: z.number().optional(),
+      late: z.number().optional(),
+      ot: z.number().optional(),
+    })
+    .optional(),
   workingDays: z
     .object({
       mon: z.string(),
@@ -175,6 +184,7 @@ export async function PUT(req: NextRequest) {
     if (body.address === "") {
       delete body.address;
     }
+
     const parsedBody = employeeSchema.parse(body);
 
     // Connect to the database
@@ -188,6 +198,16 @@ export async function PUT(req: NextRequest) {
     if (user?.role === "admin") {
       // Remove user from filter
       delete filter.user;
+    } else {
+      //remove probabilities
+      delete parsedBody.probabilities;
+      // if otmethod is random show error
+      if (parsedBody.otMethod === "random") {
+        return NextResponse.json(
+          { message: "OT method cannot be random" },
+          { status: 400 }
+        );
+      }
     }
 
     // Find the company by ID to ensure it exists and belongs to the user
