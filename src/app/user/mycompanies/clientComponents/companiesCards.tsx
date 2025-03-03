@@ -135,10 +135,17 @@ const CompaniesCards = ({
       <Card
         sx={{
           height: "auto",
-          borderRadius: 1,
+          borderRadius: 3,
           boxShadow: 1,
+
           backgroundColor: (theme) =>
-            theme.palette.mode === "light" ? "#e6fafc" : "#292e33",
+            theme.palette.mode === "light"
+              ? company.active
+                ? "#f2f7ff"
+                : "#fff2f3"
+              : company.active
+              ? "#212326"
+              : "#262122",
           transition: "transform 0.2s, background-color 0.2s",
           "&:hover": {
             transform: "scale(1.02)",
@@ -147,12 +154,13 @@ const CompaniesCards = ({
         }}
       >
         <CardHeader
-          avatar={<Business sx={{ fontSize: 28, color: "primary.main" }} />}
+          sx={{ pb: 0 }}
+          avatar={<Business sx={{ fontSize: 25, color: "primary.main" }} />}
           title={
             <Typography
               variant="subtitle1"
               sx={{
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: "600",
                 color: "text.primary",
                 whiteSpace: "nowrap",
@@ -172,22 +180,19 @@ const CompaniesCards = ({
                 Employer No: {company.employerNo}
               </Typography>
             </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <People sx={{ color: "primary.main" }} />
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Employees: {company.noOfEmployees}
-              </Typography>
-            </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              {company.active ? (
-                <Chip
-                  icon={<CheckCircle sx={{ color: "success.main" }} />}
-                  label="Active"
-                  color="success"
-                  variant="outlined"
-                  size="small"
-                />
-              ) : (
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              gap={1}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <People sx={{ fontSize: 18, color: "primary.main" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {company.noOfEmployees}
+                </Typography>
+              </Box>
+              {!company.active && (
                 <Chip
                   icon={<Cancel sx={{ color: "error.main" }} />}
                   label="Inactive"
