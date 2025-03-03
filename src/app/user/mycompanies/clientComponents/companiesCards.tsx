@@ -67,15 +67,16 @@ const normalizeString = (str: string) =>
 
 const CompaniesCards = ({
   user,
+  showActiveOnly,
 }: {
   user: { id: string; name: string; email: string; role: string };
+  showActiveOnly: boolean;
 }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [showActiveOnly, setShowActiveOnly] = useState(true);
 
   useEffect(() => {
     setFilteredCompanies(
@@ -134,25 +135,24 @@ const CompaniesCards = ({
       <Card
         sx={{
           height: "auto",
-          marginBottom: 2,
-          borderRadius: 2,
-          boxShadow: 2,
-          padding: 1,
+          borderRadius: 1,
+          boxShadow: 1,
           backgroundColor: (theme) =>
-            theme.palette.mode === "light" ? "#f9f9f9" : "#222222", // Light and dark mode background colors
+            theme.palette.mode === "light" ? "#e6fafc" : "#292e33",
           transition: "transform 0.2s, background-color 0.2s",
           "&:hover": {
             transform: "scale(1.02)",
-            boxShadow: 4,
+            boxShadow: 3,
           },
         }}
       >
         <CardHeader
-          avatar={<Business sx={{ fontSize: 36, color: "primary.main" }} />}
+          avatar={<Business sx={{ fontSize: 28, color: "primary.main" }} />}
           title={
             <Typography
-              variant="h6"
+              variant="subtitle1"
               sx={{
+                fontSize: 14,
                 fontWeight: "600",
                 color: "text.primary",
                 whiteSpace: "nowrap",
@@ -163,10 +163,10 @@ const CompaniesCards = ({
           }
         />
         <CardContent>
-          <Stack spacing={1}>
+          <Stack spacing={0.5}>
             <Box display="flex" alignItems="center" gap={1}>
               <Typography
-                variant="body1"
+                variant="body2"
                 sx={{ fontWeight: "500", color: "text.secondary" }}
               >
                 Employer No: {company.employerNo}
@@ -185,6 +185,7 @@ const CompaniesCards = ({
                   label="Active"
                   color="success"
                   variant="outlined"
+                  size="small"
                 />
               ) : (
                 <Chip
@@ -192,6 +193,7 @@ const CompaniesCards = ({
                   label="Inactive"
                   color="error"
                   variant="outlined"
+                  size="small"
                 />
               )}
             </Box>
@@ -226,16 +228,6 @@ const CompaniesCards = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showActiveOnly}
-                  onChange={(e) => setShowActiveOnly(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Active Only"
-            />
           </Box>
           <Box display="flex" gap={1} mb={2}>
             <Chip
@@ -249,7 +241,7 @@ const CompaniesCards = ({
               variant="outlined"
             />
           </Box>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             {filteredCompanies.map((company) => (
               <Grid item xs={12} sm={6} md={4} key={company._id}>
                 <Link

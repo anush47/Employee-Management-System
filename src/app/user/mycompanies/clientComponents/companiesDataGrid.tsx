@@ -57,10 +57,13 @@ export interface Company {
 
 const CompaniesDataGrid = ({
   user,
+  showActiveOnly,
 }: {
   user: { id: string; name: string; email: string; role: string };
+  showActiveOnly: boolean;
 }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -171,6 +174,14 @@ const CompaniesDataGrid = ({
     fetchCompaniesAndUsers();
   }, [user]);
 
+  useEffect(() => {
+    setFilteredCompanies(
+      companies.filter((company) => {
+        return !showActiveOnly || company.active;
+      })
+    );
+  }, [companies, showActiveOnly]);
+
   const [columnVisibilityModel, setColumnVisibilityModel] =
     React.useState<GridColumnVisibilityModel>({
       id: false,
@@ -201,7 +212,7 @@ const CompaniesDataGrid = ({
       )}
       {!loading && !error && (
         <DataGrid
-          rows={companies}
+          rows={filteredCompanies}
           columns={columns}
           initialState={{
             pagination: {

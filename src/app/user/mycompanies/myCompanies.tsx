@@ -35,6 +35,7 @@ const MyCompanies = ({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [advanced, setAdvanced] = useState(false);
+  const [showActiveOnly, setShowActiveOnly] = useState(true);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   //fetch query from url
@@ -152,6 +153,25 @@ const MyCompanies = ({
                     onChange={() => setAdvanced(!advanced)}
                     color="primary"
                     size="small"
+                    sx={{ mr: 2 }}
+                  />
+
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mr: 1,
+                      fontWeight: 500,
+                      color: "text.secondary",
+                    }}
+                  >
+                    Active Only
+                  </Typography>
+                  <Switch
+                    checked={showActiveOnly}
+                    onChange={() => setShowActiveOnly(!showActiveOnly)}
+                    color="primary"
+                    size="small"
+                    sx={{ mr: 2 }}
                   />
                 </Box>
               </Box>
@@ -162,9 +182,12 @@ const MyCompanies = ({
           >
             <Suspense fallback={<CircularProgress />}>
               {advanced ? (
-                <CompaniesDataGrid user={user} />
+                <CompaniesDataGrid
+                  user={user}
+                  showActiveOnly={showActiveOnly}
+                />
               ) : (
-                <CompaniesCards user={user} />
+                <CompaniesCards user={user} showActiveOnly={showActiveOnly} />
               )}
             </Suspense>
           </CardContent>

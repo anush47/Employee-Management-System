@@ -4,14 +4,13 @@ import {
   Button,
   Card,
   CardContent,
-  Divider,
   Typography,
   Container,
   Grid,
   useTheme,
   IconButton,
   Tooltip,
-  Paper,
+  CircularProgress,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
@@ -19,7 +18,7 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import GroupIcon from "@mui/icons-material/Group";
 import { ThemeSwitch } from "./theme-provider";
-import { ArrowForward, Logout, Phone, WhatsApp } from "@mui/icons-material";
+import { ArrowForward, Logout } from "@mui/icons-material";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -104,7 +103,26 @@ export default function LandingPage() {
                 Operations for Your Business.
               </span>
             </Typography>
-            {session ? (
+            {status === "loading" ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ mt: 4, mb: 2 }}
+              >
+                <CircularProgress color="primary" />
+                <Typography
+                  variant="h5"
+                  sx={{
+                    ml: 2,
+                    fontSize: { xs: "1.5rem", md: "1.8rem" },
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  Loading...
+                </Typography>
+              </Box>
+            ) : session ? (
               <>
                 <Typography
                   variant="h5"
@@ -226,9 +244,7 @@ export default function LandingPage() {
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 6 }} />
-
-        <Box textAlign="center">
+        <Box textAlign="center" sx={{ mt: 6 }}>
           <Typography variant="h4" sx={{ mb: 2 }}>
             Contact Us
           </Typography>
@@ -245,16 +261,6 @@ export default function LandingPage() {
               gap: 2,
             }}
           >
-            {/* <Link href="https://wa.me/94717539478">
-              <Button
-                color="primary"
-                size="medium"
-                variant="outlined"
-                startIcon={<WhatsApp />}
-              >
-                +94 71 753 9478
-              </Button>
-            </Link> */}
             <Box
               sx={{
                 display: "flex",
@@ -263,18 +269,6 @@ export default function LandingPage() {
                 gap: 2,
               }}
             >
-              {/* phone number */}
-              {/* <Link href="tel:+94717539478">
-                <Button
-                  color="primary"
-                  variant="text"
-                  sx={{ mb: { xs: 0, sm: 2 } }}
-                  startIcon={<Phone />}
-                >
-                  +94 71 753 9478
-                </Button>
-              </Link> */}
-              {/* email */}
               <Link href="mailto:salaryapp2025@gmail.com">
                 <Button
                   color="primary"
