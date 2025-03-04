@@ -22,7 +22,13 @@ import {
   Switch,
 } from "@mui/material";
 import Link from "next/link";
-import { Business, Cancel, CheckCircle, People } from "@mui/icons-material";
+import {
+  Business,
+  Cancel,
+  CheckCircle,
+  People,
+  Search,
+} from "@mui/icons-material";
 
 export interface Company {
   shifts: any;
@@ -227,11 +233,16 @@ const CompaniesCards = ({
         <>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
             <TextField
-              label="Search Companies"
+              label="Search Companies..."
               variant="outlined"
               fullWidth
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <Search sx={{ color: "action.active", mr: 1, my: 0.5 }} />
+                ),
+              }}
             />
           </Box>
           <Box display="flex" gap={1} mb={2}>

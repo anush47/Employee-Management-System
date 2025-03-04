@@ -81,7 +81,7 @@ const MyCompanies = ({
                   display: "flex",
                   flexDirection: { xs: "column", sm: "row" },
                   alignItems: { xs: "flex-start", sm: "center" },
-                  gap: { xs: 2, sm: 3 },
+                  gap: 2,
                   width: "100%",
                 }}
               >
@@ -92,23 +92,13 @@ const MyCompanies = ({
                     gap: 2,
                   }}
                 >
-                  <Typography
-                    variant={isSmallScreen ? "h5" : "h4"}
-                    sx={{
-                      fontWeight: 600,
-                      background: (theme) =>
-                        `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                      backgroundClip: "text",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    My Companies
+                  <Typography variant={isSmallScreen ? "h5" : "h4"}>
+                    Companies
                   </Typography>
-                  <Tooltip title="Add a new company" arrow>
+                  <Tooltip title="Add Company" arrow>
                     <Link href={`user?userPageSelect=mycompanies&add=true`}>
                       <Button
-                        variant="contained"
+                        variant="outlined"
                         color="primary"
                         startIcon={<Add />}
                         sx={{
@@ -121,7 +111,7 @@ const MyCompanies = ({
                           },
                         }}
                       >
-                        Add Company
+                        Add
                       </Button>
                     </Link>
                   </Tooltip>
@@ -146,7 +136,7 @@ const MyCompanies = ({
                       color: "text.secondary",
                     }}
                   >
-                    Advanced View
+                    Advanced
                   </Typography>
                   <Switch
                     checked={advanced}
@@ -164,7 +154,7 @@ const MyCompanies = ({
                       color: "text.secondary",
                     }}
                   >
-                    Active Only
+                    Active
                   </Typography>
                   <Switch
                     checked={showActiveOnly}
