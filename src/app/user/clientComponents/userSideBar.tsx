@@ -185,7 +185,13 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
           src={user.image}
           sx={{ width: 80, height: 80, mb: 2 }}
         />
-        <Typography color="primary" variant="h6" noWrap component="div">
+        <Typography
+          color="primary"
+          variant="h6"
+          noWrap
+          component="div"
+          sx={{ maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis" }}
+        >
           {user.name === "" ? "Stranger" : user.name}
         </Typography>
       </Box>

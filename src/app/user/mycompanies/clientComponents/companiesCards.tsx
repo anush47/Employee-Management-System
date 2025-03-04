@@ -20,6 +20,7 @@ import {
   Typography,
   FormControlLabel,
   Switch,
+  Tooltip,
 } from "@mui/material";
 import Link from "next/link";
 import {
@@ -138,79 +139,90 @@ const CompaniesCards = ({
 
   const CompanyCard = ({ company }: { company: Company }) => {
     return (
-      <Card
-        sx={{
-          height: "auto",
-          borderRadius: 3,
-          boxShadow: 1,
+      <Tooltip title={company.name} placement="top">
+        <Card
+          sx={{
+            height: "auto",
+            borderRadius: 3,
+            boxShadow: 1,
 
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light"
-              ? company.active
-                ? "#f2f7ff"
-                : "#fff2f3"
-              : company.active
-              ? "#212326"
-              : "#262122",
-          transition: "transform 0.2s, background-color 0.2s",
-          "&:hover": {
-            transform: "scale(1.02)",
-            boxShadow: 3,
-          },
-        }}
-      >
-        <CardHeader
-          sx={{ pb: 0 }}
-          avatar={<Business sx={{ fontSize: 25, color: "primary.main" }} />}
-          title={
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontSize: 15,
-                fontWeight: "600",
-                color: "text.primary",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {company.name}
-            </Typography>
-          }
-        />
-        <CardContent>
-          <Stack spacing={0.5}>
-            <Box display="flex" alignItems="center" gap={1}>
+            backgroundColor: (theme) =>
+              theme.palette.mode === "light"
+                ? company.active
+                  ? "#f2f7ff"
+                  : "#fff2f3"
+                : company.active
+                ? "#212326"
+                : "#262122",
+            transition: "transform 0.2s, background-color 0.2s",
+            "&:hover": {
+              transform: "scale(1.02)",
+              boxShadow: 3,
+            },
+          }}
+        >
+          <CardHeader
+            sx={{ pb: 0 }}
+            avatar={<Business sx={{ fontSize: 25, color: "primary.main" }} />}
+            title={
               <Typography
-                variant="body2"
-                sx={{ fontWeight: "500", color: "text.secondary" }}
+                variant="subtitle1"
+                sx={{
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: "text.primary",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: {
+                    xs: "200px",
+                    sm: "250px",
+                    md: "100px",
+                    lg: "200px",
+                    xl: "300px",
+                  },
+                }}
               >
-                Employer No: {company.employerNo}
+                {company.name}
               </Typography>
-            </Box>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              gap={1}
-            >
+            }
+          />
+          <CardContent>
+            <Stack spacing={0.5}>
               <Box display="flex" alignItems="center" gap={1}>
-                <People sx={{ fontSize: 18, color: "primary.main" }} />
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {company.noOfEmployees}
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: "500", color: "text.secondary" }}
+                >
+                  Employer No: {company.employerNo}
                 </Typography>
               </Box>
-              {!company.active && (
-                <Chip
-                  icon={<Cancel sx={{ color: "error.main" }} />}
-                  label="Inactive"
-                  color="error"
-                  variant="outlined"
-                  size="small"
-                />
-              )}
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                gap={1}
+              >
+                <Box display="flex" alignItems="center" gap={1}>
+                  <People sx={{ fontSize: 18, color: "primary.main" }} />
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {company.noOfEmployees}
+                  </Typography>
+                </Box>
+                {!company.active && (
+                  <Chip
+                    icon={<Cancel sx={{ color: "error.main" }} />}
+                    label="Inactive"
+                    color="error"
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Tooltip>
     );
   };
 

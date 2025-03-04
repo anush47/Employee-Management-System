@@ -221,7 +221,13 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
           padding: 3,
         }}
       >
-        <Typography color="primary" variant="h6" noWrap component="div">
+        <Typography
+          color="primary"
+          variant="h6"
+          noWrap
+          component="div"
+          sx={{ maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis" }}
+        >
           {company?.name}
         </Typography>
         <Typography color="text.secondary" variant="body2">
