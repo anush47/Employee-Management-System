@@ -139,7 +139,7 @@ const CompaniesCards = ({
 
   const CompanyCard = ({ company }: { company: Company }) => {
     return (
-      <Tooltip title={company.name} placement="top">
+      <Tooltip title={company.name} placement="top" arrow>
         <Card
           sx={{
             height: "auto",
