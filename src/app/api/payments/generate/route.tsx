@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     IdSchema.parse(userId);
 
     const body = await req.json();
-    let { salaryIds, companyId, period } = body;
+    let { salaryIds, companyId, period, regenerate } = body;
     // Validate period
     periodSchema.parse(period);
     IdSchema.parse(companyId);
@@ -60,16 +60,18 @@ export async function POST(req: NextRequest) {
     }
 
     //if payment already exists, return error
-    const existingPayment = await Payment.findOne({
-      company: companyId,
-      period: period,
-    });
+    if (regenerate !== true) {
+      const existingPayment = await Payment.findOne({
+        company: companyId,
+        period: period,
+      });
 
-    if (existingPayment) {
-      return NextResponse.json(
-        { message: "Payment already exists for:" + period },
-        { status: 400 }
-      );
+      if (existingPayment) {
+        return NextResponse.json(
+          { message: "Payment already exists for:" + period },
+          { status: 400 }
+        );
+      }
     }
 
     if (

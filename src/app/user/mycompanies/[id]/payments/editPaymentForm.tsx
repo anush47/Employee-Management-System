@@ -156,6 +156,7 @@ const EditPaymentForm: React.FC<{
         body: JSON.stringify({
           companyId: companyId,
           period: formFields.period,
+          regenerate: true,
         }),
       });
       if (!response.ok) {
