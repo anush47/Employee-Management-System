@@ -150,7 +150,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
             case "quick":
               return "Quick Tools";
             case "mycompanies":
-              return "My Companies";
+              return "Companies";
             case "employees":
               return "Employees";
             case "purchases":

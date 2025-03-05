@@ -160,10 +160,19 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
       /user?userPageSelect=mycompanies
     "
       >
-        My Companies
+        Companies
       </LinkM>,
       <LinkM underline="none" key="3" color="text.main">
-        {company ? company.name : "Loading..."}
+        {company ? (
+          <Typography
+            noWrap
+            sx={{ maxWidth: 350, overflow: "hidden", textOverflow: "ellipsis" }}
+          >
+            {company.name}
+          </Typography>
+        ) : (
+          "Loading..."
+        )}
       </LinkM>,
       <LinkM underline="none" key="4" color="text.main">
         {(() => {

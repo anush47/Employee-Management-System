@@ -174,7 +174,7 @@ export const PaymentStructure = ({
       <AccordionDetails>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Typography variant="subtitle1">Additions</Typography>
+            <Typography variant="h6">Additions</Typography>
             <div className="my-2"></div>
             {additions.map((addition, index) => (
               <Grid
@@ -230,7 +230,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={5} sm={2}>
+                <Grid item xs={8} sm={2}>
                   <FormControl fullWidth>
                     <FormControlLabel
                       control={
@@ -252,7 +252,7 @@ export const PaymentStructure = ({
                   </FormControl>
                 </Grid>
                 <Grid item xs={1}>
-                  {isEditing && !isSalary && (
+                  {isEditing && (
                     <Tooltip title="Remove" arrow>
                       <IconButton
                         color="error"
@@ -263,9 +263,12 @@ export const PaymentStructure = ({
                     </Tooltip>
                   )}
                 </Grid>
+                <Grid item xs={12}>
+                  <hr className="mb-2" />
+                </Grid>
               </Grid>
             ))}
-            {isEditing && !isSalary && (
+            {isEditing && (
               <Button
                 variant="outlined"
                 startIcon={<Add />}
@@ -276,7 +279,7 @@ export const PaymentStructure = ({
             )}
           </Grid>
           <Grid item xs={12}>
-            <Typography my={1} variant="subtitle1">
+            <Typography my={1} variant="h6">
               Deductions
             </Typography>
             {deductions.map((deduction, index) => (
@@ -333,7 +336,7 @@ export const PaymentStructure = ({
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={5} sm={2}>
+                <Grid item xs={8} sm={2}>
                   {deduction.name !== "EPF 8%" && (
                     <Tooltip title="Include To Total Earnings" arrow>
                       <FormControl fullWidth>
@@ -359,7 +362,7 @@ export const PaymentStructure = ({
                   )}
                 </Grid>
                 <Grid item xs={1}>
-                  {isEditing && !isSalary && deduction.name !== "EPF 8%" && (
+                  {isEditing && deduction.name !== "EPF 8%" && (
                     <Tooltip title="Remove" arrow>
                       <IconButton
                         color="error"
@@ -370,9 +373,12 @@ export const PaymentStructure = ({
                     </Tooltip>
                   )}
                 </Grid>
+                <Grid item xs={12}>
+                  <hr className="mb-2" />
+                </Grid>
               </Grid>
             ))}
-            {isEditing && !isSalary && (
+            {isEditing && (
               <Button
                 variant="outlined"
                 startIcon={<Add />}

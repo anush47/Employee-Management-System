@@ -279,7 +279,7 @@ const ABH: React.FC<{
             }}
           >
             <Typography variant={"h5"}>
-              <Tooltip title="Discard and go back to my companies" arrow>
+              <Tooltip title="Discard and go back" arrow>
                 <IconButton
                   sx={{
                     mr: 2,
