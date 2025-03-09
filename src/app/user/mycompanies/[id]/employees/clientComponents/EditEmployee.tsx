@@ -134,7 +134,7 @@ const EditEmployeeForm: React.FC<{
     startedAt: "",
     resignedAt: "",
   });
-  const [company, setEmployee] = useState<Company | null>(null);
+  const [employee, setEmployee] = useState<Employee | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
