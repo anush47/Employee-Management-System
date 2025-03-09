@@ -545,7 +545,7 @@ const noOtCalc = async (
     otReason,
     noPayReason,
     holidayPay,
-  } = await processSalaryWithInOut(employee, period, inOutProcessed, salary);
+  } = await generateSalaryWithInOut(employee, period, inOutProcessed, salary);
 
   return {
     ot,
