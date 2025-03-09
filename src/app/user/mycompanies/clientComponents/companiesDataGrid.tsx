@@ -5,7 +5,13 @@ import {
   GridColumnVisibilityModel,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { Box, Alert, CircularProgress, Button } from "@mui/material";
+import {
+  Box,
+  Alert,
+  CircularProgress,
+  Button,
+  Typography,
+} from "@mui/material";
 import Link from "next/link";
 
 export interface Company {
@@ -204,13 +210,13 @@ const CompaniesDataGrid = ({
         alignItems: "center",
       }}
     >
-      {loading && <CircularProgress />}
-      {error && (
+      {loading ? (
+        <CircularProgress />
+      ) : error ? (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
-      )}
-      {!loading && !error && (
+      ) : filteredCompanies.length > 0 ? (
         <DataGrid
           rows={filteredCompanies}
           columns={columns}
@@ -242,7 +248,6 @@ const CompaniesDataGrid = ({
               showQuickFilter: true,
             },
           }}
-          //checkboxSelection
           disableRowSelectionOnClick
           disableColumnFilter
           disableDensitySelector
@@ -251,6 +256,12 @@ const CompaniesDataGrid = ({
             setColumnVisibilityModel(newModel)
           }
         />
+      ) : (
+        <Box sx={{ textAlign: "left", mt: 4, mb: 4 }}>
+          <Typography variant="h5" color="textSecondary">
+            No companies to show 😟
+          </Typography>
+        </Box>
       )}
     </Box>
   );

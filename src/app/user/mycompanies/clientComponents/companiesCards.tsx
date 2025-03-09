@@ -243,43 +243,59 @@ const CompaniesCards = ({
       )}
       {!loading && !error && (
         <>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-            <TextField
-              label="Search Companies..."
-              variant="outlined"
-              fullWidth
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <Search sx={{ color: "action.active", mr: 1, my: 0.5 }} />
-                ),
-              }}
-            />
-          </Box>
-          <Box display="flex" gap={1} mb={2}>
-            <Chip
-              label={`Total: ${totalCompanies}`}
-              color="primary"
-              variant="outlined"
-            />
-            <Chip
-              label={`Active: ${activeCompanies}`}
-              color="success"
-              variant="outlined"
-            />
-          </Box>
-          <Grid container spacing={2}>
-            {filteredCompanies.map((company) => (
-              <Grid item xs={12} sm={6} md={4} key={company._id}>
-                <Link
-                  href={`/user/mycompanies/${company._id}?companyPageSelect=quick`}
-                >
-                  <CompanyCard company={company} />
-                </Link>
-              </Grid>
-            ))}
-          </Grid>
+          {totalCompanies > 1 && (
+            <>
+              <Box
+                sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}
+              >
+                <TextField
+                  label="Search Companies..."
+                  variant="outlined"
+                  fullWidth
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <Search sx={{ color: "action.active", mr: 1, my: 0.5 }} />
+                    ),
+                  }}
+                />
+              </Box>
+              <Box display="flex" gap={1} mb={2}>
+                <Chip
+                  label={`Total: ${totalCompanies}`}
+                  color="primary"
+                  variant="outlined"
+                />
+                {totalCompanies !== activeCompanies && (
+                  <Chip
+                    label={`Active: ${activeCompanies}`}
+                    color="success"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            </>
+          )}
+          {filteredCompanies.length > 0 ? (
+            <Grid container spacing={2}>
+              {filteredCompanies.map((company) => (
+                <Grid item xs={12} sm={6} md={4} key={company._id}>
+                  <Link
+                    href={`/user/mycompanies/${company._id}?companyPageSelect=quick`}
+                  >
+                    <CompanyCard company={company} />
+                  </Link>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box sx={{ textAlign: "left", mt: 4, mb: 4 }}>
+              <Typography variant="h5" color="textSecondary">
+                No companies to show 😟
+              </Typography>
+            </Box>
+          )}
         </>
       )}
     </Box>
