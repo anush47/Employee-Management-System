@@ -22,7 +22,7 @@ export const getAttendanceDoc = (
     format: "a4",
   });
   let x = 8;
-  let y = 15;
+  let y = 12;
   const borderMarginIn = 3.5;
   const borderMarginOut = 1;
   // border
@@ -46,7 +46,7 @@ export const getAttendanceDoc = (
   const nicIndex = columns.findIndex((column) => column.dataKey === "nic");
   //companyName
   doc.setFont("Times", "normal");
-  doc.setFontSize(15);
+  doc.setFontSize(12);
   const companyName = company.name;
   doc.text(companyName, x, y, {
     maxWidth: 100,
@@ -54,7 +54,7 @@ export const getAttendanceDoc = (
 
   //payslip
   doc.setFont("Times", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   doc.text(`ATTENDANCE REPORT`, doc.internal.pageSize.width - 8, y, {
     align: "right",
   });
@@ -63,13 +63,13 @@ export const getAttendanceDoc = (
     month: "long",
   });
   const periodText = `${monthName} - ${year}`;
-  y += 5;
-  doc.setFontSize(12);
+  y += 4;
+  doc.setFontSize(10);
   doc.setFont("courier", "normal");
   doc.text(`Period : ${periodText}`, doc.internal.pageSize.width - 8, y, {
     align: "right",
   });
-  y += 5;
+  y += 4;
   doc.text(
     `Employer Number : ${company.employerNo}`,
     doc.internal.pageSize.width - 8,
@@ -78,7 +78,7 @@ export const getAttendanceDoc = (
       align: "right",
     }
   );
-  y += 5;
+  y += 4;
   doc.text(
     `Member Number : ${salary[memberNoIndex]}`,
     doc.internal.pageSize.width - 8,
@@ -89,9 +89,9 @@ export const getAttendanceDoc = (
   );
 
   doc.setFont("Times", "normal");
-  doc.setFontSize(15);
+  doc.setFontSize(12);
   let addressY =
-    15 +
+    13 +
     doc.getTextDimensions(companyName, {
       maxWidth: 100,
     }).h;
@@ -103,7 +103,7 @@ export const getAttendanceDoc = (
     .split(",")
     .map((line) => line.trim());
   doc.setFont("Courier", "normal");
-  doc.setFontSize(12);
+  doc.setFontSize(10);
   //address start
   const numberOfLines = 3;
   lines
@@ -111,7 +111,7 @@ export const getAttendanceDoc = (
     .forEach((line: string | number, index: number) => {
       doc.text(line + (index < lines.length - 1 ? "," : ""), x, addressY);
       //address line spacing
-      addressY += 5;
+      addressY += 4;
     });
   doc.text(
     lines.slice(numberOfLines - 1, lines.length).join(","),
@@ -136,7 +136,7 @@ export const getAttendanceDoc = (
     headStyles: {},
     styles: {
       font: "Times",
-      fontSize: 12,
+      fontSize: 10,
       lineColor: [0, 0, 0],
     },
     head: [["Name:", "NIC:", "Designation:"]],
@@ -157,7 +157,7 @@ export const getAttendanceDoc = (
           right: 0,
         };
         data.cell.styles.cellPadding = {
-          top: 0.5,
+          top: 0.4,
           bottom: 0,
         };
       } else if (data.section === "body") {
@@ -169,7 +169,7 @@ export const getAttendanceDoc = (
         };
         data.cell.styles.cellPadding = {
           top: 0,
-          bottom: 0.5,
+          bottom: 0.4,
         };
       }
 
@@ -237,6 +237,7 @@ export const getAttendanceDoc = (
   const inOut = Array.isArray(salary[inOutIndex])
     ? (salary[inOutIndex] as inOutSchema[])
     : [];
+
   const attendanceHeaders = ["Day", "In", "Out", "Work", "OT Hrs", "OT (LKR)"];
   //add noPay if exists
   const hasNoPay =
@@ -246,6 +247,7 @@ export const getAttendanceDoc = (
   }
   //throw new Error("This is an error");
   attendanceHeaders.push("Description");
+
   const attendanceRows = inOut.map((row, i) => {
     let inDate = "-",
       inTime = "-",
@@ -262,7 +264,7 @@ export const getAttendanceDoc = (
     if (row.in) {
       const dateObj = new Date(row.in);
       const dayOfWeek = dateObj.toLocaleString("default", { weekday: "short" });
-      day = `${day} (${dayOfWeek})`;
+      day = `${day}(${dayOfWeek})`;
     }
 
     const returnArray = [
