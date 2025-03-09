@@ -132,7 +132,14 @@ const Documents = ({
 
   //handle pdf generation
   const handleGetPDF = async (
-    pdfType: "salary" | "epf" | "etf" | "payslip" | "all" | "print",
+    pdfType:
+      | "salary"
+      | "epf"
+      | "etf"
+      | "payslip"
+      | "attendance"
+      | "all"
+      | "print",
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     //preventdefault
@@ -314,78 +321,33 @@ const Documents = ({
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container spacing={3}>
-                    <Grid item xs={6} sm={2.4}>
-                      <FormControl fullWidth>
-                        <LoadingButton
-                          loading={loading}
-                          loadingPosition="start"
-                          variant="outlined"
-                          color="success"
-                          onClick={(e) => {
-                            handleGetPDF("salary", e);
-                          }}
-                        >
-                          <span>Generate Salary</span>
-                        </LoadingButton>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} sm={2.4}>
-                      <FormControl fullWidth>
-                        <LoadingButton
-                          loading={loading}
-                          loadingPosition="start"
-                          color="success"
-                          variant="outlined"
-                          onClick={(e) => handleGetPDF("epf", e)}
-                        >
-                          <span>Generate EPF</span>
-                        </LoadingButton>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} sm={2.4}>
-                      <FormControl fullWidth>
-                        <LoadingButton
-                          loading={loading}
-                          loadingPosition="start"
-                          color="success"
-                          variant="outlined"
-                          onClick={(e) => handleGetPDF("etf", e)}
-                        >
-                          <span>Generate ETF</span>
-                        </LoadingButton>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} sm={2.4}>
-                      <FormControl fullWidth>
-                        <LoadingButton
-                          loading={loading}
-                          loadingPosition="start"
-                          color="success"
-                          variant="outlined"
-                          onClick={(e) => handleGetPDF("payslip", e)}
-                        >
-                          <span>Generate Payslips</span>
-                        </LoadingButton>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} sm={2.4}>
-                      <FormControl fullWidth>
-                        <LoadingButton
-                          loading={loading}
-                          loadingPosition="start"
-                          color="success"
-                          variant="outlined"
-                          onClick={(e) => handleGetPDF("all", e)}
-                        >
-                          <span>Generate All</span>
-                        </LoadingButton>
-                      </FormControl>
-                    </Grid>
+                    {[
+                      { label: "Salary", type: "salary" as const },
+                      { label: "EPF", type: "epf" as const },
+                      { label: "ETF", type: "etf" as const },
+                      { label: "Payslips", type: "payslip" as const },
+                      //{ label: "Attendance", type: "attendance" as const },
+                      { label: "All", type: "all" as const },
+                    ].map((item) => (
+                      <Grid item xs={6} sm={2} key={item.type}>
+                        <FormControl fullWidth>
+                          <LoadingButton
+                            loading={loading}
+                            loadingPosition="start"
+                            variant="outlined"
+                            color="success"
+                            onClick={(e) => handleGetPDF(item.type, e)}
+                          >
+                            <span>{item.label}</span>
+                          </LoadingButton>
+                        </FormControl>
+                      </Grid>
+                    ))}
                   </Grid>
                 </AccordionDetails>
               </Accordion>
             </Grid>
-            <Grid item xs={6} sm={2.4}>
+            <Grid item xs={6} sm={2}>
               <FormControl fullWidth>
                 <LoadingButton
                   loading={loading}
