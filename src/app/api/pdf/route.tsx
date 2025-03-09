@@ -20,6 +20,7 @@ const pdfTypeSchema = z.union([
   z.literal("payslip"),
   z.literal("all"),
   z.literal("print"),
+  z.literal("attendance"),
 ]);
 const salaryIdsschema = z.array(z.string());
 
@@ -89,6 +90,7 @@ export async function POST(req: NextRequest) {
       companyId,
       period,
       needPayment,
+      pdfType,
       salaryIds
     );
     //const salaries1 = Array.from({ length: 20 }, () => salaries[0]);

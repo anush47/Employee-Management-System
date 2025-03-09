@@ -9,6 +9,8 @@ export const getEPFDoc = (
   data: (string | number)[][],
   payment: PaymentSchema
 ) => {
+  //remove inOut columns
+  columns = columns.filter((column) => column.dataKey !== "inOut");
   const doc = new jsPDF({
     orientation: "portrait",
     format: "a4",

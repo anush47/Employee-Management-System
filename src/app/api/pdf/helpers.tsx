@@ -8,6 +8,7 @@ import { getSalaryDoc } from "./salary";
 import { getEPFDoc } from "./epf";
 import { getETFDoc } from "./etf";
 import { getPaySlipDoc } from "./payslip";
+import { getAttendanceDoc } from "./attendance";
 
 //salary schema type
 export type SalarySchema = {
@@ -17,6 +18,7 @@ export type SalarySchema = {
     name: string;
     nic: string;
   };
+  inOut: any[];
   period: string;
   basic: number;
   holidayPay: number;
@@ -73,6 +75,7 @@ export const getData = async (
   companyId: string,
   period: string,
   needPayment: boolean = false,
+  pdfType: string,
   salaryIds: string[] | undefined = undefined
 ) => {
   await dbConnect();
@@ -81,6 +84,11 @@ export const getData = async (
   const company = await Company.findById(companyId).select(
     "name employerNo address requiredDocs"
   );
+
+  const needInOut =
+    pdfType === "attendance" ||
+    (pdfType === "all" && company.requiredDocs.attendance) ||
+    (pdfType === "print" && company.requiredDocs.attendance);
 
   // Fetch employees of the company
   const employees = await Employee.find({ company: companyId }).select(
@@ -99,7 +107,7 @@ export const getData = async (
     period,
   })
     .populate("employee", "memberNo name nic")
-    .select("-inOut"); // Exclude the 'inOut' field
+    .select(needInOut ? "" : "-inOut"); // Exclude the 'inOut' field if needInout is false
 
   // Ensure salaries are fetched correctly
   if (!salaries || salaries.length === 0) {
@@ -251,6 +259,10 @@ export const setupData = (salaries: SalarySchema[]) => {
       finalSalary: salary.finalSalary,
     };
 
+    if (salary.inOut) {
+      modifiedSalary.inOut = salary.inOut;
+    }
+
     // Add dynamic additions
     salary.paymentStructure.additions.forEach(
       (addition: { name: string; amount: string | number }) => {
@@ -296,6 +308,11 @@ export const setupData = (salaries: SalarySchema[]) => {
 
   // Finalize columns by adding static columns like "FINAL SALARY"
   columns.push({ dataKey: "finalSalary", header: "FINAL SALARY" });
+
+  //if inOut is available in salary then add it to columns
+  if (salaries[0].inOut) {
+    columns.push({ dataKey: "inOut", header: "IN/OUT" });
+  }
 
   // Prepare data based on columns
   const data: (string | number)[][] = records.map((record) => {
@@ -409,6 +426,87 @@ const getCombinedPayslips = async (
   return combinedPayslips;
 };
 
+const getCombinedAttendance = async (
+  company: CompanySchema,
+  period: string,
+  columns: { dataKey: string; header: string }[],
+  data: (string | number)[][],
+  employees: {
+    _id: string;
+    memberNo: number;
+    name: string;
+    nic: string;
+    designation: string;
+  }[]
+) => {
+  const mergePdfsIntoQuads = async (pdfsToMerge: ArrayBuffer[]) => {
+    const mergedPdf = await PDFDocument.create();
+    let page = mergedPdf.addPage();
+    const { width, height } = page.getSize();
+
+    let pdfIndex = 0;
+
+    for (let i = 0; i < pdfsToMerge.length; i += 4) {
+      // For each set of 4 PDFs, create a new page if necessary
+      if (i > 0) page = mergedPdf.addPage();
+
+      // Loop over a set of 4 PDFs (or less, if remaining are fewer than 4)
+      for (let j = 0; j < 4; j++) {
+        pdfIndex = i + j;
+        if (pdfIndex >= pdfsToMerge.length) break; // If no more PDFs left
+
+        const pdfBuffer = pdfsToMerge[pdfIndex];
+        const pdf = await PDFDocument.load(pdfBuffer);
+        const [embeddedPage] = await mergedPdf.embedPages(pdf.getPages());
+
+        // Calculate positions to place each PDF page in a 2x2 grid
+        const xOffset = (j % 2) * (width / 2); // Two columns
+        const yOffset = height - Math.floor(j / 2) * (height / 2) - height / 2; // Two rows
+
+        // Draw the embedded page on the merged document
+        page.drawPage(embeddedPage, {
+          x: xOffset,
+          y: yOffset,
+          width: width / 2, // Scaling to fit 4 on a single page
+          height: height / 2,
+        });
+      }
+    }
+
+    const mergedPdfFile = await mergedPdf.save();
+    return mergedPdfFile;
+  };
+
+  const paySlipDocArrays: ArrayBuffer[] = [];
+
+  // Iterate over each salary record to generate payslips, avoiding the last 3
+  for (let i = 0; i < data.length - 3; i++) {
+    const salary = data[i];
+    // Find the employee by their memberNo (first column in salary data)
+    let employee = employees.find((e) => e.memberNo === salary[0]);
+    if (!employee) {
+      employee = undefined;
+    }
+
+    // Get the payslip document (assuming getPaySlipDoc returns a jsPDF instance)
+    const payslipDoc = getAttendanceDoc(
+      company,
+      period,
+      columns,
+      salary,
+      employee
+    );
+
+    // Convert jsPDF document to arraybuffer
+    const payslipArrayBuffer = payslipDoc.output("arraybuffer");
+    paySlipDocArrays.push(payslipArrayBuffer);
+  }
+
+  // Combine the payslips into quads and await the result
+  const combinedPayslips = await mergePdfs(paySlipDocArrays);
+  return combinedPayslips;
+};
+
 export const mergePdfs = async (pdfsToMerges: ArrayBuffer[]) => {
   const mergedPdf = await PDFDocument.create();
 
@@ -454,6 +552,14 @@ export const getPDFOutput = async (
     );
   } else if (pdfType === "payslip") {
     pdfOutput = await getCombinedPayslips(
+      company,
+      period,
+      columns,
+      data,
+      employees
+    );
+  } else if (pdfType === "attendance") {
+    pdfOutput = await getCombinedAttendance(
       company,
       period,
       columns,

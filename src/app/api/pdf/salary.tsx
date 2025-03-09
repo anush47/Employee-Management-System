@@ -8,6 +8,9 @@ export const getSalaryDoc = (
   columns: { dataKey: string; header: string }[],
   data: (string | number)[][]
 ) => {
+  //remove inOut columns
+  columns = columns.filter((column) => column.dataKey !== "inOut");
+
   const doc = new jsPDF({
     orientation: "landscape",
     format: "a4",

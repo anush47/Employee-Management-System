@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import { CompanySchema } from "./helpers";
 import autoTable from "jspdf-autotable";
 
-export const getPaySlipDoc = (
+export const getAttendanceDoc = (
   company: CompanySchema,
   period: string,
   columns: { dataKey: string; header: string }[],
@@ -17,8 +17,6 @@ export const getPaySlipDoc = (
       }
     | undefined
 ) => {
-  //remove inOut columns
-  columns = columns.filter((column) => column.dataKey !== "inOut");
   const doc = new jsPDF({
     orientation: "portrait",
     format: "a4",
@@ -48,7 +46,7 @@ export const getPaySlipDoc = (
   const nicIndex = columns.findIndex((column) => column.dataKey === "nic");
   //companyName
   doc.setFont("Times", "normal");
-  doc.setFontSize(20);
+  doc.setFontSize(15);
   const companyName = company.name;
   doc.text(companyName, x, y, {
     maxWidth: 100,
@@ -56,8 +54,8 @@ export const getPaySlipDoc = (
 
   //payslip
   doc.setFont("Times", "bold");
-  doc.setFontSize(18);
-  doc.text(`PAYSLIP`, doc.internal.pageSize.width - 8, y, {
+  doc.setFontSize(14);
+  doc.text(`ATTENDANCE REPORT`, doc.internal.pageSize.width - 8, y, {
     align: "right",
   });
   let [year, month] = period.split("-");
@@ -65,13 +63,13 @@ export const getPaySlipDoc = (
     month: "long",
   });
   const periodText = `${monthName} - ${year}`;
-  y += 6;
-  doc.setFontSize(14);
+  y += 5;
+  doc.setFontSize(12);
   doc.setFont("courier", "normal");
   doc.text(`Period : ${periodText}`, doc.internal.pageSize.width - 8, y, {
     align: "right",
   });
-  y += 6;
+  y += 5;
   doc.text(
     `Employer Number : ${company.employerNo}`,
     doc.internal.pageSize.width - 8,
@@ -80,7 +78,7 @@ export const getPaySlipDoc = (
       align: "right",
     }
   );
-  y += 6;
+  y += 5;
   doc.text(
     `Member Number : ${salary[memberNoIndex]}`,
     doc.internal.pageSize.width - 8,
@@ -91,13 +89,13 @@ export const getPaySlipDoc = (
   );
 
   doc.setFont("Times", "normal");
-  doc.setFontSize(20);
+  doc.setFontSize(15);
   let addressY =
     15 +
     doc.getTextDimensions(companyName, {
       maxWidth: 100,
     }).h;
-  doc.setFontSize(10);
+  doc.setFontSize(8);
 
   // split into 3 lines maximum
   const lines = company.address
@@ -105,7 +103,7 @@ export const getPaySlipDoc = (
     .split(",")
     .map((line) => line.trim());
   doc.setFont("Courier", "normal");
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   //address start
   const numberOfLines = 3;
   lines
@@ -113,7 +111,7 @@ export const getPaySlipDoc = (
     .forEach((line: string | number, index: number) => {
       doc.text(line + (index < lines.length - 1 ? "," : ""), x, addressY);
       //address line spacing
-      addressY += 6;
+      addressY += 5;
     });
   doc.text(
     lines.slice(numberOfLines - 1, lines.length).join(","),
@@ -125,20 +123,20 @@ export const getPaySlipDoc = (
   );
   //get lowest
   y = Math.max(y, addressY);
-  y += 6;
+  y += 5;
   autoTable(doc, {
     startY: y,
     margin: {
-      top: 8,
+      top: 5,
       left: 8,
       right: 8,
-      bottom: 8,
+      bottom: 5,
     },
     theme: "plain",
     headStyles: {},
     styles: {
       font: "Times",
-      fontSize: 14,
+      fontSize: 12,
       lineColor: [0, 0, 0],
     },
     head: [["Name:", "NIC:", "Designation:"]],
@@ -159,7 +157,7 @@ export const getPaySlipDoc = (
           right: 0,
         };
         data.cell.styles.cellPadding = {
-          top: 1,
+          top: 0.5,
           bottom: 0,
         };
       } else if (data.section === "body") {
@@ -171,23 +169,23 @@ export const getPaySlipDoc = (
         };
         data.cell.styles.cellPadding = {
           top: 0,
-          bottom: 1,
+          bottom: 0.5,
         };
       }
 
       if (data.column.index === 1) {
         data.cell.styles.halign = "center";
         data.cell.styles.cellPadding = {
-          top: 1,
-          bottom: 1,
+          top: 0.5,
+          bottom: 0.5,
           left: 2,
         };
       } //designation
       else if (data.column.index === 2) {
         data.cell.styles.halign = "right";
         data.cell.styles.cellPadding = {
-          top: 1,
-          bottom: 1,
+          top: 0.5,
+          bottom: 0.5,
           left: 2,
         };
       }
@@ -196,17 +194,26 @@ export const getPaySlipDoc = (
       y = Math.max(data.cell.y + data.cell.height, y);
     },
   });
-  y += 16;
+  y += 8;
   //Salary details
   doc.setFont("Times", "bold");
-  doc.setFontSize(18);
-  doc.text(`Salary Details`, x, y);
+  doc.setFontSize(12);
+  doc.text(`Attendance Details`, x, y);
   y += 2;
   doc.setLineWidth(0.2);
   doc.line(x, y, doc.internal.pageSize.width - x, y);
   y += 2;
 
+  //format date and time using ISO format
+  const formatDateTime = (dateTime: string) => {
+    const dateObj = new Date(dateTime);
+    const date = dateObj.toISOString().split("T")[0].slice(5).replace("-", "/"); // MM/DD
+    const time = dateObj.toISOString().split("T")[1].slice(0, 5); // HH:MM
+    return { date, time };
+  };
+
   const noPayIndex = columns.findIndex((column) => column.dataKey === "noPay");
+  const inOutIndex = columns.findIndex((column) => column.dataKey === "inOut");
   const holidayPayIndex = columns.findIndex(
     (column) => column.dataKey === "holidayPay"
   );
@@ -216,106 +223,106 @@ export const getPaySlipDoc = (
   const salaryForEPFIndex = columns.findIndex(
     (column) => column.dataKey === "salaryForEPF"
   );
-  const salaryHeaders = ["Description", "Amount (LKR)"];
-  const salaryRows = [["Basic Salary (with budgetary)", salary[basicIndex]]];
 
-  // Add holiday pay if it exists and is not 0, null, or undefined
-  if (holidayPayIndex !== -1 && salary[holidayPayIndex]) {
-    salaryRows.push(["Holiday Pay (+)", salary[holidayPayIndex]]);
+  type inOutSchema = {
+    in: string;
+    out: string;
+    workingHours: number;
+    otHours: number;
+    ot: number;
+    noPay: number;
+    description: string;
+  };
+
+  const inOut = Array.isArray(salary[inOutIndex])
+    ? (salary[inOutIndex] as inOutSchema[])
+    : [];
+  const attendanceHeaders = ["Day", "In", "Out", "Work", "OT Hrs", "OT (LKR)"];
+  //add noPay if exists
+  const hasNoPay =
+    noPayIndex && salary[noPayIndex] != "" && salary[noPayIndex] != 0;
+  if (hasNoPay) {
+    attendanceHeaders.push("No Pay");
   }
+  //throw new Error("This is an error");
+  attendanceHeaders.push("Description");
+  const attendanceRows = inOut.map((row, i) => {
+    let inDate = "-",
+      inTime = "-",
+      outDate = "-",
+      outTime = "-",
+      day = "";
+    if (row.in != row.out) {
+      ({ date: inDate, time: inTime } = formatDateTime(row.in));
+      ({ date: outDate, time: outTime } = formatDateTime(row.out));
+      day = inDate === outDate ? inDate : `${inDate}-${outDate}`;
+    } else {
+      day = formatDateTime(row.in).date;
+    }
+    if (row.in) {
+      const dateObj = new Date(row.in);
+      const dayOfWeek = dateObj.toLocaleString("default", { weekday: "short" });
+      day = `${day} (${dayOfWeek})`;
+    }
 
-  // Add no pay if it exists and is not 0, null, or undefined
-  if (noPayIndex !== -1 && salary[noPayIndex]) {
-    salaryRows.push(["No Pay (-)", salary[noPayIndex]]);
-  }
+    const returnArray = [
+      //get current index + 1
+      day,
+      `${inTime}`,
+      `${outTime}`,
+      row.workingHours === 0 ? "-" : row.workingHours.toFixed(2),
+      row.otHours === 0 ? "-" : row.otHours.toFixed(2),
+      row.ot === 0
+        ? "-"
+        : row.ot.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+    ];
 
-  salaryRows.push(["Salary for EPF", salary[salaryForEPFIndex]]);
+    if (hasNoPay) {
+      returnArray.push(
+        row.noPay == 0
+          ? "-"
+          : salary[noPayIndex].toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+      );
+    }
 
-  let totalAdditions = 0;
-  // Append additions
-  salaryRows.push(["Empty Row", ""]);
-  //salaryRows.push(["Additions Header Row", ""]);
-  const additions = columns.filter(
-    (column) => column.dataKey.endsWith("(+)") && column.dataKey !== "OT (+)"
-  );
-  additions.forEach((addition) => {
-    const additionIndex = columns.findIndex(
-      (column) => column.dataKey === addition.dataKey
-    );
-    salaryRows.push([
-      addition.header
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" "),
-      salary[additionIndex],
-    ]);
-    totalAdditions += Number(salary[additionIndex]);
-  });
-  salaryRows.push(["Total Additions", totalAdditions]);
-  salaryRows.push(["Empty Row", ""]);
-  //salaryRows.push(["Deductions Header Row", ""]);
+    returnArray.push(row.description.trim());
 
-  let totalDeductions = 0;
-  //push epf8
-  const epf8Index = columns.findIndex((column) => column.dataKey === "epf8");
-  salaryRows.push(["EPF 8% (-)", salary[epf8Index]]);
-  totalDeductions += Number(salary[epf8Index]);
-
-  // Append deductions except epf8
-  const deductions = columns.filter(
-    (column) =>
-      column.dataKey.endsWith("(-)") &&
-      column.dataKey !== "epf8" &&
-      column.dataKey !== "EPF 8% (-)"
-  );
-  deductions.forEach((deduction) => {
-    const deductionIndex = columns.findIndex(
-      (column) => column.dataKey === deduction.dataKey
-    );
-    salaryRows.push([
-      deduction.header
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" "),
-      salary[deductionIndex] !== undefined ? salary[deductionIndex] : 0,
-    ]);
-    totalDeductions += Number(salary[deductionIndex] || 0);
+    return returnArray;
   });
 
-  salaryRows.push(["Total Deductions", totalDeductions]);
-  salaryRows.push(["Empty Row", ""]);
+  //attendanceRows.push(["Empty Row", ""]);
 
   //ot
   const otIndex = columns.findIndex((column) => column.dataKey === "OT (+)");
-  salaryRows.push(["OT (+)", salary[otIndex]]);
   //if advance
   const advanceIndex = columns.findIndex(
     (column) => column.dataKey === "advanceAmount"
   );
-  salaryRows.push(["Advance (-)", salary[advanceIndex]]);
   //final salary
   const finalSalaryIndex = columns.findIndex(
     (column) => column.dataKey === "finalSalary"
   );
-  salaryRows.push([
-    "Final Salary",
-    Number(salary[finalSalaryIndex]) - (Number(salary[advanceIndex]) || 0),
-  ]);
+  // attendanceRows.push([
+  //   "Final Salary",
+  //   Number(salary[finalSalaryIndex]) - (Number(salary[advanceIndex]) || 0),
+  // ]);
 
   autoTable(doc, {
-    columns: salaryHeaders,
-    body: salaryRows,
+    columns: attendanceHeaders,
+    body: attendanceRows,
     startY: y,
     theme: "grid",
     margin: {
       left: 8,
       right: 8,
-      top: 8,
-      bottom: 8,
+      top: 5,
+      bottom: 5,
     },
     headStyles: {
       fillColor: [0, 0, 0],
@@ -328,7 +335,8 @@ export const getPaySlipDoc = (
       lineColor: [0, 0, 0],
       lineWidth: 0.2,
       font: "courier",
-      fontSize: 14,
+      fontSize: 8,
+      cellPadding: 1,
     },
     didParseCell: function (data) {
       //Bold total and basic
@@ -340,7 +348,7 @@ export const getPaySlipDoc = (
         data.cell.styles.fontStyle = "bold";
       } else if (data.row.cells[0].text.join(" ") === "Final Salary") {
         data.cell.styles.fontStyle = "bold";
-        data.cell.styles.fontSize = 16;
+        data.cell.styles.fontSize = 10;
         data.cell.styles.lineWidth = 0.6;
       }
       //if other additions or other deductions
@@ -357,15 +365,15 @@ export const getPaySlipDoc = (
         data.cell.styles.cellPadding = 0;
         data.cell.styles.fontSize = 1;
         data.cell.styles.lineWidth = {
-          top: 0.6,
-          bottom: 0.6,
+          top: 0.5,
+          bottom: 0.5,
           left: 0.2,
           right: 0.2,
         };
       }
 
       //format currency
-      if (data.column.index === 1) {
+      if (data.column.index === -1) {
         //allign right
         data.cell.styles.halign = "right";
         if (data.section === "body") {
@@ -391,7 +399,7 @@ export const getPaySlipDoc = (
   y = doc.internal.pageSize.height - 12;
   x = doc.internal.pageSize.width - 8;
   doc.setFont("Times", "normal");
-  doc.setFontSize(14);
+  doc.setFontSize(10);
   doc.text(
     `Signature:   ...........................................................................`,
     x,
@@ -400,6 +408,5 @@ export const getPaySlipDoc = (
       align: "right",
     }
   );
-
   return doc;
 };
