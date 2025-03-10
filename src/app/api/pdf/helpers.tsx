@@ -477,7 +477,7 @@ const getCombinedAttendance = async (
     return mergedPdfFile;
   };
 
-  const paySlipDocArrays: ArrayBuffer[] = [];
+  const attendanceDocArrays: ArrayBuffer[] = [];
 
   // Iterate over each salary record to generate payslips, avoiding the last 3
   for (let i = 0; i < data.length - 3; i++) {
@@ -489,7 +489,7 @@ const getCombinedAttendance = async (
     }
 
     // Get the payslip document (assuming getPaySlipDoc returns a jsPDF instance)
-    const payslipDoc = getAttendanceDoc(
+    const attendanceDoc = getAttendanceDoc(
       company,
       period,
       columns,
@@ -498,13 +498,13 @@ const getCombinedAttendance = async (
     );
 
     // Convert jsPDF document to arraybuffer
-    const payslipArrayBuffer = payslipDoc.output("arraybuffer");
-    paySlipDocArrays.push(payslipArrayBuffer);
+    const attendanceArrayBuffer = attendanceDoc.output("arraybuffer");
+    attendanceDocArrays.push(attendanceArrayBuffer);
   }
 
   // Combine the payslips into quads and await the result
-  const combinedPayslips = await mergePdfs(paySlipDocArrays);
-  return combinedPayslips;
+  const combinedAttendance = await mergePdfs(attendanceDocArrays);
+  return combinedAttendance;
 };
 
 export const mergePdfs = async (pdfsToMerges: ArrayBuffer[]) => {

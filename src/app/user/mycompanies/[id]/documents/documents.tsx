@@ -326,7 +326,7 @@ const Documents = ({
                       { label: "EPF", type: "epf" as const },
                       { label: "ETF", type: "etf" as const },
                       { label: "Payslips", type: "payslip" as const },
-                      //{ label: "Attendance", type: "attendance" as const },
+                      { label: "Attendance", type: "attendance" as const },
                       { label: "All", type: "all" as const },
                     ].map((item) => (
                       <Grid item xs={6} sm={2} key={item.type}>

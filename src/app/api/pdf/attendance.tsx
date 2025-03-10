@@ -33,12 +33,6 @@ export const getAttendanceDoc = (
     doc.internal.pageSize.width - 2 * borderMarginIn,
     doc.internal.pageSize.height - 2 * borderMarginIn
   );
-  doc.rect(
-    borderMarginOut,
-    borderMarginOut,
-    doc.internal.pageSize.width - 2 * borderMarginOut,
-    doc.internal.pageSize.height - 2 * borderMarginOut
-  );
   const memberNoIndex = columns.findIndex(
     (column) => column.dataKey === "memberNo"
   );
@@ -238,10 +232,13 @@ export const getAttendanceDoc = (
     ? (salary[inOutIndex] as inOutSchema[])
     : [];
 
-  const attendanceHeaders = ["Day", "In", "Out", "Work", "OT Hrs", "OT (LKR)"];
+  const attendanceHeaders = ["Day", "In", "Out", "Work(h)", "OT(h)", "OT(LKR)"];
   //add noPay if exists
   const hasNoPay =
-    noPayIndex && salary[noPayIndex] != "" && salary[noPayIndex] != 0;
+    noPayIndex &&
+    salary[noPayIndex] != undefined &&
+    salary[noPayIndex] != "" &&
+    salary[noPayIndex] != 0;
   if (hasNoPay) {
     attendanceHeaders.push("No Pay");
   }
