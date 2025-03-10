@@ -136,7 +136,11 @@ function calculateSalaryDetails(
     } = getFilteredAdditionsAndDeductions();
 
     const amountNeeded =
-      Number(source.totalSalary) - ot - source.basic + source.basic * 0.08;
+      Number(source.totalSalary) -
+      ot -
+      holidayPay -
+      source.basic +
+      (source.basic + holidayPay) * 0.08;
     console.log(source.totalSalary, amountNeeded);
 
     //change the  parsedAdditions and parsedDeductions in additions with range, null to 0
