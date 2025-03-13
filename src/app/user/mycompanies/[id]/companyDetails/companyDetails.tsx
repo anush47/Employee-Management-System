@@ -75,6 +75,11 @@ const CompanyDetails = ({
     startedAt: "",
     employerName: "",
     employerAddress: "",
+    openHours: {
+      start: "",
+      end: "",
+      allDay: false,
+    },
     probabilities: {
       workOnHoliday: 1,
       workOnOff: 1,
@@ -129,6 +134,12 @@ const CompanyDetails = ({
       {category.label}
     </MenuItem>
   ));
+
+  const formatTime = (value: string) => {
+    // Format time to HH:MM if necessary
+    const [hours, minutes] = value.split(":");
+    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const fetchCompanyAndUser = async () => {
@@ -195,8 +206,7 @@ const CompanyDetails = ({
     let { name, value } = event.target;
     if (name === "active" || name === "monthlyPriceOverride") {
       value = event.target.checked;
-    }
-    if (name.startsWith("requiredDocs")) {
+    } else if (name.startsWith("requiredDocs")) {
       const requiredDocs = {
         ...formFields.requiredDocs,
         [name.split(".")[1]]: event.target.checked,
@@ -206,13 +216,28 @@ const CompanyDetails = ({
         requiredDocs: requiredDocs as NonNullable<Company["requiredDocs"]>,
       }));
       return;
-    }
-    if (name.startsWith("probabilities")) {
+    } else if (name.startsWith("probabilities")) {
       setFormFields((prevFields) => ({
         ...prevFields,
         probabilities: {
           ...prevFields.probabilities,
           [name.split(".")[1]]: parseInt(value),
+        },
+      }));
+      return;
+    } else if (name.startsWith("openHours")) {
+      //split
+      const [_, subName] = name.split(".");
+      if (subName === "allDay") {
+        value = event.target.checked;
+      } else {
+        value = formatTime(value);
+      }
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        openHours: {
+          ...prevFields.openHours,
+          [subName]: value,
         },
       }));
       return;
@@ -241,6 +266,11 @@ const CompanyDetails = ({
         employerName: "",
         employerAddress: "",
         requiredDocs: undefined,
+        openHours: {
+          start: "",
+          end: "",
+          allDay: false,
+        },
         endedAt: "",
         active: true,
         probabilities: {
@@ -676,6 +706,59 @@ const CompanyDetails = ({
                   />
                 </FormControl>
               </Grid>
+              <Grid item xs={12} sm={3}>
+                <FormControl fullWidth>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formFields.openHours.allDay}
+                        size="large"
+                        name="openHours.allDay"
+                        color="success"
+                        value={formFields.openHours.allDay}
+                        onChange={handleChange}
+                        disabled={!isEditing || loading}
+                        sx={{
+                          "& .MuiSvgIcon-root": {
+                            color: formFields.active ? "green" : "red",
+                          },
+                        }}
+                      />
+                    }
+                    label="Open 24h ?"
+                  />
+                </FormControl>
+              </Grid>
+              {formFields.openHours.allDay ? null : (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <TextField
+                        label="Start Time"
+                        type="time"
+                        variant="filled"
+                        name="openHours.start"
+                        value={formFields.openHours.start}
+                        onChange={handleChange}
+                        disabled={!isEditing || loading}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <TextField
+                        label="Close Time"
+                        type="time"
+                        variant="filled"
+                        name="openHours.end"
+                        value={formFields.openHours.end}
+                        onChange={handleChange}
+                        disabled={!isEditing || loading}
+                      />
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
 
               <Grid item xs={12}>
                 <PaymentStructure

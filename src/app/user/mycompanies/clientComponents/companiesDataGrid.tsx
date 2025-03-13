@@ -47,6 +47,11 @@ export interface Company {
     late: number;
     ot: number;
   };
+  openHours: {
+    start: string;
+    end: string;
+    allDay: boolean;
+  };
   paymentStructure: {
     additions: {
       name: string;

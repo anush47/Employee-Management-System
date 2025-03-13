@@ -14,6 +14,11 @@ interface ICompany extends Document {
   monthlyPriceOverride: boolean;
   employerName: string;
   employerAddress: string;
+  openHours: {
+    start: string;
+    end: string;
+    allDay: boolean;
+  };
   requiredDocs: {
     epf: boolean;
     etf: boolean;
@@ -256,6 +261,22 @@ const companySchema = new Schema<ICompany>(
     },
     employerAddress: {
       type: String,
+    },
+    openHours: {
+      type: {
+        start: {
+          type: String,
+          default: "08:00",
+        },
+        end: {
+          type: String,
+          default: "17:00",
+        },
+        allDay: {
+          type: Boolean,
+          default: true,
+        },
+      },
     },
   },
   {

@@ -101,6 +101,13 @@ const companyUpdateSchema = z.object({
       sun: z.string().optional(),
     })
     .optional(),
+  openHours: z
+    .object({
+      start: z.string().optional(),
+      end: z.string().optional(),
+      allDay: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export async function PUT(req: NextRequest) {
@@ -184,9 +191,10 @@ export async function PUT(req: NextRequest) {
       if (price !== company.monthlyPrice) {
         // Update the company's monthly price if it has changed
         companyData.monthlyPrice = price;
-        await company.save();
       }
     }
+
+    console.log(companyData);
 
     // Update the company in the database
     const updatedCompany = await company.updateOne(companyData);
@@ -201,6 +209,7 @@ export async function PUT(req: NextRequest) {
     // Return the updated company data
     return NextResponse.json({ company: updatedCompany });
   } catch (error) {
+    console.error(error);
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(

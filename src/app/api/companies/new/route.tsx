@@ -36,6 +36,11 @@ const companySchema = z.object({
   active: z.boolean().default(true),
   employerName: z.string().optional(),
   employerAddress: z.string().optional(),
+  openHours: z.object({
+    start: z.string().optional(),
+    end: z.string().optional(),
+    allDay: z.boolean().optional(),
+  }),
 });
 
 export async function POST(req: NextRequest) {

@@ -352,7 +352,6 @@ const EmployeesDataGrid: React.FC<{
           throw new Error("Failed to fetch employees");
         }
         const data = await response.json();
-        console.log(data);
 
         setEmployees(
           data.employees.map((employee: Employee) => ({

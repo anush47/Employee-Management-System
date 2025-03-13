@@ -51,6 +51,11 @@ const AddCompanyForm: React.FC<{
     mode: "",
     workingDays: {},
     paymentMethod: "",
+    openHours: {
+      start: "",
+      end: "",
+      allDay: true,
+    },
     paymentStructure: {
       additions: [],
       deductions: [],
@@ -84,19 +89,42 @@ const AddCompanyForm: React.FC<{
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const formatTime = (value: string) => {
+    // Format time to HH:MM if necessary
+    const [hours, minutes] = value.split(":");
+    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  };
+
   // Unified handle change for all fields
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>
   ) => {
     let { name, value } = event.target;
-    //capitalize name
-    if (name === "name" || name === "employerNo") {
-      value = value.toUpperCase();
+    if (name.startsWith("openHours")) {
+      //split
+      const [_, subName] = name.split(".");
+      if (subName === "allDay") {
+        value = event.target.checked;
+      } else {
+        value = formatTime(value);
+      }
+      setFormFields((prevFields) => ({
+        ...prevFields,
+        openHours: {
+          ...prevFields.openHours,
+          [subName]: value,
+        },
+      }));
+    } else {
+      //capitalize name
+      if (name === "name" || name === "employerNo") {
+        value = value.toUpperCase();
+      }
+      if (name === "active") {
+        value = event.target.checked;
+      }
+      setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
     }
-    if (name === "active") {
-      value = event.target.checked;
-    }
-    setFormFields((prevFields) => ({ ...prevFields, [name]: value }));
   };
 
   const onSaveClick = async () => {
@@ -148,6 +176,11 @@ const AddCompanyForm: React.FC<{
           workingDays: {},
           employerName: "",
           employerAddress: "",
+          openHours: {
+            start: "09:00",
+            end: "17:00",
+            allDay: true,
+          },
           probabilities: {
             workOnOff: 1,
             workOnHoliday: 1,
@@ -366,7 +399,7 @@ const AddCompanyForm: React.FC<{
               </LocalizationProvider>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={3}>
             <FormControl fullWidth>
               <FormControlLabel
                 control={
@@ -384,6 +417,54 @@ const AddCompanyForm: React.FC<{
               />
             </FormControl>
           </Grid>
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formFields.openHours.allDay}
+                    size="large"
+                    name="openHours.allDay"
+                    color="success"
+                    value={formFields.openHours.allDay}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                }
+                label="Open 24h ?"
+              />
+            </FormControl>
+          </Grid>
+          {formFields.openHours.allDay ? null : (
+            <>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <TextField
+                    label="Start Time"
+                    type="time"
+                    variant="filled"
+                    name="openHours.start"
+                    value={formFields.openHours.start}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <TextField
+                    label="Close Time"
+                    type="time"
+                    variant="filled"
+                    name="openHours.end"
+                    value={formFields.openHours.end}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                </FormControl>
+              </Grid>
+            </>
+          )}
           <Grid item xs={12}>
             <FormControl fullWidth>
               <TextField
