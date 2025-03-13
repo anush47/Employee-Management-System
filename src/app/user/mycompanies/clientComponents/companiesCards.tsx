@@ -116,7 +116,7 @@ const CompaniesCards = ({
         setLoading(true);
 
         // Fetch companies
-        const companiesResponse = await fetch(`/api/companies/many`);
+        const companiesResponse = await fetch(`/api/companies`);
         if (!companiesResponse.ok) {
           throw new Error("Failed to fetch companies");
         }

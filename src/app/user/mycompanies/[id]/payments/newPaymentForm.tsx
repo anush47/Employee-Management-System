@@ -106,18 +106,16 @@ const NewPaymentForm = ({
     const fetchCompany = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/companies/one?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/companies?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch Company");
         }
         const data = await response.json();
-        setCompany(data.company);
+        setCompany(data.companies[0]);
         setFormFields({
           ...formFields,
-          epfPaymentMethod: data.company.paymentMethod,
-          etfPaymentMethod: data.company.paymentMethod,
+          epfPaymentMethod: data.companies[0].paymentMethod,
+          etfPaymentMethod: data.companies[0].paymentMethod,
         });
       } catch (error) {
         setSnackbarMessage(

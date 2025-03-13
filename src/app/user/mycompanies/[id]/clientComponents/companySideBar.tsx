@@ -203,14 +203,12 @@ const CompanySideBar: React.FC<Props> = ({ window, user }) => {
     //fetch company
     const fetchCompany = async () => {
       try {
-        const response = await fetch(
-          `/api/companies/one?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/companies?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch company");
         }
         const data = await response.json();
-        setCompany(data.company);
+        setCompany(data.companies[0]);
       } catch (error) {
         console.error(error);
       }

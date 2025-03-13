@@ -151,32 +151,34 @@ const ABH: React.FC<{
           let employeeData = {};
           if (employeeId) {
             const employeeResponse = await fetch(
-              `/api/employees/one?employeeId=${employeeId}`
+              `/api/employees?employeeId=${employeeId}`
             );
             const employeeResult = await employeeResponse.json();
             employeeData = {
-              nameWithInitials: formatName(employeeResult.employee.name),
-              nic: employeeResult.employee.nic,
-              memberNo: employeeResult.employee.memberNo,
-              designation: employeeResult.employee.designation,
-              mobileNumber: employeeResult.employee.phoneNumber,
-              email: employeeResult.employee.email,
-              address: employeeResult.employee.address,
+              fullName: employeeResult.employees[0].name,
+              nameWithInitials: formatName(employeeResult.employees[0].name),
+              nic: employeeResult.employees[0].nic,
+              memberNo: employeeResult.employees[0].memberNo,
+              designation: employeeResult.employees[0].designation,
+              mobileNumber: employeeResult.employees[0].phoneNumber,
+              email: employeeResult.employees[0].email,
+              address: employeeResult.employees[0].address,
               nationality: "SRI LANKAN",
-              startDate: employeeResult.employee.startedAt,
+              startDate: employeeResult.employees[0].startedAt,
             };
           }
 
           const companyResponse = await fetch(
-            `/api/companies/one?companyId=${companyId}`
+            `/api/companies?companyId=${companyId}`
           );
           const companyResult = await companyResponse.json();
           setFormDetails((prevDetails) => ({
             ...prevDetails,
             ...employeeData,
-            employerNo: companyResult.company.employerNo,
-            employerName: companyResult.company.employerName,
-            employerAddress: companyResult.company.employerAddress,
+            employerNo: companyResult.companies[0].employerNo,
+            employerName: companyResult.companies[0].employerName,
+            employerAddress: companyResult.companies[0].employerAddress,
+            date: dayjs().format("DD-MM-YYYY"),
           }));
 
           setSnackbarMessage("Data fetched successfully");

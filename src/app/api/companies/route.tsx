@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import Company from "@/app/models/Company";
-import { options } from "../../auth/[...nextauth]/options";
+import { options } from "../auth/[...nextauth]/options";
 import { z } from "zod";
 import Employee from "@/app/models/Employee";
-import { calculateMonthlyPrice } from "../../purchases/price/priceUtils";
+import { calculateMonthlyPrice } from "../purchases/price/priceUtils";
 
 // Define schema for validation
 const userIdSchema = z.string().min(1, "User ID is required");
@@ -23,28 +23,194 @@ export async function GET(req: NextRequest) {
 
     //get the companyId from url
     const companyId = req.nextUrl.searchParams.get("companyId");
-    // Validate companyId
-    companyIdSchema.parse(companyId);
+
+    //get is userNeeded from url
+    const isUserNeeded = req.nextUrl.searchParams.get("needUsers");
 
     // Create filter
-    const filter = { user: userId, _id: companyId };
+    const filter: {
+      user?: string;
+      _id?: string;
+    } = { user: userId };
     if (user?.role === "admin") {
       // Remove user from filter
       delete filter.user;
+    }
+    if (companyId) {
+      filter._id = companyId;
     }
 
     // Connect to the database
     await dbConnect();
 
-    // Fetch companies from the database
-    const company = await Company.findOne(filter).lean(); // Use .lean() for better performance
-    // Return the company data
-    return NextResponse.json({ company });
+    if (companyId) {
+      // Fetch company from the database
+      const company = await Company.findOne(filter).lean(); // Use .lean() for better performance
+      // Return the company data
+      return NextResponse.json({ companies: [company] });
+    } else {
+      // Fetch companies from the database
+      let companies;
+
+      if (isUserNeeded) {
+        companies = await Company.find(filter)
+          .populate("user", "name email") // Use populate to include user details
+          .lean();
+      } else {
+        companies = await Company.find(filter).lean();
+      }
+      if (!companies) {
+        return NextResponse.json(
+          { message: "Companies not found" },
+          { status: 404 }
+        );
+      }
+
+      // Add the number of employees for each company in a single batch operation
+      const companyIds = companies.map((company) => company._id);
+
+      // Get employee counts in bulk for all companies
+      const employeeCounts = await Employee.aggregate([
+        { $match: { company: { $in: companyIds }, active: true } },
+        { $group: { _id: "$company", count: { $sum: 1 } } },
+      ]);
+
+      // Create a mapping of companyId to employee count
+      const employeeCountMap = employeeCounts.reduce((acc, { _id, count }) => {
+        acc[_id] = count;
+        return acc;
+      }, {});
+
+      // Add employee counts to companies
+      const companiesWithEmployeeCount = companies.map((company) => ({
+        ...company,
+        noOfEmployees: employeeCountMap[company._id as string] || 0, // Default to 0 if no employees
+      }));
+
+      // Return the response
+      return NextResponse.json({ companies: companiesWithEmployeeCount });
+    }
   } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: error.errors[0].message },
+        { status: 400 }
+      );
+    }
+    // Handle general errors
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// Define schema for company creation
+const companyCreateSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  employerNo: z
+    .string()
+    .min(1, "Employer Number is required")
+    .regex(/^[A-Z]\/\d{5}$/, "Employer Number must match the pattern A/12345"),
+  address: z.string().optional(),
+  startedAt: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  monthlyPrice: z.number(),
+  monthlyPriceOverride: z.boolean(),
+  requiredDocs: z.object({
+    epf: z.boolean(),
+    etf: z.boolean(),
+    salary: z.boolean(),
+    paySlip: z.boolean(),
+  }),
+  workingDays: z.object({
+    mon: z.string().optional(),
+    tue: z.string().optional(),
+    wed: z.string().optional(),
+    thu: z.string().optional(),
+    fri: z.string().optional(),
+    sat: z.string().optional(),
+    sun: z.string().optional(),
+  }),
+  active: z.boolean().default(true),
+  employerName: z.string().optional(),
+  employerAddress: z.string().optional(),
+  openHours: z.object({
+    start: z.string().optional(),
+    end: z.string().optional(),
+    allDay: z.boolean().optional(),
+  }),
+});
+
+export async function POST(req: NextRequest) {
+  try {
+    // Get user session
+    const session = await getServerSession(options);
+    const user = session?.user || null;
+    const userId = user?.id;
+
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Parse and validate the request body
+    const body = await req.json();
+    //setMonthlyPrice
+    body.monthlyPrice = calculateMonthlyPrice(null, 0, 0);
+    body.monthlyPriceOverride = false;
+    body.workingDays = {
+      mon: "full",
+      tue: "full",
+      wed: "full",
+      thu: "full",
+      fri: "full",
+      sat: "half",
+      sun: "off",
+    };
+    body.requiredDocs = {
+      epf: true,
+      etf: true,
+      salary: true,
+      paySlip: true,
+    };
+    const parsedBody = companyCreateSchema.parse(body);
+
+    // Connect to the database
+    await dbConnect();
+
+    // Create new company
+    const newCompany = new Company({
+      ...parsedBody,
+      user: userId,
+    });
+
+    // Save the new company to the database
+    await newCompany.save();
+
+    // Return success response
+    return NextResponse.json({ message: "Company added successfully" });
+  } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: error.errors[0].message },
+        { status: 400 }
+      );
+    }
+
+    //duplicate error
+    if ((error as any).code === 11000) {
+      return NextResponse.json(
+        { message: "Company with this Employer Number already exists" },
         { status: 400 }
       );
     }
@@ -170,6 +336,8 @@ export async function PUT(req: NextRequest) {
       delete companyData.monthlyPriceOverride;
       //delete probabilities
       delete companyData.probabilities;
+      //delete user
+      delete companyData.user;
     }
 
     // Connect to the database

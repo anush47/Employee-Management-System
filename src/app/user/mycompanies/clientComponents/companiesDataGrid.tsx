@@ -37,6 +37,7 @@ export interface Company {
   employerAddress: String;
   startedAt: Date | String;
   endedAt: Date | String;
+  user: any;
   workingDays: {
     [key: string]: "full" | "half" | "off";
   };
@@ -124,49 +125,18 @@ const CompaniesDataGrid = ({
         setLoading(true);
 
         // Fetch companies
-        const companiesResponse = await fetch(`/api/companies/many`);
+        const companiesResponse = await fetch(`/api/companies?needUsers=true`);
         if (!companiesResponse.ok) {
           throw new Error("Failed to fetch companies");
         }
         const companiesData = await companiesResponse.json();
 
-        // Create a map to store user details to avoid fetching the same user multiple times
-        const userCache: { [key: string]: { name: string; email: string } } =
-          {};
-
-        // Fetch user details for each company in parallel
-        const userFetchPromises = companiesData.companies.map(
-          (company: any) => {
-            if (company.user && user.role === "admin") {
-              if (userCache[company.user]) {
-                return Promise.resolve(userCache[company.user]);
-              } else {
-                return fetch(`/api/auth/users?user=${company.user}`)
-                  .then((res) => {
-                    if (!res.ok) {
-                      throw new Error("Failed to fetch user details");
-                    }
-                    return res.json();
-                  })
-                  .then((userData) => {
-                    userCache[company.user] = userData.user;
-                    return userData.user;
-                  });
-              }
-            } else {
-              return Promise.resolve({ name: "Unknown", email: "Unknown" });
-            }
-          }
-        );
-
-        const usersData = await Promise.all(userFetchPromises);
-
         const companiesWithUserNames = companiesData.companies.map(
-          (company: any, index: number) => ({
+          (company: any) => ({
             ...company,
             id: company._id,
-            userName: usersData[index].name,
-            userEmail: usersData[index].email,
+            userName: company.user.name,
+            userEmail: company.user.email,
           })
         );
 

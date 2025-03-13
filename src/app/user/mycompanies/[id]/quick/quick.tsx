@@ -84,17 +84,15 @@ const QuickTools = ({
   useEffect(() => {
     const fetchCompany = async () => {
       try {
-        const response = await fetch(
-          `/api/companies/one?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/companies?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const companyData = await response.json();
-        if (!companyData.company) {
+        if (!companyData.companies[0]) {
           throw new Error("Company data not found in the response");
         }
-        setCompany(companyData.company);
+        setCompany(companyData.companies[0]);
       } catch (error) {
         console.error("Error fetching company:", error);
         setSnackbarMessage("Failed to fetch company data");
@@ -106,9 +104,7 @@ const QuickTools = ({
 
     const fetchEmployees = async () => {
       try {
-        const response = await fetch(
-          `/api/employees/many?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/employees?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

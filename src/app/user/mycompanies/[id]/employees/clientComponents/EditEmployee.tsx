@@ -145,17 +145,15 @@ const EditEmployeeForm: React.FC<{
     const fetchEmployee = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/one?employeeId=${employeeId}`
-        );
+        const response = await fetch(`/api/employees?employeeId=${employeeId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch Employee");
         }
         const data = await response.json();
-        setEmployee(data.employee);
+        setEmployee(data.employees[0]);
         //set working days if undefined
-        if (!data.employee.workingDays) {
-          data.employee.workingDays = {
+        if (!data.employees[0].workingDays) {
+          data.employees[0].workingDays = {
             mon: "off",
             tue: "off",
             wed: "off",
@@ -166,7 +164,7 @@ const EditEmployeeForm: React.FC<{
           };
         }
 
-        setFormFields(data.employee);
+        setFormFields(data.employees[0]);
       } catch (error) {
         setSnackbarMessage(
           error instanceof Error ? error.message : "Error fetching company."
@@ -238,7 +236,7 @@ const EditEmployeeForm: React.FC<{
     }
     try {
       // Perform POST request to update the employee
-      const response = await fetch("/api/employees/one", {
+      const response = await fetch("/api/employees", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -323,7 +321,7 @@ const EditEmployeeForm: React.FC<{
   const handleDeleteConfirmation = async () => {
     try {
       // Perform DELETE request to delete the employee
-      const response = await fetch("/api/employees/one", {
+      const response = await fetch("/api/employees", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

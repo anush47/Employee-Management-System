@@ -302,6 +302,14 @@ export default function LandingPage() {
             </Link>
           </Typography>
         </Box>
+
+        {session?.user.role === "admin" && (
+          <Box textAlign="center" sx={{ mt: 4 }}>
+            <Link href="/admin">
+              <Button variant="contained">Admin</Button>
+            </Link>
+          </Box>
+        )}
       </Container>
     </main>
   );

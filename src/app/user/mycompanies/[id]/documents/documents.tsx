@@ -91,15 +91,12 @@ const Documents = ({
     const getCompany = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/companies/one/?companyId=${companyId}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`/api/companies?companyId=${companyId}`, {
+          method: "GET",
+        });
         try {
           const result = await response.json();
-          setCompany(result.company);
+          setCompany(result.companies[0]);
         } catch (error) {
           console.error("Error parsing JSON or updating state:", error);
           setCompany(undefined); // or handle the error state as needed

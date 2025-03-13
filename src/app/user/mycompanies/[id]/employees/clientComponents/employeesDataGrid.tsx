@@ -359,9 +359,7 @@ const EmployeesDataGrid: React.FC<{
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/many?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/employees?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }
@@ -442,7 +440,7 @@ const EmployeesDataGrid: React.FC<{
       newEmployee.basic = parseFloat(newEmployee.basic);
       try {
         // Perform POST request to update the employee
-        const response = await fetch("/api/employees/one", {
+        const response = await fetch("/api/employees", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

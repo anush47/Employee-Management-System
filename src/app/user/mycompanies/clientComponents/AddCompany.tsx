@@ -41,6 +41,7 @@ const AddCompanyForm: React.FC<{
     name: "",
     employerNo: "",
     address: "",
+    user: "",
     startedAt: "",
     endedAt: "",
     active: true,
@@ -139,7 +140,7 @@ const AddCompanyForm: React.FC<{
     setLoading(true);
     try {
       // Perform POST request to add a new company
-      const response = await fetch("/api/companies/new", {
+      const response = await fetch("/api/companies", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -164,6 +165,7 @@ const AddCompanyForm: React.FC<{
         setFormFields({
           id: "",
           name: "",
+          user: "",
           employerNo: "",
           address: "",
           startedAt: "",

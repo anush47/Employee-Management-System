@@ -117,12 +117,9 @@ const AddSalaryForm: React.FC<{
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/many?companyId=${companyId}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`/api/employees?companyId=${companyId}`, {
+          method: "GET",
+        });
         const result = await response.json();
 
         setEmployees([

@@ -89,17 +89,15 @@ const GenerateSalaryOne = ({
     const fetchEmployee = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/one?employeeId=${employeeId}`
-        );
+        const response = await fetch(`/api/employees?employeeId=${employeeId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch Employee");
         }
         const data = await response.json();
-        setEmployee(data.employee);
+        setEmployee(data.employees[0]);
         // Set working days if undefined
-        if (!data.employee.workingDays) {
-          data.employee.workingDays = {
+        if (!data.employees[0].workingDays) {
+          data.employees[0].workingDays = {
             mon: "off",
             tue: "off",
             wed: "off",

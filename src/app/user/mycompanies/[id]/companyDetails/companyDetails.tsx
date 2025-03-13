@@ -53,6 +53,7 @@ import { Shifts } from "./shifts";
 import { start } from "repl";
 import { WorkingDays } from "./workingDays";
 import { LoadingButton } from "@mui/lab";
+import ChangeUser from "./ChangeUser";
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const CompanyDetails = ({
@@ -75,6 +76,7 @@ const CompanyDetails = ({
     startedAt: "",
     employerName: "",
     employerAddress: "",
+    user: "",
     openHours: {
       start: "",
       end: "",
@@ -148,32 +150,31 @@ const CompanyDetails = ({
 
         // Fetch company details
         const companyResponse = await fetch(
-          `/api/companies/one?companyId=${companyId}`
+          `/api/companies?companyId=${companyId}`
         );
         if (!companyResponse.ok) {
           throw new Error("Failed to fetch company");
         }
         const companyData = await companyResponse.json();
         const companyWithId = {
-          ...companyData.company,
-          id: companyData.company._id,
+          ...companyData.companies[0],
+          id: companyData.companies[0]._id,
         };
 
         // Fetch associated user details (if company has a user)
         if (companyWithId.user && user.role === "admin") {
           const userResponse = await fetch(
-            `/api/auth/users?user=${companyWithId.user}`
+            `/api/users?userId=${companyWithId.user}`
           );
           if (!userResponse.ok) {
             throw new Error("Failed to fetch user details");
           }
           const userData = await userResponse.json();
-
           // Add user name and email
           setCompanyUser(
-            userData.user && {
-              userName: userData.user.name,
-              userEmail: userData.user.email,
+            userData.users[0] && {
+              userName: userData.users[0].name,
+              userEmail: userData.users[0].email,
             }
           );
         }
@@ -256,6 +257,7 @@ const CompanyDetails = ({
       company || {
         id: "",
         name: "",
+        user: "",
         employerNo: "",
         monthlyPrice: "",
         monthlyPriceOverride: false,
@@ -311,7 +313,7 @@ const CompanyDetails = ({
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/companies/one`, {
+      const response = await fetch(`/api/companies`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -346,7 +348,7 @@ const CompanyDetails = ({
 
   const handleDeleteConfirmation = async () => {
     try {
-      const response = await fetch(`/api/companies/one`, {
+      const response = await fetch(`/api/companies`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -841,22 +843,45 @@ const CompanyDetails = ({
               </Grid>
               <Grid item xs={12}>
                 <hr className="my-2" />
-                <Typography variant="h6">Associated User</Typography>
+                <Typography variant="h5">User Info</Typography>
                 <br />
-                {companyUser && (
-                  <>
-                    <Typography>Name: {companyUser.userName}</Typography>
-                    <Typography>Email: {companyUser.userEmail}</Typography>
-                  </>
-                )}
-
-                <div className="my-5" />
-
                 {user.role === "admin" ? (
                   <Grid item xs={12}>
+                    {companyUser && (
+                      <>
+                        <Typography>Name: {companyUser.userName}</Typography>
+                        <Typography>Email: {companyUser.userEmail}</Typography>
+                      </>
+                    )}
+                    <div className="my-5" />
+
                     <Accordion>
                       <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography>Mode</Typography>
+                        <Typography variant="h5">Change User</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box mt={2}>
+                          <FormControl fullWidth>
+                            <ChangeUser
+                              isEditing={isEditing}
+                              user={formFields.user}
+                              setUser={(user) => {
+                                setFormFields((prevFields) => ({
+                                  ...prevFields,
+                                  user,
+                                }));
+                              }}
+                            />
+                          </FormControl>
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+
+                    <div className="my-5" />
+
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography variant="h5">Mode</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
                         <Box mt={2}>
@@ -882,7 +907,7 @@ const CompanyDetails = ({
 
                     <Accordion>
                       <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography>Monthly Price</Typography>
+                        <Typography variant="h5">Monthly Price</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
                         <Box mt={2}>
@@ -924,7 +949,7 @@ const CompanyDetails = ({
 
                     <Accordion>
                       <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography>Probabilities</Typography>
+                        <Typography variant="h5">Probabilities</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
                         <Grid container spacing={3} mt={2}>
@@ -1011,7 +1036,7 @@ const CompanyDetails = ({
 
                     <Accordion>
                       <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography>Required Documents</Typography>
+                        <Typography variant="h5">Required Documents</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
                         <Box mt={2}>
@@ -1078,10 +1103,12 @@ const CompanyDetails = ({
                         </Box>
                       </AccordionDetails>
                     </Accordion>
+
+                    <div className="my-5" />
                   </Grid>
                 ) : (
                   <>
-                    <Typography mt={5}>
+                    <Typography>
                       Mode: {modeTexts[company.mode as keyof typeof modeTexts]}
                     </Typography>
                     <Typography variant="h6" mt={3}>

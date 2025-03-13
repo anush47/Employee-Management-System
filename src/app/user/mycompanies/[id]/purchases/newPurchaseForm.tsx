@@ -111,9 +111,9 @@ const NewPurchaseForm: React.FC<{ handleBackClick: () => void }> = ({
     const fetchCompany = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/companies/one?companyId=${companyId}`);
+        const res = await fetch(`/api/companies?companyId=${companyId}`);
         const data = await res.json();
-        setPrice(data.company.monthlyPrice);
+        setPrice(data.companies[0].monthlyPrice);
       } catch (err) {
         setError("Failed to fetch company details");
       } finally {

@@ -44,9 +44,7 @@ const GenerateSalaryAll = ({ period }: { period: string }) => {
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/employees/many?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/employees?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }

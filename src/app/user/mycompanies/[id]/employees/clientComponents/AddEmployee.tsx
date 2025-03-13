@@ -119,23 +119,21 @@ const AddEmployeeForm: React.FC<{
     const fetchCompany = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/companies/one?companyId=${companyId}`
-        );
+        const response = await fetch(`/api/companies?companyId=${companyId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch company");
         }
         const data = await response.json();
-        setCompany(data.company);
+        setCompany(data.companies[0]);
         // Set default payment structure to payments from company
         setFormFields((prev) => ({
           ...prev,
           shifts:
-            data.company.shifts && data.company.shifts.length > 0
-              ? data.company.shifts
+            data.companies[0].shifts && data.companies[0].shifts.length > 0
+              ? data.companies[0].shifts
               : [{ start: "08:00", end: "17:00" }],
-          workingDays: data.company.workingDays
-            ? data.company.workingDays
+          workingDays: data.companies[0].workingDays
+            ? data.companies[0].workingDays
             : {
                 mon: "full",
                 tue: "full",
@@ -146,10 +144,10 @@ const AddEmployeeForm: React.FC<{
                 sun: "off",
               },
           paymentStructure:
-            data.company.paymentStructure &&
-            data.company.paymentStructure.additions.length > 0 &&
-            data.company.paymentStructure.deductions.length > 0
-              ? data.company.paymentStructure
+            data.companies[0].paymentStructure &&
+            data.companies[0].paymentStructure.additions.length > 0 &&
+            data.companies[0].paymentStructure.deductions.length > 0
+              ? data.companies[0].paymentStructure
               : {
                   additions: [
                     { name: "incentive", amount: "" },
@@ -157,8 +155,8 @@ const AddEmployeeForm: React.FC<{
                   ],
                   deductions: [],
                 },
-          probabilities: data.company.probabilities
-            ? data.company.probabilities
+          probabilities: data.companies[0].probabilities
+            ? data.companies[0].probabilities
             : {
                 workOnOff: 1,
                 workOnHoliday: 1,
@@ -237,7 +235,7 @@ const AddEmployeeForm: React.FC<{
     setLoading(true);
     try {
       // Perform POST request to add a new employee
-      const response = await fetch("/api/employees/new", {
+      const response = await fetch("/api/employees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -316,9 +314,7 @@ const AddEmployeeForm: React.FC<{
     setNameLoading(true);
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/employees/many?companyId=${companyId}`
-      );
+      const response = await fetch(`/api/employees?companyId=${companyId}`);
       if (!response.ok) {
         throw new Error("Failed to fetch employees");
       }

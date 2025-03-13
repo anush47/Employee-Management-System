@@ -49,8 +49,8 @@ const EditForm = ({
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/changeName", {
-        method: "POST",
+      const response = await fetch("/api/users", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },

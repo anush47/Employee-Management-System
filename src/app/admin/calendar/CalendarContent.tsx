@@ -1,4 +1,4 @@
-"user client";
+"use client";
 import React, { useEffect } from "react";
 
 const CalendarContent = ({
@@ -13,10 +13,14 @@ const CalendarContent = ({
 }) => {
   useEffect(() => {
     const fetchHolidays = async () => {
-      const response = await fetch("/api/holidays");
+      const response = await fetch(
+        "/api/calendar/holidays?startDate=2025-01-01&endDate=2025-12-31"
+      );
       const data = await response.json();
       console.log(data);
     };
+
+    fetchHolidays();
   }, []);
 
   return (
