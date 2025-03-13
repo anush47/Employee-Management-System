@@ -108,7 +108,9 @@ export async function POST(req: NextRequest) {
 
     const inOutInitial = initialInOutProcess(inOut);
 
-    for (const employee of employees) {
+    for (const [index, employee] of employees.entries()) {
+      //add index to employee
+      employee.index = index;
       const existingSalary = await Salary.findOne({
         employee: employee._id,
         period: period,

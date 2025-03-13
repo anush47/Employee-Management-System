@@ -141,7 +141,6 @@ function calculateSalaryDetails(
       holidayPay -
       source.basic +
       (source.basic + holidayPay) * 0.08;
-    console.log(source.totalSalary, amountNeeded);
 
     //change the  parsedAdditions and parsedDeductions in additions with range, null to 0
     parsedAdditions = parsedAdditions.map((addition) => {
@@ -179,7 +178,6 @@ function calculateSalaryDetails(
     );
 
     let adjustmentRequired = amountNeeded - (totalAdditions - totalDeductions);
-    console.log(adjustmentRequired, "adjustmentRequired");
 
     if (adjustmentRequired !== 0) {
       // Helper to calculate optimal value within range
@@ -297,9 +295,9 @@ function calculateSalaryDetails(
       });
 
       // Final debugging logs
-      console.log("Remaining adjustmentRequired:", adjustmentRequired);
-      console.log("Final parsedAdditions:", parsedAdditions);
-      console.log("Final parsedDeductions:", parsedDeductions);
+      // console.log("Remaining adjustmentRequired:", adjustmentRequired);
+      // console.log("Final parsedAdditions:", parsedAdditions);
+      // console.log("Final parsedDeductions:", parsedDeductions);
     }
   }
 

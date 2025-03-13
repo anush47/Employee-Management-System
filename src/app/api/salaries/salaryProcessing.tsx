@@ -359,8 +359,19 @@ export const generateSalaryWithInOut = async (
   const generateRandomRecord = (day: Date) => {
     const workingDayStatus = getWorkingDayStatus(day, employee);
     const holidayStatus = getHoliday(day, holidays);
-
-    const shift = shifts[Math.floor(Math.random() * shifts.length)]; // Random shift
+    let shift;
+    //if no shift
+    if (shifts.length === 0) {
+      throw new Error(`No shift found for employee: ${employee.name}`);
+    }
+    if (shifts.length <= 1) {
+      //if only one shift
+      shift = shifts[0];
+    } else {
+      //if multiple shifts
+      //get shift based on index and day
+      shift = shifts[(employee.index + day.getUTCDate() - 1) % shifts.length];
+    }
     const probabilities = employee.probabilities || {};
     const absentProb =
       probabilities.absent !== undefined ? probabilities.absent / 100 : 0.05; // 5% chance to be absent
