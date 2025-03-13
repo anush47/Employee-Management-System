@@ -1,5 +1,5 @@
 // Determine if inOut contains already processed records (objects) or unprocessed Dates
-import { getHolidays } from "../holidays/holidayHelper";
+import { getHolidays } from "../calendar/holidays/holidayHelper";
 import { ProcessedInOut, RawInOut } from "./generate/salaryGeneration";
 
 export const processSalaryWithInOut = async (
@@ -502,9 +502,10 @@ export const generateSalaryWithInOut = async (
       //if employee.openHours is available then get the latest the employee can stay
       if (employee.openHours && !employee.openHours.allDay) {
         const maxOutTime = new Date(day);
+        const randomOutOffset = Math.random() * 30; // maximum late time in minutes after closed
         maxOutTime.setUTCHours(
           Number(employee.openHours.end.split(":")[0]),
-          Number(employee.openHours.end.split(":")[1])
+          Number(employee.openHours.end.split(":")[1]) + randomOutOffset
         );
         if (outDate > maxOutTime) {
           outDate = maxOutTime;
