@@ -108,9 +108,16 @@ export async function POST(req: NextRequest) {
 
     const inOutInitial = initialInOutProcess(inOut);
 
+    // check if company has openHours
+    const openHours = company.openHours;
+
     for (const [index, employee] of employees.entries()) {
       //add index to employee
       employee.index = index;
+      //if openHours is available add to employee
+      if (openHours) {
+        employee.openHours = openHours;
+      }
       const existingSalary = await Salary.findOne({
         employee: employee._id,
         period: period,

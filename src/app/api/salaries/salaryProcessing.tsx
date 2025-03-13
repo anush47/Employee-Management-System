@@ -20,6 +20,9 @@ export const processSalaryWithInOut = async (
   const records: {
     in: string;
     out: string;
+    break: number;
+    workingHoursTreshold: number;
+    halfDayTreshold: number;
     workingHours: number;
     otHours: number;
     ot: number;
@@ -75,14 +78,18 @@ export const processSalaryWithInOut = async (
       60;
 
     //workingHoursTreshold
-    let workingHoursTreshold = 9;
+    const workingHoursTreshold =
+      8 + (shift.break !== undefined ? shift.break : 1);
+    const halfDayTreshold = 6;
     const { ot, otHours } = calculateOT(
       workingHours,
       workingDayStatus,
       holiday,
       source.basic,
       source.divideBy,
-      workingHoursTreshold
+      workingHoursTreshold,
+      halfDayTreshold,
+      shift.break
     );
     const workingText = (() => {
       const texts = [];
@@ -106,13 +113,23 @@ export const processSalaryWithInOut = async (
           texts.push("Worked on Off Day (Holiday Pay)");
         } else if (holiday.categories.public || holiday.categories.mercantile) {
           texts.push("Worked on Holiday (Holiday Pay)");
-        } else if (workingDayStatus === "full" && workingHours < 9) {
+        } else if (
+          workingDayStatus === "full" &&
+          workingHours < workingHoursTreshold
+        ) {
           texts.push(
-            `Left ${(9 - workingHours).toFixed(2)} h early on a Full Day`
+            `Left ${(workingHoursTreshold - workingHours).toFixed(
+              2
+            )} h early on a Full Day`
           );
-        } else if (workingDayStatus === "half" && workingHours < 6) {
+        } else if (
+          workingDayStatus === "half" &&
+          workingHours < halfDayTreshold
+        ) {
           texts.push(
-            `Left ${(6 - workingHours).toFixed(2)} h early on a Half Day`
+            `Left ${(halfDayTreshold - workingHours).toFixed(
+              2
+            )} h early on a Half Day`
           );
         }
       }
@@ -145,6 +162,9 @@ export const processSalaryWithInOut = async (
     records.push({
       in: inDate.toISOString(),
       out: outDate.toISOString(),
+      break: shift.break,
+      workingHoursTreshold,
+      halfDayTreshold,
       workingHours,
       otHours,
       ot,
@@ -260,6 +280,7 @@ export const processSalaryWithInOut = async (
         const shift = {
           start: "08:00", // Default shift start time
           end: "17:00", // Default shift end time
+          break: 1, // Default break time in hours
         };
 
         if (shift) {
@@ -310,7 +331,7 @@ export const processSalaryWithInOut = async (
     }
 
     if (record.description.includes("Left")) {
-      leftEarlyHours += 9 - record.workingHours;
+      leftEarlyHours += record.workingHoursTreshold - record.workingHours;
     }
     if (record.workingHours === 0 && record.description.includes("Absent")) {
       absentDays += 1;
@@ -425,6 +446,9 @@ export const generateSalaryWithInOut = async (
     let inDate = new Date(day);
     let outDate = new Date(day);
 
+    const halfDayTreshold = 6;
+    const fullDayTreshold = 8 + (shift.break || 1);
+
     if (!present) {
       //absent
       inDate.setUTCHours(
@@ -464,15 +488,27 @@ export const generateSalaryWithInOut = async (
       //if half day
       if (workingDayStatus === "half") {
         outDate.setUTCHours(
-          Number(shift.start.split(":")[0]) + 6,
+          Number(shift.start.split(":")[0]) + halfDayTreshold,
           Number(shift.start.split(":")[1]) + randomOutOffset
         );
       } else {
         //full day
         outDate.setUTCHours(
-          Number(shift.start.split(":")[0]) + 9,
+          Number(shift.start.split(":")[0]) + fullDayTreshold,
           Number(shift.start.split(":")[1]) + randomOutOffset
         );
+      }
+
+      //if employee.openHours is available then get the latest the employee can stay
+      if (employee.openHours && !employee.openHours.allDay) {
+        const maxOutTime = new Date(day);
+        maxOutTime.setUTCHours(
+          Number(employee.openHours.end.split(":")[0]),
+          Number(employee.openHours.end.split(":")[1])
+        );
+        if (outDate > maxOutTime) {
+          outDate = maxOutTime;
+        }
       }
     }
 
@@ -644,7 +680,9 @@ const calculateOT = (
   basic: number,
   divideBy: number,
   //workingHoursTreshold
-  workingHoursTreshold: number = 9
+  workingHoursTreshold: number = 9,
+  halfDayTreshold: number = 6,
+  breakHours: number = 1
 ) => {
   if (workingHours === 0) {
     return {
@@ -661,7 +699,7 @@ const calculateOT = (
   ) {
     workingHoursTreshold = 0;
   } else if (workingDayStatus === "half") {
-    workingHoursTreshold = 6;
+    workingHoursTreshold = halfDayTreshold;
   }
   if (workingHours > workingHoursTreshold) {
     otHours = workingHours - workingHoursTreshold;
@@ -673,17 +711,17 @@ const calculateOT = (
 
   if (
     (holiday.categories.public || holiday.categories.mercantile) &&
-    otHours > 6
+    otHours > halfDayTreshold
   ) {
-    otHours -= 1; //reduce break hour
+    otHours -= breakHours; //reduce break hour
   }
   let ot = 0;
   if (otHours > 0) {
     ot = (otHours * basic * multiplier) / divideBy;
-    if (holiday.categories.mercantile && otHours > 8) {
+    if (holiday.categories.mercantile && otHours > workingHoursTreshold) {
       ot =
-        (8 * basic * multiplier) / divideBy +
-        ((otHours - 8) * basic * 3) / divideBy; // tripleot
+        (workingHoursTreshold * basic * multiplier) / divideBy +
+        ((otHours - workingHoursTreshold) * basic * 3) / divideBy; // tripleot
     }
   }
   return {
