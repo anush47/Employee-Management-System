@@ -97,11 +97,11 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
   };
 
   const menus = [
-    {
-      name: "Quick Tools",
-      key: "quick",
-      icon: <Home />,
-    },
+    // {
+    //   name: "Quick Tools",
+    //   key: "quick",
+    //   icon: <Home />,
+    // },
     {
       name: "My Companies",
       key: "mycompanies",
