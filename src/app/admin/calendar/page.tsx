@@ -2,7 +2,7 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import React from "react";
 import CalendarContent from "./CalendarContent";
-import UnAuthorize from "./UnAuthorize";
+import UnAuthorize from "../UnAuthorize";
 
 const CalendarManage = async () => {
   //get the user
@@ -28,7 +28,7 @@ const CalendarManage = async () => {
         />
       </div>
     ) : (
-      <UnAuthorize />
+      <UnAuthorize user />
     )
   );
 };

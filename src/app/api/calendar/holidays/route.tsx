@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import dbConnect from "@/app/lib/db";
-import { options } from "../auth/[...nextauth]/options";
+import { options } from "../../auth/[...nextauth]/options";
 import { getHolidays } from "./holidayHelper";
 
 const daySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {

@@ -1,5 +1,5 @@
 "user client";
-import React from "react";
+import React, { useEffect } from "react";
 
 const CalendarContent = ({
   user: { name, email, id, role },
@@ -11,6 +11,14 @@ const CalendarContent = ({
     role: string;
   };
 }) => {
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      const response = await fetch("/api/holidays");
+      const data = await response.json();
+      console.log(data);
+    };
+  }, []);
+
   return (
     <div>
       <p>Name: {name}</p>
