@@ -29,6 +29,7 @@ interface ICompany extends Document {
   shifts: {
     start: string;
     end: string;
+    break: number;
   }[];
   workingDays: {
     [key: string]: "full" | "half" | "off";
@@ -160,10 +161,13 @@ const companySchema = new Schema<ICompany>(
             type: String,
             required: true,
           },
+          break: {
+            type: Number,
+          },
         },
       ],
       required: true,
-      default: [{ start: "08:00", end: "17:00" }],
+      default: [{ start: "08:00", end: "17:00", break: 1 }],
     },
     paymentStructure: {
       additions: {

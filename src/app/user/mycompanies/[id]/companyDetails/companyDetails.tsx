@@ -711,16 +711,18 @@ const CompanyDetails = ({
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={formFields.openHours.allDay}
+                        checked={formFields?.openHours?.allDay}
                         size="large"
                         name="openHours.allDay"
                         color="success"
-                        value={formFields.openHours.allDay}
+                        value={formFields?.openHours?.allDay}
                         onChange={handleChange}
                         disabled={!isEditing || loading}
                         sx={{
                           "& .MuiSvgIcon-root": {
-                            color: formFields.active ? "green" : "red",
+                            color: formFields?.openHours?.allDay
+                              ? "green"
+                              : "red",
                           },
                         }}
                       />
@@ -729,7 +731,7 @@ const CompanyDetails = ({
                   />
                 </FormControl>
               </Grid>
-              {formFields.openHours.allDay ? null : (
+              {formFields?.openHours?.allDay ? null : (
                 <>
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>
@@ -738,7 +740,7 @@ const CompanyDetails = ({
                         type="time"
                         variant="filled"
                         name="openHours.start"
-                        value={formFields.openHours.start}
+                        value={formFields?.openHours?.start}
                         onChange={handleChange}
                         disabled={!isEditing || loading}
                       />
@@ -751,7 +753,7 @@ const CompanyDetails = ({
                         type="time"
                         variant="filled"
                         name="openHours.end"
-                        value={formFields.openHours.end}
+                        value={formFields?.openHours?.end}
                         onChange={handleChange}
                         disabled={!isEditing || loading}
                       />

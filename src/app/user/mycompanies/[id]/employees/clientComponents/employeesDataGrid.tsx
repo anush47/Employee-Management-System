@@ -41,6 +41,7 @@ export interface Employee {
   shifts: {
     start: string;
     end: string;
+    break: number;
   }[];
   probabilities: {
     workOnOff: number;

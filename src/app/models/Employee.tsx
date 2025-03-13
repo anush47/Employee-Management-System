@@ -24,6 +24,7 @@ interface IEmployee extends Document {
   shifts: {
     start: string;
     end: string;
+    break: number;
   }[];
   probabilities: {
     workOnOff: number;
@@ -89,6 +90,9 @@ const employeeSchema = new Schema<IEmployee>(
           end: {
             type: String,
             required: true,
+          },
+          break: {
+            type: Number,
           },
         },
       ],

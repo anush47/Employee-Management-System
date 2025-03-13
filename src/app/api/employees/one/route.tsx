@@ -119,6 +119,7 @@ const employeeSchema = z.object({
       z.object({
         start: z.string(),
         end: z.string(),
+        break: z.number().optional(),
       })
     )
     .optional(),

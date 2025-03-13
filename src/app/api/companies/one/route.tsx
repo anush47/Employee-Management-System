@@ -80,6 +80,15 @@ const companyUpdateSchema = z.object({
     salary: z.boolean().optional(),
     paySlip: z.boolean().optional(),
   }),
+  shifts: z
+    .array(
+      z.object({
+        start: z.string().optional(),
+        end: z.string().optional(),
+        break: z.number().optional(),
+      })
+    )
+    .optional(),
   probabilities: z
     .object({
       workOnOff: z.number().optional(),

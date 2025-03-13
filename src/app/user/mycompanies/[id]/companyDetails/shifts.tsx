@@ -20,8 +20,8 @@ import { Add, ExpandMore, Remove } from "@mui/icons-material";
 
 interface ShiftsProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  shifts: { start: string; end: string }[];
-  setShifts: (shifts: { start: string; end: string }[]) => void;
+  shifts: { start: string; end: string; break: number }[];
+  setShifts: (shifts: { start: string; end: string; break: number }[]) => void;
   isEditing: boolean;
 }
 
@@ -38,19 +38,21 @@ export const Shifts = ({
   isEditing,
 }: ShiftsProps) => {
   useEffect(() => {
-    setShifts(shifts || [{ start: "", end: "" }]);
+    setShifts(shifts || [{ start: "", end: "", break: 0 }]);
   }, [shifts]);
 
   const [errors, setErrors] = React.useState<{
     start: string[];
     end: string[];
-  }>({ start: [], end: [] });
+    break: string[];
+  }>({ start: [], end: [], break: [] });
 
   const handleAddField = () => {
-    setShifts([...shifts, { start: "", end: "" }]);
+    setShifts([...shifts, { start: "", end: "", break: 1 }]);
     setErrors((prev) => ({
       start: [...prev.start, ""],
       end: [...prev.end, ""],
+      break: [...prev.break, ""],
     }));
   };
 
@@ -60,18 +62,23 @@ export const Shifts = ({
     setErrors((prev) => ({
       start: prev.start.filter((_, i) => i !== index),
       end: prev.end.filter((_, i) => i !== index),
+      break: prev.break.filter((_, i) => i !== index),
     }));
   };
 
   const handleFieldChange = (
     index: number,
-    field: "start" | "end",
-    value: string
+    field: "start" | "end" | "break",
+    value: string | number
   ) => {
     const newShifts = [...shifts];
-    const formattedTime = formatTime(value);
+    if (field === "break") {
+      value = Number(value);
+    } else {
+      value = formatTime(value as string);
+    }
 
-    newShifts[index] = { ...newShifts[index], [field]: formattedTime };
+    newShifts[index] = { ...newShifts[index], [field]: value };
     setShifts(newShifts);
   };
 
@@ -100,7 +107,7 @@ export const Shifts = ({
                   <Grid item xs={12}>
                     <Typography>Shift {index + 1}</Typography>
                   </Grid>
-                  <Grid item xs={5}>
+                  <Grid item xs={12} sm={3}>
                     <FormControl fullWidth>
                       <TextField
                         label="Start Time"
@@ -116,7 +123,7 @@ export const Shifts = ({
                       />
                     </FormControl>
                   </Grid>
-                  <Grid item xs={5}>
+                  <Grid item xs={12} sm={3}>
                     <FormControl fullWidth>
                       <TextField
                         label="End Time"
@@ -125,6 +132,22 @@ export const Shifts = ({
                         value={shift.end}
                         onChange={(e) =>
                           handleFieldChange(index, "end", e.target.value)
+                        }
+                        InputProps={{
+                          readOnly: !isEditing,
+                        }}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <FormControl fullWidth>
+                      <TextField
+                        label="Break Hours"
+                        type="number"
+                        variant="filled"
+                        value={shift.break}
+                        onChange={(e) =>
+                          handleFieldChange(index, "break", e.target.value)
                         }
                         InputProps={{
                           readOnly: !isEditing,

@@ -38,6 +38,7 @@ const employeeSchema = z.object({
     z.object({
       start: z.string().min(1, "Start time is required"),
       end: z.string().min(1, "End time is required"),
+      break: z.number().default(0),
     })
   ),
   probabilities: z
