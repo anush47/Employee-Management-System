@@ -289,7 +289,7 @@ const AdminPageContent: React.FC = () => {
 
   return (
     <Box
-      className="flex min-h-screen p-4"
+      className="flex min-h-screen p-1"
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -307,11 +307,9 @@ const AdminPageContent: React.FC = () => {
         sx={{
           backgroundColor: theme.palette.background.paper,
           borderRadius: 3,
-          margin: 1,
           width: "100%",
           maxWidth: "1200px",
           boxShadow: 4,
-          p: 1,
         }}
       >
         <CardHeader
@@ -330,7 +328,7 @@ const AdminPageContent: React.FC = () => {
                 onClick={() => setCreateDialogOpen(true)}
                 startIcon={<Add />}
               >
-                New User
+                New
               </Button>
             </Box>
           }
