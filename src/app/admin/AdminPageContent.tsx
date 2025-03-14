@@ -322,7 +322,7 @@ const AdminPageContent: React.FC = () => {
               alignItems="center"
             >
               <Typography variant="h5" color={theme.palette.text.primary}>
-                User Management
+                Users
               </Typography>
               <Button
                 variant="outlined"
