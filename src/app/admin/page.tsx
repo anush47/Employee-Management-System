@@ -10,9 +10,9 @@ const Test = async () => {
   const session = await getServerSession(options);
   const user = session?.user || null;
   return user && user.role === "admin" ? (
-    <div>
+    <>
       <AdminPageContent />
-    </div>
+    </>
   ) : (
     <UnAuthorize user />
   );

@@ -53,7 +53,7 @@ import { Shifts } from "./shifts";
 import { start } from "repl";
 import { WorkingDays } from "./workingDays";
 import { LoadingButton } from "@mui/lab";
-import ChangeUser from "./ChangeUser";
+const ChangeUser = React.lazy(() => import("./ChangeUser"));
 const SlideTransition = (props: any) => <Slide {...props} direction="up" />;
 
 const CompanyDetails = ({
@@ -810,6 +810,7 @@ const CompanyDetails = ({
                   }}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <TextField
@@ -825,6 +826,7 @@ const CompanyDetails = ({
                   />
                 </FormControl>
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <TextField
@@ -841,6 +843,7 @@ const CompanyDetails = ({
                   />
                 </FormControl>
               </Grid>
+
               <Grid item xs={12}>
                 <hr className="my-2" />
                 <Typography variant="h5">User Info</Typography>
@@ -862,16 +865,20 @@ const CompanyDetails = ({
                       <AccordionDetails>
                         <Box mt={2}>
                           <FormControl fullWidth>
-                            <ChangeUser
-                              isEditing={isEditing}
-                              user={formFields.user}
-                              setUser={(user) => {
-                                setFormFields((prevFields) => ({
-                                  ...prevFields,
-                                  user,
-                                }));
-                              }}
-                            />
+                            {isEditing && (
+                              <React.Suspense fallback={<CircularProgress />}>
+                                <ChangeUser
+                                  isEditing={isEditing}
+                                  user={formFields.user}
+                                  setUser={(user) => {
+                                    setFormFields((prevFields) => ({
+                                      ...prevFields,
+                                      user,
+                                    }));
+                                  }}
+                                />
+                              </React.Suspense>
+                            )}
                           </FormControl>
                         </Box>
                       </AccordionDetails>

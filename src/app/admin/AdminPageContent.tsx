@@ -84,25 +84,28 @@ const AdminPageContent: React.FC = () => {
       flex: 4,
       renderCell: (params) => {
         return (
-          <Typography overflow={"auto"}>
-            {params.value?.map((company: any) => {
-              return (
-                <Link
-                  href={`/user/mycompanies/${company._id}?companyPageSelect=details`}
-                  key={company._id}
-                >
-                  <Button
-                    color="primary"
-                    variant="text"
-                    size="small"
-                    sx={{ mx: 1 }}
-                  >
-                    {company.name}
-                  </Button>
-                </Link>
-              );
-            })}
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              overflowX: "auto",
+              whiteSpace: "nowrap",
+              p: 1,
+              maxWidth: "100%", // Ensures it doesn’t exceed the column width
+            }}
+          >
+            {params.value?.map((company: any) => (
+              <Link
+                href={`/user/mycompanies/${company._id}?companyPageSelect=details`}
+                key={company._id}
+                passHref
+              >
+                <Button color="primary" variant="outlined" size="small">
+                  {company.name}
+                </Button>
+              </Link>
+            ))}
+          </Box>
         );
       },
     },
@@ -264,16 +267,20 @@ const AdminPageContent: React.FC = () => {
     useState<GridColumnVisibilityModel>({
       id: false,
       email: false,
+      delete: false,
     });
 
   if (loading) {
     return (
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-        bgcolor={theme.palette.background.default}
+        className="flex flex-col items-center justify-center min-h-screen"
+        style={{
+          background:
+            theme.palette.mode === "dark"
+              ? "linear-gradient(to right, #0f2c61, #1a237e, #283593, #303f9f)"
+              : "linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9)",
+          color: theme.palette.text.primary,
+        }}
       >
         <CircularProgress color="primary" size={60} />
       </Box>
@@ -282,112 +289,94 @@ const AdminPageContent: React.FC = () => {
 
   return (
     <Box
-      bgcolor={theme.palette.background.default}
-      minHeight="100vh"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
+      className="flex min-h-screen p-4"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        background:
+          theme.palette.mode === "dark"
+            ? "linear-gradient(to right, #0f2c61, #1a237e, #283593, #303f9f)"
+            : "linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9)",
+        color: theme.palette.text.primary,
+      }}
     >
-      <Container maxWidth="lg">
-        <Paper
-          elevation={4}
-          sx={{
-            padding: 3,
-            borderRadius: 3,
-            backgroundColor: theme.palette.background.paper,
-          }}
-        >
-          <Card
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: 3,
-            }}
-          >
-            <CardHeader
-              title={
-                <Typography variant="h5" color={theme.palette.text.primary}>
-                  User Management
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => {
-                      setCreateDialogOpen(true);
-                    }}
-                    sx={{
-                      marginLeft: {
-                        xs: 0,
-                        sm: 2,
-                      },
-                    }}
-                    startIcon={<Add />}
-                  >
-                    Create User
-                  </Button>
-                </Typography>
+      <Card
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: 3,
+          margin: 2,
+          width: "100%",
+          maxWidth: "1200px",
+          boxShadow: 4,
+        }}
+      >
+        <CardHeader
+          title={
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography variant="h5" color={theme.palette.text.primary}>
+                User Management
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setCreateDialogOpen(true)}
+                startIcon={<Add />}
+              >
+                New User
+              </Button>
+            </Box>
+          }
+        />
+        <CardContent>
+          <Box sx={{ height: 450, width: "100%" }}>
+            <DataGrid
+              rows={users}
+              columns={columns}
+              editMode="row"
+              initialState={{
+                pagination: { paginationModel: { pageSize: 20 } },
+                filter: {
+                  filterModel: {
+                    items: [],
+                    quickFilterExcludeHiddenColumns: false,
+                  },
+                },
+              }}
+              pageSizeOptions={[5, 10, 20, 50]}
+              slots={{ toolbar: GridToolbar }}
+              slotProps={{ toolbar: { showQuickFilter: true } }}
+              disableRowSelectionOnClick
+              disableDensitySelector
+              columnVisibilityModel={columnVisibilityModel}
+              onColumnVisibilityModelChange={(newModel) =>
+                setColumnVisibilityModel(newModel)
               }
             />
-            <CardContent>
-              <Box sx={{ height: 450, width: "100%" }}>
-                <DataGrid
-                  rows={users}
-                  columns={columns}
-                  editMode="row"
-                  initialState={{
-                    pagination: {
-                      paginationModel: {
-                        pageSize: 10,
-                      },
-                    },
-                    filter: {
-                      filterModel: {
-                        items: [],
-                        quickFilterExcludeHiddenColumns: false,
-                      },
-                    },
-                  }}
-                  pageSizeOptions={[5, 10, 20, 50]}
-                  slots={{
-                    toolbar: (props) => (
-                      <GridToolbar
-                        {...props}
-                        csvOptions={{ disableToolbarButton: false }}
-                        printOptions={{ disableToolbarButton: false }}
-                      />
-                    ),
-                  }}
-                  slotProps={{
-                    toolbar: {
-                      showQuickFilter: true,
-                    },
-                  }}
-                  disableRowSelectionOnClick
-                  disableDensitySelector
-                  columnVisibilityModel={columnVisibilityModel}
-                  onColumnVisibilityModelChange={(newModel) =>
-                    setColumnVisibilityModel(newModel)
-                  }
-                />
-              </Box>
-              <Box display="flex" justifyContent="center" mt={4}>
-                <Link href="/">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    sx={{ borderRadius: 2, paddingX: 3 }}
-                  >
-                    Home
-                  </Button>
-                </Link>
-              </Box>
-            </CardContent>
-          </Card>
-        </Paper>
-      </Container>
+          </Box>
+          <Box display="flex" justifyContent="center" mt={4}>
+            <Link href="/" passHref>
+              <Button
+                variant="outlined"
+                color="primary"
+                sx={{ borderRadius: 2, px: { xs: 2, sm: 4 } }}
+              >
+                Home
+              </Button>
+            </Link>
+          </Box>
+        </CardContent>
+      </Card>
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={5000}
         onClose={handleSnackbarClose}
-        //TransitionComponent={(props) => <Slide {...props} direction="up" />}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
@@ -403,7 +392,7 @@ const AdminPageContent: React.FC = () => {
         open={deleteDialogOpen}
         onClose={handleDeleteDialogClose}
         title="Confirm Deletion"
-        message={`Are you sure you want to delete this user?`}
+        message="Are you sure you want to delete this user?"
       />
       <CreateUserDialog open={createDialogOpen} setOpen={setCreateDialogOpen} />
     </Box>
