@@ -307,10 +307,11 @@ const AdminPageContent: React.FC = () => {
         sx={{
           backgroundColor: theme.palette.background.paper,
           borderRadius: 3,
-          margin: 2,
+          margin: 1,
           width: "100%",
           maxWidth: "1200px",
           boxShadow: 4,
+          p: 1,
         }}
       >
         <CardHeader
