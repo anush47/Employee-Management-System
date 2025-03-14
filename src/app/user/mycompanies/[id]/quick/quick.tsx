@@ -239,7 +239,7 @@ const QuickTools = ({
   const handleDeleteSalaries = () => {
     setGeneratedSalaries([]);
     setSnackbarMessage("Salaries deleted successfully");
-    setSnackbarSeverity("warning");
+    setSnackbarSeverity("success");
     setSnackbarOpen(true);
   };
 
@@ -620,7 +620,7 @@ const QuickTools = ({
                               fullWidth
                               disabled={loading}
                             >
-                              <span>Generate Salaries</span>
+                              <span>Salaries</span>
                             </LoadingButton>
                           </span>
                         </Tooltip>
@@ -638,7 +638,7 @@ const QuickTools = ({
                         onClick={handlePayments}
                         disabled={loading}
                       >
-                        Generate Payment
+                        Payment
                       </LoadingButton>
                     </FormControl>
                   </Grid>
@@ -655,7 +655,7 @@ const QuickTools = ({
                         }}
                         disabled={loading}
                       >
-                        Generate Documents
+                        Documents
                       </LoadingButton>
                     </FormControl>
                   </Grid>

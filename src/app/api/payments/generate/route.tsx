@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     // If no salaries
     if (!salaries || salaries.length === 0) {
       return NextResponse.json(
-        { message: "No salaries found for the company" },
+        { message: `No salaries found for ${period} in ${company.name}` },
         { status: 400 }
       );
     }
