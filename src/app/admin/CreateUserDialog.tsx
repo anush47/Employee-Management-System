@@ -32,12 +32,14 @@ export default function CreateUserDialog({
 
   const handleClose = () => {
     setOpen(false);
+    if (success) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
     setError(null);
     setSuccess(null);
     setFormVisible(true); // Reset form visibility for the next open
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
