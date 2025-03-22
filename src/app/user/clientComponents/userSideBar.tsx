@@ -29,9 +29,9 @@ import {
   Menu as MenuIcon,
   NavigateNext,
   ShoppingBag,
-  Groups,
   LocalAtm,
   Payments,
+  Group,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { Link as LinkM } from "@mui/material";
@@ -110,7 +110,7 @@ const UserSideBar: React.FC<Props> = ({ window, user }) => {
     {
       name: "Employees",
       key: "employees",
-      icon: <Groups />,
+      icon: <Group />,
     },
     {
       name: "Salaries",
