@@ -720,13 +720,6 @@ const CompanyDetails = ({
                         value={formFields?.openHours?.allDay}
                         onChange={handleChange}
                         disabled={!isEditing || loading}
-                        sx={{
-                          "& .MuiSvgIcon-root": {
-                            color: formFields?.openHours?.allDay
-                              ? "green"
-                              : "red",
-                          },
-                        }}
                       />
                     }
                     label="Open 24h ?"
@@ -744,7 +737,9 @@ const CompanyDetails = ({
                         name="openHours.start"
                         value={formFields?.openHours?.start}
                         onChange={handleChange}
-                        disabled={!isEditing || loading}
+                        InputProps={{
+                          readOnly: !isEditing || loading,
+                        }}
                       />
                     </FormControl>
                   </Grid>
@@ -757,7 +752,9 @@ const CompanyDetails = ({
                         name="openHours.end"
                         value={formFields?.openHours?.end}
                         onChange={handleChange}
-                        disabled={!isEditing || loading}
+                        InputProps={{
+                          readOnly: !isEditing || loading,
+                        }}
                       />
                     </FormControl>
                   </Grid>
