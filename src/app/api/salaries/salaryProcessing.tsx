@@ -698,12 +698,11 @@ const calculateOT = (
     holiday.categories.mercantile ||
     holiday.categories.public
   ) {
-    workingHoursTreshold = 0;
+    otHours = workingHours;
   } else if (workingDayStatus === "half") {
-    workingHoursTreshold = halfDayTreshold;
-  }
-  if (workingHours > workingHoursTreshold) {
-    otHours = workingHours - workingHoursTreshold;
+    otHours = Math.max(workingHours - halfDayTreshold, 0);
+  } else {
+    otHours = Math.max(workingHours - workingHoursTreshold, 0);
   }
   let multiplier = 1.5;
   if (holiday.categories.mercantile) {
@@ -711,18 +710,21 @@ const calculateOT = (
   }
 
   if (
-    (holiday.categories.public || holiday.categories.mercantile) &&
+    (holiday.categories.public ||
+      holiday.categories.mercantile ||
+      workingDayStatus === "off") &&
     otHours > halfDayTreshold
   ) {
     otHours -= breakHours; //reduce break hour
   }
   let ot = 0;
   if (otHours > 0) {
-    ot = (otHours * basic * multiplier) / divideBy;
     if (holiday.categories.mercantile && otHours > workingHoursTreshold) {
       ot =
         (workingHoursTreshold * basic * multiplier) / divideBy +
         ((otHours - workingHoursTreshold) * basic * 3) / divideBy; // tripleot
+    } else {
+      ot = (otHours * basic * multiplier) / divideBy;
     }
   }
   return {
