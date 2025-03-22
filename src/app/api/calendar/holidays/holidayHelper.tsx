@@ -16,45 +16,25 @@ const holidaySchema = z.object({
 });
 
 export const getHolidays: {
-  (startDate: string, endDate: string): Promise<{
+  (startDate: string | null, endDate: string | null): Promise<{
     holidays: any[];
     messege: string;
   }>;
-} = async (startDate: string, endDate: string) => {
-  //check if atleast one is available for the years of start day and end days if the years are different
-  const startYear = startDate.split("-")[0];
-  const endYear = endDate.split("-")[0];
-  //check if atleast one is in start year
-  Holiday.exists({
-    date: { $gte: `${startYear}-01-01`, $lte: `${startYear}-12-31` },
-  }).then((exists) => {
-    if (!exists) {
-      //send error
-      return {
-        holidays: undefined,
-        message: `No holidays available for ${startYear}`,
-      };
-    }
-  });
-  if (startYear !== endYear) {
-    //check if atleast one is in end year
-    Holiday.exists({
-      date: { $gte: `${endYear}-01-01`, $lte: `${endYear}-12-31` },
-    }).then((exists) => {
-      if (!exists) {
-        //send error
-        return {
-          holidays: undefined,
-          message: `No holidays available for ${endYear}`,
-        };
-      }
-    });
+} = async (startDate: string | null, endDate: string | null) => {
+  let query: any = {};
+
+  if (startDate) {
+    query.date = { ...query.date, $gte: startDate };
+  }
+  if (endDate) {
+    query.date = { ...query.date, $lte: endDate };
   }
 
-  // Get holidays
-  const holidays = await Holiday.find({
-    date: { $gte: startDate, $lte: endDate },
-  }).lean();
+  // If neither startDate nor endDate is provided, return all holidays
+  const holidays = await Holiday.find(query).lean();
 
-  return { holidays, messege: "Holidays fetched successfully" };
+  return {
+    holidays,
+    messege: "Holidays fetched successfully",
+  };
 };

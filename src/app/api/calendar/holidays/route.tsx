@@ -28,14 +28,12 @@ export async function GET(req: NextRequest) {
     const startDate = req.nextUrl.searchParams.get("startDate");
     const endDate = req.nextUrl.searchParams.get("endDate");
 
-    if (!startDate || !endDate) {
-      return NextResponse.json(
-        { message: "Start and End day is required" },
-        { status: 400 }
-      );
+    if (startDate) {
+      daySchema.parse(startDate);
     }
-    daySchema.parse(startDate);
-    daySchema.parse(endDate);
+    if (endDate) {
+      daySchema.parse(endDate);
+    }
 
     const holidayResponse = await getHolidays(startDate, endDate);
     if (!holidayResponse.holidays && holidayResponse.messege) {

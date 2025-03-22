@@ -13,29 +13,25 @@ import {
   CardContent,
   Button,
   CardHeader,
-  Container,
-  Paper,
   Typography,
   useTheme,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Alert,
   Snackbar,
-  Grid,
-  TextField,
-  FormControl,
 } from "@mui/material";
 import Link from "next/link";
 import { LoadingButton } from "@mui/lab";
 import { Add, Delete } from "@mui/icons-material";
-import { time } from "console";
-import { title } from "process";
 import CreateUserDialog from "./CreateUserDialog";
 
-const AdminPageContent: React.FC = () => {
+const Users = ({
+  user,
+}: {
+  user: { name: string; email: string; role: string; image: string };
+}) => {
   const theme = useTheme();
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
@@ -272,44 +268,18 @@ const AdminPageContent: React.FC = () => {
 
   if (loading) {
     return (
-      <Box
-        className="flex flex-col items-center justify-center min-h-screen"
-        style={{
-          background:
-            theme.palette.mode === "dark"
-              ? "linear-gradient(to right, #0f2c61, #1a237e, #283593, #303f9f)"
-              : "linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9)",
-          color: theme.palette.text.primary,
-        }}
-      >
+      <Box className="flex flex-col items-center justify-center min-h-screen">
         <CircularProgress color="primary" size={60} />
       </Box>
     );
   }
 
   return (
-    <Box
-      className="flex min-h-screen p-1"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-        background:
-          theme.palette.mode === "dark"
-            ? "linear-gradient(to right, #0f2c61, #1a237e, #283593, #303f9f)"
-            : "linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9)",
-        color: theme.palette.text.primary,
-      }}
-    >
+    <Box>
       <Card
         sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 3,
-          width: "100%",
-          maxWidth: "1200px",
-          boxShadow: 4,
+          minHeight: "91vh",
+          overflowY: "auto",
         }}
       >
         <CardHeader
@@ -359,17 +329,6 @@ const AdminPageContent: React.FC = () => {
               }
             />
           </Box>
-          <Box display="flex" justifyContent="center" mt={4}>
-            <Link href="/" passHref>
-              <Button
-                variant="outlined"
-                color="primary"
-                sx={{ borderRadius: 2, px: { xs: 2, sm: 4 } }}
-              >
-                Home
-              </Button>
-            </Link>
-          </Box>
         </CardContent>
       </Card>
       <Snackbar
@@ -398,4 +357,4 @@ const AdminPageContent: React.FC = () => {
   );
 };
 
-export default AdminPageContent;
+export default Users;
