@@ -24,7 +24,7 @@ const userAgreementDialog: React.FC<UserAgreementDialogProps> = ({
       open={openConsentDialog}
       onClose={handleCloseConsentDialog}
     >
-      <DialogContent>
+      <DialogContent sx={{ p: { xs: 2, sm: 5 } }}>
         <Agreement />
       </DialogContent>
       <DialogActions>

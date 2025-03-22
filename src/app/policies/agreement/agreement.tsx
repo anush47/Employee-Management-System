@@ -20,7 +20,7 @@ const Agreement = () => {
           alt="SalaryApp Logo"
         />
       </Box>
-      <Card sx={{ p: { xs: 3, sm: 5 }, borderRadius: 4, boxShadow: 6 }}>
+      <Card sx={{ p: { xs: 1, sm: 5 }, borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Typography
             variant="h4"
