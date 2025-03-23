@@ -82,8 +82,8 @@ export const getEPFDoc = (
   const nicIndex = columns.findIndex((column) => column.dataKey === "nic");
   const epf8Index = columns.findIndex((column) => column.dataKey === "epf8");
   const epf12Index = columns.findIndex((column) => column.dataKey === "epf12");
-  const salaryForEPFIndex = columns.findIndex(
-    (column) => column.dataKey === "salaryForEPF"
+  const totalEarningsIndex = columns.findIndex(
+    (column) => column.dataKey === "totalEarnings"
   );
 
   //period text
@@ -198,7 +198,7 @@ export const getEPFDoc = (
 
     { dataKey: "epf12", header: "EMPLOYER (12%)" },
     { dataKey: "epf8", header: "EMPLOYEE (8%)" },
-    { dataKey: "salaryForEPF", header: "TOTAL EARNINGS" },
+    { dataKey: "totalEarnings", header: "TOTAL EARNINGS" },
   ];
 
   const epfData = data.reduce((acc: (string | number)[][], item: any) => {
@@ -209,7 +209,7 @@ export const getEPFDoc = (
       item[epf8Index] + item[epf12Index],
       item[epf12Index],
       item[epf8Index],
-      item[salaryForEPFIndex],
+      item[totalEarningsIndex],
     ]);
     return acc;
   }, []);
@@ -260,7 +260,7 @@ export const getEPFDoc = (
         (data.column.dataKey === "total" ||
           data.column.dataKey === "epf8" ||
           data.column.dataKey === "epf12" ||
-          data.column.dataKey === "salaryForEPF")
+          data.column.dataKey === "totalEarnings")
       ) {
         if (!isNaN(Number(data.cell.text))) {
           data.cell.text = [

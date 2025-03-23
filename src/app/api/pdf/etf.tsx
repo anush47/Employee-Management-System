@@ -77,8 +77,8 @@ export const getETFDoc = (
   const nameIndex = columns.findIndex((column) => column.dataKey === "name");
   const nicIndex = columns.findIndex((column) => column.dataKey === "nic");
   const etf3Index = columns.findIndex((column) => column.dataKey === "etf3");
-  const salaryForEPFIndex = columns.findIndex(
-    (column) => column.dataKey === "salaryForEPF"
+  const totalEarningsIndex = columns.findIndex(
+    (column) => column.dataKey === "totalEarnings"
   );
 
   // right top
@@ -178,7 +178,7 @@ export const getETFDoc = (
     },
     { dataKey: "nic", header: "N. I. C." },
     { dataKey: "etf3", header: "CONTRIBUTION" },
-    { dataKey: "salaryForEPF", header: "TOTAL EARNINGS" },
+    { dataKey: "totalEarnings", header: "TOTAL EARNINGS" },
   ];
 
   const etfData = data.reduce((acc: (string | number)[][], item: any) => {
@@ -187,7 +187,7 @@ export const getETFDoc = (
       item[nameIndex],
       item[nicIndex],
       item[etf3Index],
-      item[salaryForEPFIndex],
+      item[totalEarningsIndex],
     ]);
     return acc;
   }, []);
@@ -236,7 +236,7 @@ export const getETFDoc = (
           data.row.index < data.table.body.length - 1
         ) &&
         (data.column.dataKey === "etf3" ||
-          data.column.dataKey === "salaryForEPF")
+          data.column.dataKey === "totalEarnings")
       ) {
         if (!isNaN(Number(data.cell.text))) {
           data.cell.text = [

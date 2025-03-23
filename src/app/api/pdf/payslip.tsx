@@ -210,14 +210,19 @@ export const getPaySlipDoc = (
   const holidayPayIndex = columns.findIndex(
     (column) => column.dataKey === "holidayPay"
   );
+  const totalEarningsIndex = columns.findIndex(
+    (column) => column.dataKey === "totalEarnings"
+  );
   const basicIndex = columns.findIndex(
     (column) => column.dataKey === "basicWithBA"
   );
-  const salaryForEPFIndex = columns.findIndex(
-    (column) => column.dataKey === "salaryForEPF"
-  );
   const salaryHeaders = ["Description", "Amount (LKR)"];
-  const salaryRows = [["Basic Salary (with budgetary)", salary[basicIndex]]];
+  const salaryRows = [
+    [
+      "Basic Salary (with budgetary)",
+      salary[basicIndex === -1 ? totalEarningsIndex : basicIndex],
+    ],
+  ];
 
   // Add holiday pay if it exists and is not 0, null, or undefined
   if (holidayPayIndex !== -1 && salary[holidayPayIndex]) {
@@ -229,7 +234,7 @@ export const getPaySlipDoc = (
     salaryRows.push(["No Pay (-)", salary[noPayIndex]]);
   }
 
-  salaryRows.push(["Salary for EPF", salary[salaryForEPFIndex]]);
+  salaryRows.push(["Total Earnings", salary[totalEarningsIndex]]);
 
   let totalAdditions = 0;
   // Append additions
@@ -296,7 +301,9 @@ export const getPaySlipDoc = (
   const advanceIndex = columns.findIndex(
     (column) => column.dataKey === "advanceAmount"
   );
-  salaryRows.push(["Advance (-)", salary[advanceIndex]]);
+  if (salary[advanceIndex]) {
+    salaryRows.push(["Advance (-)", salary[advanceIndex]]);
+  }
   //final salary
   const finalSalaryIndex = columns.findIndex(
     (column) => column.dataKey === "finalSalary"
@@ -333,7 +340,7 @@ export const getPaySlipDoc = (
     didParseCell: function (data) {
       //Bold total and basic
       if (
-        data.row.cells[0].text.join(" ") === "Basic Salary (with budgetary)" ||
+        data.row.cells[0].text.join(" ") === "Total Earnings" ||
         data.row.cells[0].text.join(" ") === "Total Additions" ||
         data.row.cells[0].text.join(" ") === "Total Deductions"
       ) {

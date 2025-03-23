@@ -193,8 +193,8 @@ export const setupData = (salaries: SalarySchema[]) => {
 
   columns.push(
     {
-      dataKey: "salaryForEPF",
-      header: "SALARY FOR EPF",
+      dataKey: "totalEarnings",
+      header: "TOTAL EARNINGS",
     },
     {
       dataKey: "epf12",
@@ -237,7 +237,7 @@ export const setupData = (salaries: SalarySchema[]) => {
       }
     });
 
-    const salaryForEPF =
+    const totalEarnings =
       basicWithBA +
       (salary.holidayPay || 0) -
       (salary.noPay.amount || 0) +
@@ -251,10 +251,10 @@ export const setupData = (salaries: SalarySchema[]) => {
       basicWithBA,
       holidayPay: salary.holidayPay,
       noPay: salary.noPay.amount || 0,
-      salaryForEPF,
-      epf12: salaryForEPF * 0.12,
-      etf3: salaryForEPF * 0.03,
-      epf8: salaryForEPF * 0.08,
+      totalEarnings,
+      epf12: totalEarnings * 0.12,
+      etf3: totalEarnings * 0.03,
+      epf8: totalEarnings * 0.08,
       advanceAmount: salary.advanceAmount,
       finalSalary: salary.finalSalary,
     };
